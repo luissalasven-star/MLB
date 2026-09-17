@@ -116,6 +116,18 @@
         .stats-table tr:hover { background: #f0f9ff; }
         .biomecanica-table { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; margin-bottom: 15px;}
         .biomecanica-table td { border-bottom: 1px solid #e2e8f0; }
+
+        /* --- TARJETAS DE PROPS INDIVIDUALES --- */
+        .props-titulo { font-size: 16px; font-weight: 900; color: #0f172a; border-bottom: 2px solid #e0f2fe; padding-bottom: 10px; margin-bottom: 15px; text-transform: uppercase; text-align: left;}
+        .props-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; }
+        .prop-card { background: #ffffff; border-radius: 12px; padding: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.04); border-left: 5px solid #3b82f6; text-align: left; animation: fadeInSlide 0.7s ease-out both; }
+        .prop-card.pitcher { border-left-color: #f59e0b; }
+        .prop-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .prop-name { font-size: 15px; font-weight: 900; color: #0f172a; }
+        .prop-tag { background: #e0f2fe; color: #0369a1; padding: 3px 8px; border-radius: 6px; font-size: 10px; font-weight: 800; text-transform: uppercase; }
+        .prop-metric { display: flex; justify-content: space-between; font-size: 13px; color: #475569; margin-bottom: 6px; border-bottom: 1px dashed #f1f5f9; padding-bottom: 4px;}
+        .prop-metric b { color: #0f172a; font-size: 14px; }
+        .prop-verdict { background: #f8fafc; padding: 8px; border-radius: 6px; font-size: 12.5px; font-weight: 700; color: #16a34a; margin-top: 10px; display: flex; align-items: center; gap: 6px; border: 1px solid #dcfce7; }
     </style>
 </head>
 <body>
@@ -180,6 +192,10 @@
 
             <div id="veredicto" class="veredicto-global" style="display: none;"></div>
             <div class="tarjetas-container" id="tarjetas-resultado"></div>
+            
+            <!-- NUEVO MÓDULO: PROPS INDIVIDUALES (Integrado dentro del Content Area) -->
+            <div id="props-individuales" style="display: none; width: 100%; margin-top: 10px;"></div>
+
         </div>
 
         <div class="sidebar-ranking">
@@ -521,6 +537,10 @@
                 `;
 
                 contenedor.innerHTML = `${crearTarjetaMatchup(awayTeam, "Visitante", probs.probAway.toFixed(1)+"%", homeTeam, 'badge-prob-away')}${crearTarjetaMatchup(homeTeam, "Local", probs.probHome.toFixed(1)+"%", awayTeam, 'badge-prob-home')}`;
+                
+                // LLAMADA AL NUEVO MÓDULO DE PROPS INDIVIDUALES
+                generarMatchupsIndividuales(awayTeam, homeTeam);
+
                 estado.innerHTML = "✅ Módulo de Big Data sincronizado y validado.";
             } catch (e) { estado.innerHTML = "❌ Error al cruzar la data analítica."; }
         }
@@ -569,6 +589,58 @@
                         <tr><td class="val-label">Bullpen (ERA / WHIP)</td><td class="val-home-away">${t.teamEra} / ${t.teamWhip}</td></tr>
                     </table>
                 </div>`;
+        }
+
+        // FUNCIÓN DEL NUEVO MÓDULO DE PROPS INDIVIDUALES
+        function generarMatchupsIndividuales(awayTeam, homeTeam) {
+            let contenedorProps = document.getElementById('props-individuales');
+            contenedorProps.style.display = "block";
+            
+            let pitcherHome = homeTeam.pitcher;
+            let pitcherAway = awayTeam.pitcher;
+
+            let kPropHome = parseFloat(pitcherHome.k9) > 9.5 ? "Alta (Over 6.5 Ks)" : (parseFloat(pitcherHome.k9) < 7.5 ? "Baja (Under 4.5 Ks)" : "Línea Ajustada (5.5 Ks)");
+            let kPropAway = parseFloat(pitcherAway.k9) > 9.5 ? "Alta (Over 6.5 Ks)" : (parseFloat(pitcherAway.k9) < 7.5 ? "Baja (Under 4.5 Ks)" : "Línea Ajustada (5.5 Ks)");
+
+            contenedorProps.innerHTML = `
+                <div class="props-titulo">🎯 Radar de Props: Matchups Individuales Avanzados</div>
+                <div class="props-grid">
+                    
+                    <div class="prop-card pitcher">
+                        <div class="prop-header">
+                            <span class="prop-name">${pitcherHome.nombre}</span>
+                            <span class="prop-tag">🔥 K-PROP (Ponches)</span>
+                        </div>
+                        <div class="prop-metric"><span>Tasa de Ponches (K/9)</span> <b>${pitcherHome.k9}</b></div>
+                        <div class="prop-metric"><span>Whiff % (Abanicados)</span> <b>${pitcherHome.arsenal.whiff}</b></div>
+                        <div class="prop-metric"><span>xERA / SIERA</span> <b>${pitcherHome.xERA} / ${pitcherHome.siera}</b></div>
+                        <div class="prop-verdict">✔️ Proyección de Ponches: ${kPropHome}</div>
+                    </div>
+
+                    <div class="prop-card pitcher">
+                        <div class="prop-header">
+                            <span class="prop-name">${pitcherAway.nombre}</span>
+                            <span class="prop-tag">🔥 K-PROP (Ponches)</span>
+                        </div>
+                        <div class="prop-metric"><span>Tasa de Ponches (K/9)</span> <b>${pitcherAway.k9}</b></div>
+                        <div class="prop-metric"><span>Whiff % (Abanicados)</span> <b>${pitcherAway.arsenal.whiff}</b></div>
+                        <div class="prop-metric"><span>xERA / SIERA</span> <b>${pitcherAway.xERA} / ${pitcherAway.siera}</b></div>
+                        <div class="prop-verdict">✔️ Proyección de Ponches: ${kPropAway}</div>
+                    </div>
+
+                    <div class="prop-card">
+                        <div class="prop-header">
+                            <span class="prop-name">Líder Ofensivo ${homeTeam.name.split(' ').pop()}</span>
+                            <span class="prop-tag">🚀 HIT-PROP (Bases)</span>
+                        </div>
+                        <div class="prop-metric"><span>wRC+ (Creación de Carreras)</span> <b>${homeTeam.teamWrcPlus}</b></div>
+                        <div class="prop-metric"><span>wOBA Estimado</span> <b>${homeTeam.teamWoba}</b></div>
+                        <div class="prop-metric"><span>Matchup vs SIERA ${pitcherAway.siera}</span> <b>${parseFloat(homeTeam.teamWoba) > 0.320 && parseFloat(pitcherAway.siera) > 4.00 ? 'Favorable' : 'Riesgoso'}</b></div>
+                        <div class="prop-verdict"> ${parseFloat(homeTeam.teamWrcPlus) > 110 ? '✔️ Alta Prob. de +1.5 Bases Totales' : '⚠️ Evitar Props de Hits (Duelo Difícil)'}</div>
+                    </div>
+
+                </div>
+            `;
         }
     </script>
 </body>
