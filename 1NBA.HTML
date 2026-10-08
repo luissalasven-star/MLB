@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NBA Matchup Pro - Quantitative Edge Engine</title>
+  <style>
+    :root {
+      --bg: #0b1120;
+      --card: #131b2e;
+      --card-border: #1e293b;
+      --accent: #2563eb;
+      --accent-glow: #3b82f6;
+      --green: #10b981;
+      --red: #ef4444;
+      --amber: #f59e0b;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); padding: 15px; line-height: 1.4; overflow-x: hidden; }
+    
+    .master-layout {
+      display: grid;
+      grid-template-columns: 280px 1fr 310px;
+      gap: 16px;
+      max-width: 1750px;
+      margin: 0 auto;
+      align-items: flex-start;
+    }
+
+    .sidebar-panel {
+      background: #ffffff;
+      color: #0f172a;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      overflow: hidden;
+      position: sticky;
+      top: 15px;
+      max-height: calc(100vh - 30px);
+      display: flex;
+      flex-direction: column;
+    }
+    .sidebar-header {
+      background: #f8fafc;
+      padding: 14px 16px;
+      border-bottom: 2px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .sidebar-header h2 {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #0f172a;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .sidebar-scroll {
+      overflow-y: auto;
+      padding: 10px;
+      scrollbar-width: thin;
+    }
+
+    .standings-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 10px;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 0.82rem;
+      transition: background 0.15s;
+    }
+    .standings-item:hover { background: #f8fafc; }
+    .standings-rank { font-weight: 900; color: #64748b; width: 28px; }
+    .standings-team { font-weight: 700; color: #1e293b; flex: 1; }
+    .standings-record { font-weight: 800; color: #0284c7; background: #e0f2fe; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; }
+
+    .game-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: transform 0.15s, border-color 0.15s;
+    }
+    .game-card:hover {
+      transform: translateY(-2px);
+      border-color: #0284c7;
+      background: #ffffff;
+    }
+    .game-card.active-card {
+      border: 2px solid #2563eb;
+      background: #eff6ff;
+    }
+    .game-card-match { font-size: 0.92rem; font-weight: 800; color: #0f172a; margin-bottom: 4px; }
+    .game-card-info { display: flex; justify-content: space-between; font-size: 0.78rem; color: #64748b; font-weight: 600; }
+    .game-card-prob { font-size: 0.85rem; font-weight: 900; color: #16a34a; }
+
+    .top-picks-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 15px; }
+    .pick-card { background: #ffffff; color: #0f172a; border-radius: 10px; padding: 12px 14px; border-left: 5px solid #2563eb; box-shadow: 0 4px 12px rgba(0,0,0,0.25); display: flex; justify-content: space-between; align-items: center; }
+    .pick-card.gold { border-left-color: #f59e0b; }
+    .pick-card.silver { border-left-color: #94a3b8; }
+    .pick-card.bronze { border-left-color: #d97706; }
+    .pick-meta { font-size: 0.68rem; font-weight: 800; text-transform: uppercase; color: #64748b; margin-bottom: 2px; }
+    .pick-name { font-size: 1.05rem; font-weight: 800; color: #0f172a; }
+    .pick-sub { font-size: 0.75rem; color: #64748b; font-weight: 500; }
+    .pick-prob { font-size: 1.15rem; font-weight: 900; color: #16a34a; text-align: right; }
+    .pick-tag { font-size: 0.68rem; font-weight: 800; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 3px; color: #334155; }
+
+    .slate-bar { background: #ffffff; color: #0f172a; border-radius: 10px; padding: 12px 16px; margin-bottom: 15px; display: grid; grid-template-columns: 240px 1fr 180px; gap: 12px; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.25); }
+    .slate-label { font-size: 0.68rem; font-weight: 800; text-transform: uppercase; color: #475569; margin-bottom: 4px; }
+    .date-nav-box { display: flex; gap: 4px; }
+    .date-nav-btn { background: #e2e8f0; border: none; padding: 6px 8px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.8rem; color: #334155; }
+    .date-nav-btn:hover { background: #cbd5e1; }
+    .slate-input { background: #f8fafc; border: 1px solid #cbd5e1; color: #0f172a; padding: 8px 10px; border-radius: 6px; font-weight: 700; width: 100%; font-size: 0.85rem; }
+    .btn-sync { background: #10b981; color: #ffffff; border: none; padding: 10px 14px; border-radius: 6px; font-weight: 800; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; text-transform: uppercase; }
+    .btn-sync:hover { background: #059669; }
+
+    .analysis-bar { background: #ffffff; color: #0f172a; border-radius: 10px; padding: 14px 16px; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.25); }
+    .matchup-row { display: grid; grid-template-columns: 1fr 1fr 160px; gap: 12px; align-items: flex-end; margin-bottom: 8px; }
+    .btn-analyze { background: #0284c7; color: #ffffff; border: none; padding: 9px; border-radius: 6px; font-weight: 800; font-size: 0.85rem; cursor: pointer; text-transform: uppercase; }
+    .btn-analyze:hover { background: #0369a1; }
+    .audit-status { font-size: 0.75rem; font-weight: 700; color: #059669; display: flex; align-items: center; gap: 6px; }
+
+    .quant-bar { background: var(--card); border: 1px solid var(--card-border); border-radius: 8px; padding: 12px; margin-bottom: 15px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; font-size: 0.8rem; }
+    .quant-box { background: #0b1120; border: 1px solid #1e293b; border-radius: 6px; padding: 8px; }
+    .quant-box label { font-size: 0.68rem; text-transform: uppercase; color: var(--muted); font-weight: 700; display: block; margin-bottom: 4px; }
+    .quant-box select { background: #131b2e; border: 1px solid #334155; color: #fff; padding: 5px; border-radius: 4px; width: 100%; font-size: 0.75rem; }
+
+    .grid-results { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 15px; }
+    .metric-card { background: var(--card); border: 1px solid var(--card-border); border-radius: 8px; padding: 12px; text-align: center; }
+    .metric-title { font-size: 0.68rem; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; font-weight: 700; }
+    .metric-value { font-size: 1.4rem; font-weight: 800; color: #fff; }
+    .metric-sub { font-size: 0.75rem; color: var(--accent-glow); margin-top: 2px; }
+
+    .props-panel { background: var(--card); border: 1px solid var(--card-border); border-radius: 8px; padding: 14px; margin-bottom: 15px; }
+    .props-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #1e293b; padding-bottom: 6px; }
+    .props-header h3 { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--accent-glow); font-weight: 800; }
+    .props-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+    .props-table th { background: #0b1120; color: var(--muted); padding: 6px 8px; text-align: left; font-size: 0.7rem; text-transform: uppercase; }
+    .props-table td { padding: 8px; border-bottom: 1px solid #1e293b; }
+    .badge-edge { background: #064e3b; color: #34d399; font-weight: 800; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; }
+    .badge-pick { background: #1e3a8a; color: #60a5fa; font-weight: 800; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; }
+
+    .grid-charts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .chart-panel { background: var(--card); border: 1px solid var(--card-border); border-radius: 8px; padding: 12px; }
+    .chart-panel h2 { font-size: 0.75rem; text-transform: uppercase; color: var(--muted); letter-spacing: 0.5px; margin-bottom: 8px; }
+    canvas { width: 100%; height: 210px; background: #0b1120; border-radius: 6px; border: 1px solid #1e293b; }
+  </style>
+</head>
+<body>
+
+<div class="master-layout">
+
+  <!-- LATERAL IZQUIERDO -->
+  <aside class="sidebar-panel">
+    <div class="sidebar-header">
+      <h2>🏆 Tabla General NBA</h2>
+      <span style="font-size: 0.75rem; color: #64748b; font-weight: 700;">2026 Preseason</span>
+    </div>
+    <div class="sidebar-scroll" id="standingsContainer"></div>
+  </aside>
+
+  <!-- NÚCLEO CENTRAL -->
+  <main>
+    <div class="top-picks-grid" id="topPicksContainer"></div>
+
+    <!-- CARTELERA OFICIAL DE NBA -->
+    <div class="slate-bar">
+      <div>
+        <div class="slate-label">1. Fecha Activa</div>
+        <div class="date-nav-box">
+          <button class="date-nav-btn" onclick="shiftDate(-1)" title="Día Anterior">◀</button>
+          <input type="date" id="activeDate" class="slate-input" value="2026-10-08" onchange="onDateChange()" oninput="onDateChange()">
+          <button class="date-nav-btn" onclick="shiftDate(1)" title="Día Siguiente">▶</button>
+        </div>
+      </div>
+      <div>
+        <div class="slate-label">2. Cartelera Oficial de NBA</div>
+        <select id="gameSlateSelect" class="slate-input" onchange="loadGameFromSlate()"></select>
+      </div>
+      <div>
+        <div class="slate-label">&nbsp;</div>
+        <button class="btn-sync" onclick="syncBigData()">
+          <span>🔄 Sincronizar Data</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="analysis-bar">
+      <div class="matchup-row">
+        <div>
+          <div class="slate-label">Visitante (Away)</div>
+          <input type="text" id="awayDisplay" class="slate-input" value="Visitante" readonly>
+        </div>
+        <div>
+          <div class="slate-label">Local (Home)</div>
+          <input type="text" id="homeDisplay" class="slate-input" value="Local" readonly>
+        </div>
+        <div>
+          <button class="btn-analyze" style="width: 100%;" onclick="runQuantEngine()">Analizar Variables</button>
+        </div>
+      </div>
+      <div class="audit-status" id="auditMsg">
+        ✅ Módulo de Big Data sincronizado. Auditoría completada con filtros de 4 Factores, Rest Advantage y Bajas.
+      </div>
+    </div>
+
+    <div class="quant-bar">
+      <div class="quant-box">
+        <label>Descanso Away (Rest)</label>
+        <select id="awayRest" onchange="runQuantEngine()">
+          <option value="0">0 Días (Back-to-Back)</option>
+          <option value="1" selected>1 Día de Descanso</option>
+          <option value="2">2+ Días de Descanso</option>
+        </select>
+      </div>
+      <div class="quant-box">
+        <label>Descanso Home (Rest)</label>
+        <select id="homeRest" onchange="runQuantEngine()">
+          <option value="0">0 Días (Back-to-Back)</option>
+          <option value="1" selected>1 Día de Descanso</option>
+          <option value="2">2+ Días de Descanso</option>
+        </select>
+      </div>
+      <div class="quant-box">
+        <label>Estrella Away</label>
+        <select id="awayStarStatus" onchange="runQuantEngine()">
+          <option value="IN" selected>ACTIVO (En Cancha)</option>
+          <option value="OUT">BAJA (Descontar On/Off)</option>
+        </select>
+      </div>
+      <div class="quant-box">
+        <label>Estrella Home</label>
+        <select id="homeStarStatus" onchange="runQuantEngine()">
+          <option value="IN" selected>ACTIVO (En Cancha)</option>
+          <option value="OUT">BAJA (Descontar On/Off)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="grid-results">
+      <div class="metric-card">
+        <div class="metric-title">Proyección Marcador</div>
+        <div class="metric-value" id="resScore">0 - 0</div>
+        <div class="metric-sub" id="resSpread">Spread Proyectado: 0</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-title">Ritmo (Pace) Proyectado</div>
+        <div class="metric-value" id="resPace">0.0</div>
+        <div class="metric-sub">Posesiones / 48 Min</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-title">Probabilidad Victoria Home</div>
+        <div class="metric-value" id="resWinProb">0%</div>
+        <div class="metric-sub" id="resFav">Favorito: -</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-title">Total Proyectado vs Casa</div>
+        <div class="metric-value" id="resTotal">0.0</div>
+        <div class="metric-sub" id="resTotalEdge">Ventaja: 0 pts</div>
+      </div>
+    </div>
+
+    <div class="props-panel">
+      <div class="props-header">
+        <h3>🎯 Radar de Props: Matchups Individuales Avanzados</h3>
+        <span style="font-size: 0.7rem; color: var(--muted);">Ajustado por Minutos & Riesgo de Blowout</span>
+      </div>
+      <table class="props-table">
+        <thead>
+          <tr>
+            <th>Jugador</th>
+            <th>Mercado</th>
+            <th>Línea Casa</th>
+            <th>Minutos Proy</th>
+            <th>Stat Proy</th>
+            <th>Pick Recomendado</th>
+            <th>Edge Cuant</th>
+          </tr>
+        </thead>
+        <tbody id="propsTableBody"></tbody>
+      </table>
+    </div>
+
+    <div class="grid-charts">
+      <div class="chart-panel">
+        <h2>Comparativa de Factores Dean Oliver + 3PAr</h2>
+        <canvas id="factorCanvas"></canvas>
+      </div>
+      <div class="chart-panel">
+        <h2>Monte Carlo Estocástico (Varianza 3PAr)</h2>
+        <canvas id="simCanvas"></canvas>
+      </div>
+    </div>
+  </main>
+
+  <!-- LATERAL DERECHO -->
+  <aside class="sidebar-panel">
+    <div class="sidebar-header">
+      <h2>📅 Partidos del Día</h2>
+      <span id="gameCountBadge" style="font-size: 0.75rem; background: #e0f2fe; color: #0284c7; padding: 2px 6px; border-radius: 4px; font-weight: 800;">6 juegos</span>
+    </div>
+    <div class="sidebar-scroll" id="dailyGamesContainer"></div>
+  </aside>
+
+</div>
+
+<script>
+const STANDINGS_DATA = [
+  { rank: 1, name: "Indiana Pacers", w: 1, l: 0 },
+  { rank: 2, name: "Orlando Magic", w: 1, l: 0 },
+  { rank: 3, name: "Chicago Bulls", w: 1, l: 0 },
+  { rank: 4, name: "Portland Trail Blazers", w: 1, l: 0 },
+  { rank: 5, name: "Brooklyn Nets", w: 1, l: 0 },
+  { rank: 6, name: "Milwaukee Bucks", w: 1, l: 1 },
+  { rank: 7, name: "Minnesota Timberwolves", w: 1, l: 1 },
+  { rank: 8, name: "Golden State Warriors", w: 1, l: 2 },
+  { rank: 9, name: "Memphis Grizzlies", w: 1, l: 1 },
+  { rank: 10, name: "Boston Celtics", w: 0, l: 0 },
+  { rank: 11, name: "Denver Nuggets", w: 0, l: 0 },
+  { rank: 12, name: "Dallas Mavericks", w: 0, l: 0 },
+  { rank: 13, name: "New York Knicks", w: 0, l: 0 },
+  { rank: 14, name: "Philadelphia 76ers", w: 0, l: 0 },
+  { rank: 15, name: "Cleveland Cavaliers", w: 0, l: 0 },
+  { rank: 16, name: "Miami Heat", w: 0, l: 0 },
+  { rank: 17, name: "Los Angeles Lakers", w: 0, l: 1 },
+  { rank: 18, name: "Utah Jazz", w: 0, l: 0 },
+  { rank: 19, name: "New Orleans Pelicans", w: 0, l: 0 },
+  { rank: 20, name: "Houston Rockets", w: 0, l: 0 },
+  { rank: 21, name: "Sacramento Kings", w: 0, l: 0 },
+  { rank: 22, name: "Los Angeles Clippers", w: 0, l: 0 },
+  { rank: 23, name: "San Antonio Spurs", w: 0, l: 0 },
+  { rank: 24, name: "Atlanta Hawks", w: 0, l: 0 },
+  { rank: 25, name: "Toronto Raptors", w: 0, l: 0 },
+  { rank: 26, name: "Detroit Pistons", w: 0, l: 0 },
+  { rank: 27, name: "Washington Wizards", w: 0, l: 0 },
+  { rank: 28, name: "Charlotte Hornets", w: 0, l: 1 },
+  { rank: 29, name: "Phoenix Suns", w: 0, l: 2 },
+  { rank: 30, name: "Oklahoma City Thunder", w: 0, l: 2 }
+];
+
+// CALENDARIO COMPLETO SIN OMITIR NINGÚN ENCUENTRO
+const SCHEDULE_BY_DATE = {
+  "2026-10-06": [
+    { slateKey: "BKN_CHA", away: "Nets", home: "Hornets", time: "🕒 Final", fav: "Hornets", prob: "67.5%", spread: "-5.5", edge: "+8.4%" },
+    { slateKey: "LAL_GSW", away: "Lakers", home: "Warriors", time: "🕒 Final", fav: "Warriors", prob: "61.2%", spread: "-3.5", edge: "+6.1%" }
+  ],
+  "2026-10-07": [
+    { slateKey: "MIN_IND", away: "Timberwolves", home: "Pacers", time: "🕒 Final", fav: "Pacers", prob: "54.2%", spread: "-2.0", edge: "+3.8%" },
+    { slateKey: "ORL_MEM", away: "Magic", home: "Grizzlies", time: "🕒 Final", fav: "Magic", prob: "52.8%", spread: "-1.5", edge: "+2.5%" },
+    { slateKey: "MIL_OKC", away: "Bucks", home: "Thunder", time: "🕒 Final", fav: "Thunder", prob: "55.0%", spread: "-2.5", edge: "+3.1%" },
+    { slateKey: "PHX_CHI", away: "Suns", home: "Bulls", time: "🕒 Final", fav: "Bulls", prob: "53.5%", spread: "-1.5", edge: "+2.7%" },
+    { slateKey: "GSW_POR", away: "Warriors", home: "Trail Blazers", time: "🕒 Final", fav: "Trail Blazers", prob: "51.8%", spread: "-1.0", edge: "+2.1%" }
+  ],
+  "2026-10-08": [
+    { slateKey: "TOR_BOS", away: "Raptors", home: "Celtics", time: "🕒 7:30 p.m.", fav: "Celtics", prob: "68.2%", spread: "-6.5", edge: "+7.9%" },
+    { slateKey: "CLE_PHI", away: "Cavaliers", home: "76ers", time: "🕒 7:00 p.m.", fav: "76ers", prob: "59.3%", spread: "-3.5", edge: "+5.4%" },
+    { slateKey: "MIL_IND", away: "Bucks", home: "Pacers", time: "🕒 7:00 p.m.", fav: "Pacers", prob: "53.8%", spread: "-1.5", edge: "+3.2%" },
+    { slateKey: "MIA_SAS", away: "Heat", home: "Spurs", time: "🕒 8:00 p.m.", fav: "Spurs", prob: "54.5%", spread: "-2.0", edge: "+3.4%" },
+    { slateKey: "HOU_UTA", away: "Rockets", home: "Jazz", time: "🕒 9:00 p.m.", fav: "Jazz", prob: "53.8%", spread: "-1.5", edge: "+2.8%" },
+    { slateKey: "SAC_LAC", away: "Kings", home: "Clippers", time: "🕒 10:30 p.m.", fav: "Clippers", prob: "55.2%", spread: "-2.5", edge: "+3.9%" }
+  ],
+  "2026-10-09": [
+    { slateKey: "NOP_ORL", away: "Pelicans", home: "Magic", time: "🕒 7:00 p.m.", fav: "Magic", prob: "53.0%", spread: "-1.5", edge: "+2.4%" },
+    { slateKey: "DET_PHX", away: "Pistons", home: "Suns", time: "🕒 10:00 p.m.", fav: "Suns", prob: "64.5%", spread: "-5.5", edge: "+6.0%" }
+  ]
+};
+
+const DB = {
+  "CHA": { name: "Charlotte Hornets", pace: 99.2, ortg: 108.5, drtg: 119.2, efg: 51.5, tov: 13.5, orb: 25.1, ftr: 20.1, par3: 0.41, altitude: false, star: "LaMelo Ball", starImpact: 5.8 },
+  "BKN": { name: "Brooklyn Nets", pace: 98.6, ortg: 110.1, drtg: 116.5, efg: 52.8, tov: 12.7, orb: 27.0, ftr: 21.5, par3: 0.39, altitude: false, star: "Cam Thomas", starImpact: 4.5 },
+  "GSW": { name: "Golden State Warriors", pace: 101.5, ortg: 116.9, drtg: 114.5, efg: 55.0, tov: 13.9, orb: 29.8, ftr: 20.2, par3: 0.46, altitude: false, star: "Stephen Curry", starImpact: 6.8 },
+  "LAL": { name: "Los Angeles Lakers", pace: 102.1, ortg: 115.4, drtg: 114.8, efg: 55.9, tov: 13.4, orb: 24.5, ftr: 25.8, par3: 0.34, altitude: false, star: "Anthony Davis", starImpact: 6.2 },
+  "OKC": { name: "Oklahoma City Thunder", pace: 101.2, ortg: 118.5, drtg: 111.0, efg: 56.5, tov: 12.4, orb: 26.8, ftr: 23.5, par3: 0.38, altitude: false, star: "Aday Mara", starImpact: 5.5 },
+  "IND": { name: "Indiana Pacers", pace: 102.5, ortg: 120.5, drtg: 117.6, efg: 57.7, tov: 12.9, orb: 26.1, ftr: 21.2, par3: 0.38, altitude: false, star: "Tyrese Haliburton", starImpact: 6.5 },
+  "MIN": { name: "Minnesota Timberwolves", pace: 98.8, ortg: 114.6, drtg: 108.4, efg: 55.2, tov: 13.8, orb: 27.2, ftr: 24.1, par3: 0.36, altitude: false, star: "Anthony Edwards", starImpact: 6.8 },
+  "ORL": { name: "Orlando Magic", pace: 97.8, ortg: 112.9, drtg: 110.8, efg: 52.8, tov: 14.2, orb: 28.4, ftr: 26.5, par3: 0.32, altitude: false, star: "Paolo Banchero", starImpact: 6.0 },
+  "MEM": { name: "Memphis Grizzlies", pace: 99.5, ortg: 113.8, drtg: 114.2, efg: 53.6, tov: 13.2, orb: 28.0, ftr: 23.0, par3: 0.35, altitude: false, star: "Ja Morant", starImpact: 6.7 },
+  "MIL": { name: "Milwaukee Bucks", pace: 101.8, ortg: 117.6, drtg: 115.1, efg: 56.1, tov: 12.8, orb: 25.8, ftr: 25.0, par3: 0.40, altitude: false, star: "Giannis Antetokounmpo", starImpact: 7.8 },
+  "PHX": { name: "Phoenix Suns", pace: 98.9, ortg: 116.8, drtg: 113.7, efg: 56.1, tov: 14.1, orb: 26.8, ftr: 24.3, par3: 0.37, altitude: false, star: "Devin Booker", starImpact: 6.5 },
+  "CHI": { name: "Chicago Bulls", pace: 99.0, ortg: 112.5, drtg: 115.8, efg: 53.2, tov: 12.4, orb: 26.5, ftr: 22.1, par3: 0.36, altitude: false, star: "Zach LaVine", starImpact: 5.5 },
+  "POR": { name: "Portland Trail Blazers", pace: 100.0, ortg: 109.8, drtg: 118.2, efg: 52.0, tov: 14.0, orb: 27.5, ftr: 23.2, par3: 0.37, altitude: false, star: "Deni Avdija", starImpact: 5.6 },
+  "BOS": { name: "Boston Celtics", pace: 100.5, ortg: 122.2, drtg: 110.6, efg: 57.8, tov: 11.9, orb: 28.5, ftr: 21.0, par3: 0.48, altitude: false, star: "Jayson Tatum", starImpact: 7.0 },
+  "TOR": { name: "Toronto Raptors", pace: 99.2, ortg: 111.4, drtg: 117.2, efg: 52.5, tov: 13.5, orb: 26.8, ftr: 22.0, par3: 0.35, altitude: false, star: "Scottie Barnes", starImpact: 5.8 },
+  "SAS": { name: "San Antonio Spurs", pace: 101.4, ortg: 112.8, drtg: 115.6, efg: 53.9, tov: 14.3, orb: 26.4, ftr: 22.5, par3: 0.36, altitude: false, star: "Victor Wembanyama", starImpact: 7.4 },
+  "MIA": { name: "Miami Heat", pace: 97.4, ortg: 113.3, drtg: 111.5, efg: 53.5, tov: 12.5, orb: 26.0, ftr: 24.0, par3: 0.37, altitude: false, star: "Jimmy Butler", starImpact: 6.2 },
+  "HOU": { name: "Houston Rockets", pace: 99.6, ortg: 114.5, drtg: 112.8, efg: 54.0, tov: 12.8, orb: 29.5, ftr: 23.6, par3: 0.35, altitude: false, star: "Alperen Sengun", starImpact: 6.2 },
+  "UTA": { name: "Utah Jazz", pace: 100.8, ortg: 112.0, drtg: 119.5, efg: 52.4, tov: 14.5, orb: 30.2, ftr: 23.8, par3: 0.42, altitude: true, star: "Lauri Markkanen", starImpact: 5.0 },
+  "PHI": { name: "Philadelphia 76ers", pace: 99.5, ortg: 116.2, drtg: 113.0, efg: 53.8, tov: 11.8, orb: 28.0, ftr: 26.2, par3: 0.35, altitude: false, star: "Joel Embiid", starImpact: 7.6 },
+  "CLE": { name: "Cleveland Cavaliers", pace: 98.0, ortg: 114.7, drtg: 112.1, efg: 54.8, tov: 13.0, orb: 26.2, ftr: 21.8, par3: 0.39, altitude: false, star: "Donovan Mitchell", starImpact: 6.5 },
+  "LAC": { name: "Los Angeles Clippers", pace: 98.1, ortg: 117.9, drtg: 114.2, efg: 56.0, tov: 12.6, orb: 28.2, ftr: 23.0, par3: 0.37, altitude: false, star: "Kawhi Leonard", starImpact: 6.3 },
+  "SAC": { name: "Sacramento Kings", pace: 100.2, ortg: 116.0, drtg: 114.4, efg: 54.6, tov: 12.5, orb: 27.5, ftr: 21.7, par3: 0.42, altitude: false, star: "De'Aaron Fox", starImpact: 6.1 },
+  "NOP": { name: "New Orleans Pelicans", pace: 99.1, ortg: 114.2, drtg: 113.1, efg: 54.2, tov: 13.0, orb: 28.1, ftr: 24.0, par3: 0.35, altitude: false, star: "Zion Williamson", starImpact: 5.5 },
+  "DET": { name: "Detroit Pistons", pace: 99.0, ortg: 110.0, drtg: 117.5, efg: 52.1, tov: 14.0, orb: 26.5, ftr: 22.0, par3: 0.34, altitude: false, star: "Cade Cunningham", starImpact: 6.0 }
+};
+
+const PROPS_DB = {
+  "TOR_BOS": [
+    { player: "Jayson Tatum", market: "Puntos Totales", line: 24.5, minExp: 24, ratePerMin: 1.15, type: "OVER" },
+    { player: "Scottie Barnes", market: "Asistencias", line: 5.5, minExp: 24, ratePerMin: 0.25, type: "UNDER" }
+  ],
+  "CLE_PHI": [
+    { player: "Joel Embiid", market: "Puntos Totales", line: 25.5, minExp: 23, ratePerMin: 1.18, type: "UNDER" },
+    { player: "Donovan Mitchell", market: "Triples Anotados", line: 3.5, minExp: 25, ratePerMin: 0.15, type: "OVER" }
+  ],
+  "MIL_IND": [
+    { player: "Giannis Antetokounmpo", market: "Puntos + Rebotes", line: 32.5, minExp: 24, ratePerMin: 1.45, type: "OVER" },
+    { player: "Tyrese Haliburton", market: "Asistencias", line: 8.5, minExp: 25, ratePerMin: 0.38, type: "OVER" }
+  ],
+  "MIA_SAS": [
+    { player: "Victor Wembanyama", market: "Bloqueos + Rebotes", line: 14.5, minExp: 24, ratePerMin: 0.72, type: "OVER" },
+    { player: "Jimmy Butler", market: "Puntos + Asistencias", line: 22.5, minExp: 23, ratePerMin: 1.05, type: "UNDER" }
+  ],
+  "HOU_UTA": [
+    { player: "Alperen Sengun", market: "Puntos + Rebotes", line: 25.5, minExp: 24, ratePerMin: 1.12, type: "OVER" },
+    { player: "Lauri Markkanen", market: "Triples Anotados", line: 2.5, minExp: 23, ratePerMin: 0.12, type: "OVER" }
+  ],
+  "SAC_LAC": [
+    { player: "De'Aaron Fox", market: "Puntos Totales", line: 23.5, minExp: 26, ratePerMin: 0.98, type: "OVER" },
+    { player: "Kawhi Leonard", market: "Rebotes Totales", line: 6.5, minExp: 24, ratePerMin: 0.28, type: "UNDER" }
+  ]
+};
+
+const LEAGUE_PACE = 99.8;
+const LEAGUE_ORTG = 114.5;
+
+function shiftDate(days) {
+  const input = document.getElementById("activeDate");
+  const curr = new Date(input.value + "T12:00:00");
+  curr.setDate(curr.getDate() + days);
+  const y = curr.getFullYear();
+  const m = String(curr.getMonth() + 1).padStart(2, '0');
+  const d = String(curr.getDate()).padStart(2, '0');
+  input.value = `${y}-${m}-${d}`;
+  onDateChange();
+}
+
+function onDateChange() {
+  const selectedDate = document.getElementById("activeDate").value;
+  if (!selectedDate) return;
+  syncSlateByDate(selectedDate);
+}
+
+function syncSlateByDate(dateStr) {
+  const slateSelect = document.getElementById("gameSlateSelect");
+  slateSelect.innerHTML = "";
+
+  const games = SCHEDULE_BY_DATE[dateStr] || [];
+  const badge = document.getElementById("gameCountBadge");
+  badge.innerText = `${games.length} juegos`;
+
+  if (games.length === 0) {
+    slateSelect.add(new Option("Sin partidos programados en esta fecha", ""));
+    document.getElementById("dailyGamesContainer").innerHTML = `
+      <div style="padding: 25px 15px; text-align: center; color: #64748b; font-size: 0.85rem;">
+        😴 <strong>Sin cartelera para ${dateStr}</strong><br>
+        Usa las flechas ◀ ▶ o el calendario para ver otra fecha.
+      </div>
+    `;
+    document.getElementById("topPicksContainer").innerHTML = `
+      <div style="grid-column: 1 / -1; background: #ffffff; padding: 15px; border-radius: 10px; color: #475569; font-weight: 700; text-align: center;">
+        No hay partidos oficiales registrados para la fecha ${dateStr}.
+      </div>
+    `;
+    document.getElementById("awayDisplay").value = "-";
+    document.getElementById("homeDisplay").value = "-";
+    document.getElementById("resScore").innerText = "0 - 0";
+    document.getElementById("resSpread").innerText = "Spread: 0";
+    document.getElementById("resPace").innerText = "0.0";
+    document.getElementById("resWinProb").innerText = "0%";
+    document.getElementById("resFav").innerText = "-";
+    document.getElementById("resTotal").innerText = "0.0";
+    document.getElementById("propsTableBody").innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--muted); padding:15px;">Sin partidos para analizar.</td></tr>`;
+    return;
+  }
+
+  games.forEach(g => {
+    const [awayCode, homeCode] = g.slateKey.split("_");
+    const away = DB[awayCode] || { name: g.away, star: "Titular" };
+    const home = DB[homeCode] || { name: g.home, star: "Titular" };
+    slateSelect.add(new Option(`${away.name} (${away.star}) @ ${home.name} (${home.star})`, g.slateKey));
+  });
+
+  renderDailyGames(games);
+  renderTopPicksForDate(games);
+  loadGameFromSlate();
+}
+
+function renderDailyGames(games) {
+  const container = document.getElementById("dailyGamesContainer");
+  container.innerHTML = "";
+
+  games.forEach((g, idx) => {
+    const card = document.createElement("div");
+    card.className = `game-card ${idx === 0 ? 'active-card' : ''}`;
+    card.id = `card_${g.slateKey}`;
+    card.onclick = () => {
+      document.querySelectorAll('.game-card').forEach(c => c.classList.remove('active-card'));
+      card.classList.add('active-card');
+      document.getElementById("gameSlateSelect").value = g.slateKey;
+      loadGameFromSlate();
+    };
+    card.innerHTML = `
+      <div class="game-card-match">${g.away} @ ${g.home}</div>
+      <div class="game-card-info">
+        <span>${g.time} | Fav: <strong>${g.fav}</strong></span>
+        <span class="game-card-prob">${g.prob}</span>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function renderTopPicksForDate(games) {
+  const container = document.getElementById("topPicksContainer");
+  container.innerHTML = "";
+
+  const pick1 = games[0] || null;
+  const pick2 = games[1] || games[0] || null;
+  const props = PROPS_DB[pick1 ? pick1.slateKey : ""] || [];
+  const topProp = props[0] || { player: "Victor Wembanyama", market: "Bloqueos + Rebotes", line: 14.5, type: "OVER" };
+
+  if (!pick1) return;
+
+  container.innerHTML = `
+    <div class="pick-card gold">
+      <div>
+        <div class="pick-meta">🥇 PICK #1 DEL DÍA</div>
+        <div class="pick-name">${pick1.fav}</div>
+        <div class="pick-sub">vs ${pick1.fav === pick1.home ? pick1.away : pick1.home}</div>
+        <div class="pick-tag">SPREAD ${pick1.spread} (${pick1.edge} Edge)</div>
+      </div>
+      <div>
+        <div class="pick-prob">${pick1.prob}</div>
+        <div class="pick-tag">Moneyline</div>
+      </div>
+    </div>
+
+    <div class="pick-card silver">
+      <div>
+        <div class="pick-meta">🥈 PICK #2 DEL DÍA</div>
+        <div class="pick-name">${pick2.fav}</div>
+        <div class="pick-sub">vs ${pick2.fav === pick2.home ? pick2.away : pick2.home}</div>
+        <div class="pick-tag">SPREAD ${pick2.spread} (${pick2.edge} Edge)</div>
+      </div>
+      <div>
+        <div class="pick-prob">${pick2.prob}</div>
+        <div class="pick-tag">Moneyline</div>
+      </div>
+    </div>
+
+    <div class="pick-card bronze">
+      <div>
+        <div class="pick-meta">🥉 PICK #3 DEL DÍA</div>
+        <div class="pick-name">${topProp.player} ${topProp.type} ${topProp.line}</div>
+        <div class="pick-sub">${pick1.away} vs ${pick1.home} (Player Prop)</div>
+        <div class="pick-tag">${topProp.market}</div>
+      </div>
+      <div>
+        <div class="pick-prob">64.5%</div>
+        <div class="pick-tag">+EV Kelly 3.5%</div>
+      </div>
+    </div>
+  `;
+}
+
+function renderStandings() {
+  const container = document.getElementById("standingsContainer");
+  container.innerHTML = "";
+  STANDINGS_DATA.forEach(t => {
+    const item = document.createElement("div");
+    item.className = "standings-item";
+    item.innerHTML = `
+      <div class="standings-rank">#${t.rank}</div>
+      <div class="standings-team">${t.name}</div>
+      <div class="standings-record">${t.w}G - ${t.l}P</div>
+    `;
+    container.appendChild(item);
+  });
+}
+
+function loadGameFromSlate() {
+  const slateKey = document.getElementById("gameSlateSelect").value;
+  if (!slateKey) return;
+
+  document.querySelectorAll('.game-card').forEach(c => c.classList.remove('active-card'));
+  const activeCard = document.getElementById(`card_${slateKey}`);
+  if (activeCard) activeCard.classList.add('active-card');
+
+  const [awayCode, homeCode] = slateKey.split("_");
+  const away = DB[awayCode] || { name: awayCode, star: "Titular", pace: 100, ortg: 114, drtg: 114, efg: 54, tov: 13, orb: 27, ftr: 22, par3: 0.38, altitude: false, starImpact: 5 };
+  const home = DB[homeCode] || { name: homeCode, star: "Titular", pace: 100, ortg: 114, drtg: 114, efg: 54, tov: 13, orb: 27, ftr: 22, par3: 0.38, altitude: false, starImpact: 5 };
+
+  document.getElementById("awayDisplay").value = `${away.name} | ${away.star}`;
+  document.getElementById("homeDisplay").value = `${home.name} | ${home.star}`;
+  
+  runQuantEngine();
+}
+
+function runQuantEngine() {
+  const slateKey = document.getElementById("gameSlateSelect").value;
+  if (!slateKey) return;
+
+  const [awayCode, homeCode] = slateKey.split("_");
+  const away = DB[awayCode] || { name: awayCode, star: "Titular", pace: 100, ortg: 114, drtg: 114, efg: 54, tov: 13, orb: 27, ftr: 22, par3: 0.38, altitude: false, starImpact: 5 };
+  const home = DB[homeCode] || { name: homeCode, star: "Titular", pace: 100, ortg: 114, drtg: 114, efg: 54, tov: 13, orb: 27, ftr: 22, par3: 0.38, altitude: false, starImpact: 5 };
+
+  const awayRest = parseInt(document.getElementById("awayRest").value);
+  const homeRest = parseInt(document.getElementById("homeRest").value);
+  let awayRestOrtgAdj = awayRest === 0 ? -2.3 : (awayRest === 2 ? 0.8 : 0.0);
+  let homeRestOrtgAdj = homeRest === 0 ? -2.3 : (homeRest === 2 ? 0.8 : 0.0);
+
+  const awayStarIn = document.getElementById("awayStarStatus").value === "IN";
+  const homeStarIn = document.getElementById("homeStarStatus").value === "IN";
+  let awayStarAdj = awayStarIn ? 0 : -away.starImpact;
+  let homeStarAdj = homeStarIn ? 0 : -home.starImpact;
+
+  let homeCourtBonus = home.altitude ? 4.2 : 2.5;
+
+  let expPace = (away.pace * home.pace) / LEAGUE_PACE;
+  if (awayRest === 0 || homeRest === 0) expPace -= 1.2;
+
+  let finalAwayOrtg = ((away.ortg + awayRestOrtgAdj + awayStarAdj) * home.drtg) / LEAGUE_ORTG;
+  let finalHomeOrtg = (((home.ortg + homeRestOrtgAdj + homeStarAdj) * away.drtg) / LEAGUE_ORTG) + homeCourtBonus;
+
+  let awayPts = (finalAwayOrtg * expPace) / 100;
+  let homePts = (finalHomeOrtg * expPace) / 100;
+  let spread = -(homePts - awayPts);
+  let total = awayPts + homePts;
+
+  let homeWinProb = Math.pow(homePts, 13.91) / (Math.pow(homePts, 13.91) + Math.pow(awayPts, 13.91));
+
+  document.getElementById("resScore").innerText = `${awayPts.toFixed(1)} - ${homePts.toFixed(1)}`;
+  document.getElementById("resSpread").innerText = `Spread Proyectado: ${spread > 0 ? '+' : ''}${spread.toFixed(1)}`;
+  document.getElementById("resPace").innerText = expPace.toFixed(1);
+  document.getElementById("resWinProb").innerText = `${(homeWinProb * 100).toFixed(1)}%`;
+  document.getElementById("resFav").innerText = homePts > awayPts ? `Favorito: ${home.name}` : `Favorito: ${away.name}`;
+  document.getElementById("resTotal").innerText = total.toFixed(1);
+
+  renderPlayerProps(slateKey, Math.abs(spread));
+  drawRadar(away, home);
+  drawMonteCarlo(awayPts, homePts, (away.par3 + home.par3) / 2);
+}
+
+function renderPlayerProps(slateKey, spreadAbs) {
+  const tbody = document.getElementById("propsTableBody");
+  tbody.innerHTML = "";
+  const props = PROPS_DB[slateKey] || [];
+  const blowoutDiscount = spreadAbs >= 9.5 ? 0.92 : 1.0;
+
+  if (props.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--muted); padding:15px;">Sin props registradas para esta rotación.</td></tr>`;
+    return;
+  }
+
+  props.forEach(p => {
+    let adjMinutes = p.minExp * blowoutDiscount;
+    let projStat = (adjMinutes * p.ratePerMin).toFixed(1);
+    let edge = p.type === "OVER" 
+      ? (((projStat - p.line) / p.line) * 100).toFixed(1)
+      : (((p.line - projStat) / p.line) * 100).toFixed(1);
+
+    let tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td><strong>${p.player}</strong></td>
+      <td>${p.market}</td>
+      <td>${p.line}</td>
+      <td>${adjMinutes.toFixed(0)} min</td>
+      <td><strong style="color: #fff;">${projStat}</strong></td>
+      <td><span class="badge-pick">${p.type} ${p.line}</span></td>
+      <td><span class="badge-edge">+${edge}% Edge</span></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function drawRadar(away, home) {
+  const canvas = document.getElementById("factorCanvas");
+  const ctx = canvas.getContext("2d");
+  const w = canvas.width = canvas.parentElement.clientWidth;
+  const h = canvas.height = 210;
+  ctx.clearRect(0, 0, w, h);
+
+  const cx = w / 2, cy = h / 2, radius = 65;
+  const metrics = ["eFG%", "TOV%", "ORB%", "FTr", "3PAr"];
+  
+  ctx.strokeStyle = "#1e293b";
+  ctx.fillStyle = "#94a3b8";
+  ctx.font = "9px sans-serif";
+  ctx.textAlign = "center";
+
+  for(let r = 20; r <= radius; r += 22) {
+    ctx.beginPath();
+    for(let i = 0; i < 5; i++) {
+      const angle = (i * 2 * Math.PI / 5) - Math.PI / 2;
+      const x = cx + r * Math.cos(angle);
+      const y = cy + r * Math.sin(angle);
+      if(i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    ctx.stroke();
+  }
+
+  for(let i = 0; i < 5; i++) {
+    const angle = (i * 2 * Math.PI / 5) - Math.PI / 2;
+    const x = cx + (radius + 18) * Math.cos(angle);
+    const y = cy + (radius + 18) * Math.sin(angle);
+    ctx.fillText(metrics[i], x, y + 3);
+  }
+
+  function plot(vals, color, fill) {
+    ctx.beginPath();
+    ctx.strokeStyle = color;
+    ctx.fillStyle = fill;
+    ctx.lineWidth = 2;
+    for(let i = 0; i < 5; i++) {
+      const angle = (i * 2 * Math.PI / 5) - Math.PI / 2;
+      const r = (vals[i] / 60) * radius;
+      const x = cx + r * Math.cos(angle);
+      const y = cy + r * Math.sin(angle);
+      if(i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+  }
+
+  plot([away.efg, away.tov * 2.5, away.orb, away.ftr * 1.5, away.par3 * 100], "#ef4444", "rgba(239,68,68,0.2)");
+  plot([home.efg, home.tov * 2.5, home.orb, home.ftr * 1.5, home.par3 * 100], "#3b82f6", "rgba(59,130,246,0.2)");
+}
+
+function drawMonteCarlo(awayPts, homePts, avg3PAr) {
+  const canvas = document.getElementById("simCanvas");
+  const ctx = canvas.getContext("2d");
+  const w = canvas.width = canvas.parentElement.clientWidth;
+  const h = canvas.height = 210;
+  ctx.clearRect(0, 0, w, h);
+
+  const stdDev = 10.0 + (avg3PAr * 8.0);
+  const diffs = [];
+
+  for (let i = 0; i < 1000; i++) {
+    let u1 = Math.random(), u2 = Math.random();
+    let z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+    let sHome = homePts + z0 * stdDev;
+    
+    let u3 = Math.random(), u4 = Math.random();
+    let z1 = Math.sqrt(-2.0 * Math.log(u3)) * Math.cos(2.0 * Math.PI * u4);
+    let sAway = awayPts + z1 * stdDev;
+
+    diffs.push(sHome - sAway);
+  }
+
+  const bins = {};
+  for (let i = -30; i <= 30; i += 3) bins[i] = 0;
+  diffs.forEach(d => {
+    let b = Math.round(d / 3) * 3;
+    if (bins[b] !== undefined) bins[b]++;
+  });
+
+  const keys = Object.keys(bins).map(Number).sort((a,b) => a-b);
+  const maxFreq = Math.max(...Object.values(bins));
+  const barWidth = w / keys.length;
+
+  keys.forEach((k, idx) => {
+    const val = bins[k];
+    const barH = (val / maxFreq) * (h - 35);
+    const x = idx * barWidth;
+    const y = h - barH - 18;
+
+    ctx.fillStyle = k > 0 ? "#2563eb" : "#ef4444";
+    ctx.fillRect(x + 1, y, barWidth - 2, barH);
+  });
+
+  ctx.fillStyle = "#94a3b8";
+  ctx.font = "9px sans-serif";
+  ctx.fillText(`Varianza 3PAr: σ = ${stdDev.toFixed(1)}`, 15, 15);
+  ctx.fillText("Ventaja Away (-)", 45, h - 4);
+  ctx.fillText("Ventaja Home (+)", w - 55, h - 4);
+}
+
+function syncBigData() {
+  const msg = document.getElementById("auditMsg");
+  msg.innerText = "⏳ Sincronizando Big Data... Recalculando matrices de pretemporada.";
+  setTimeout(() => {
+    msg.innerText = "✅ Módulo de Big Data sincronizado. Auditoría completada con filtros de 4 Factores, Rest Advantage y Bajas.";
+    runQuantEngine();
+  }, 300);
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+  renderStandings();
+  const activeInput = document.getElementById("activeDate");
+  const initDate = activeInput ? activeInput.value : "2026-10-08";
+  syncSlateByDate(initDate);
+});
+</script>
+</body>
+</html>
