@@ -128,6 +128,30 @@
         .prop-metric { display: flex; justify-content: space-between; font-size: 13px; color: #475569; margin-bottom: 6px; border-bottom: 1px dashed #f1f5f9; padding-bottom: 4px;}
         .prop-metric b { color: #0f172a; font-size: 14px; }
         .prop-verdict { background: #f8fafc; padding: 8px; border-radius: 6px; font-size: 12.5px; font-weight: 700; color: #16a34a; margin-top: 10px; display: flex; align-items: center; gap: 6px; border: 1px solid #dcfce7; }
+
+        /* Clases para modo TBD (To Be Determined) */
+        .alerta-tbd {
+            background: linear-gradient(135deg, #ef4444, #b91c1c);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 900;
+            text-align: center;
+            text-transform: uppercase;
+            box-shadow: 0 10px 25px rgba(239, 68, 68, 0.4);
+            margin-bottom: 15px;
+            border: 2px solid #fee2e2;
+        }
+        .matchup-card.tbd-card {
+            background: #f8fafc;
+            opacity: 0.8;
+            filter: grayscale(100%);
+            border: 2px dashed #cbd5e1;
+        }
+        .matchup-card.tbd-card::before {
+            background: #94a3b8;
+        }
     </style>
 </head>
 <body>
@@ -464,11 +488,21 @@
             let venueBuscado = cachePartidos.find(game => game.homeTeam === nombreEquipo || game.awayTeam === nombreEquipo)?.venue || "Neutral";
             let pf = parkFactors[venueBuscado] || 1.00;
 
-            let poderAbridor = ((4.0 - parseFloat(sieraVal))*2.0) + ((0.320 - parseFloat(xwobaVal))*30) + ((4.0 - parseFloat(xFipVal))*1.0);
-            let poderBullpen = (4.20 - parseFloat(teamEra)) * 2.5;
+            let poderAbridor = ((4.00 - parseFloat(sieraVal)) * 2.8) + 
+                               ((0.320 - parseFloat(xwobaVal)) * 35.0) + 
+                               ((4.00 - parseFloat(xFipVal)) * 1.2) + 
+                               (parseFloat(kMinusBbVal) * 0.15);
+                               
+            let poderBullpen = ((4.20 - parseFloat(teamEra)) * 1.5) + 
+                               ((1.30 - parseFloat(teamWhip)) * 6.0); 
+                               
+            let basePitching = (poderAbridor * 0.65) + (poderBullpen * 0.35);
             
-            let basePitching = (poderAbridor * 0.70) + (poderBullpen * 0.30);
-            let baseHitting = ((teamWrcPlus - 100)*0.08) + ((parseFloat(teamWoba) - 0.310)*4) + ((parseFloat(teamBarrelPct) - 7.0)*1.5);
+            let baseHitting = ((teamWrcPlus - 100) * 0.12) + 
+                              ((parseFloat(teamXwoba) - 0.315) * 40.0) + 
+                              ((parseFloat(teamBarrelPct) - 7.0) * 1.2) + 
+                              ((parseFloat(teamHardHitPct) - 38.0) * 0.2);
+                              
             let indice = parseFloat((basePitching + baseHitting).toFixed(2));
 
             return {
@@ -593,19 +627,27 @@
                     let awayObj = await calcularIndiceCompleto(p.awayTeam, p.awayPitcher); let homeObj = await calcularIndiceCompleto(p.homeTeam, p.homePitcher);
                     let diff = homeObj.indice - awayObj.indice; let probs = calcularProbabilidadesRealistas(diff);
                     let maxProb = Math.max(probs.probHome, probs.probAway); let eqFav = probs.probHome >= probs.probAway ? p.homeTeam : p.awayTeam; let isHomeFav = probs.probHome >= probs.probAway;
-                    listaPartidos.push({ indexOriginal: i, awayTeamShort: p.awayTeam.split(' ').pop(), homeTeamShort: p.homeTeam.split(' ').pop(), favorecido: eqFav.split(' ').pop(), probabilidad: maxProb, hora: p.gameTime, isHomeFav: isHomeFav });
+                    
+                    // Identificador de juego TBD
+                    let isTbd = p.homePitcher.toLowerCase().includes("definir") || p.awayPitcher.toLowerCase().includes("definir");
+                    
+                    listaPartidos.push({ indexOriginal: i, awayTeamShort: p.awayTeam.split(' ').pop(), homeTeamShort: p.homeTeam.split(' ').pop(), favorecido: eqFav.split(' ').pop(), probabilidad: maxProb, hora: p.gameTime, isHomeFav: isHomeFav, isTbd: isTbd });
                 } catch (e) {}
             }
             
             let sb = document.getElementById('sidebar-ranking-list'); sb.innerHTML = ""; document.getElementById('sidebar-count').textContent = `${listaPartidos.length} juegos`;
             listaPartidos.forEach((item) => {
                 let div = document.createElement('div'); div.className = 'ranking-item';
+                let probText = item.isTbd ? "N/A" : item.probabilidad.toFixed(1) + "%";
+                let favText = item.isTbd ? "TBD" : item.favorecido;
+                
                 div.onclick = function() { document.getElementById('select-partidos').value = item.indexOriginal; seleccionarPartidoLista(); ejecutarAnalisisMatchup(); window.scrollTo({ top: 0, behavior: 'smooth' }); };
-                div.innerHTML = `<div class="ranking-info"><b>${item.awayTeamShort} @ ${item.homeTeamShort}</b><div style="font-size: 10px; color: #0ea5e9; margin-top: 4px; font-weight: 800; text-transform: uppercase;">🕒 ${item.hora} | Fav: ${item.favorecido}</div></div><span class="ranking-prob">${item.probabilidad.toFixed(1)}%</span>`;
+                div.innerHTML = `<div class="ranking-info"><b>${item.awayTeamShort} @ ${item.homeTeamShort}</b><div style="font-size: 10px; color: #0ea5e9; margin-top: 4px; font-weight: 800; text-transform: uppercase;">🕒 ${item.hora} | Fav: ${favText}</div></div><span class="ranking-prob" ${item.isTbd ? 'style="background: #94a3b8;"' : ''}>${probText}</span>`;
                 sb.appendChild(div);
             });
 
-            let top3 = [...listaPartidos].sort((a,b) => b.probabilidad - a.probabilidad).slice(0, 3);
+            // Filtro para excluir juegos TBD del Top 3
+            let top3 = [...listaPartidos].filter(p => !p.isTbd).sort((a,b) => b.probabilidad - a.probabilidad).slice(0, 3);
             let t3c = document.getElementById('top3-container'); t3c.innerHTML = "";
             if(top3.length > 0) {
                 t3c.style.display = "flex";
@@ -613,6 +655,8 @@
                     let medal = index === 0 ? "🥇" : (index === 1 ? "🥈" : "🥉"); let pickClass = index === 0 ? "pick-1" : (index === 1 ? "pick-2" : "pick-3"); let opp = pick.isHomeFav ? pick.awayTeamShort : pick.homeTeamShort;
                     t3c.innerHTML += `<div class="top3-card ${pickClass}"><div class="top3-title">${medal} Pick #${index + 1} del Día</div><div class="top3-team"><span>${pick.favorecido}</span><span class="top3-prob">${pick.probabilidad.toFixed(1)}%</span></div><div class="top3-vs">vs ${opp}</div></div>`;
                 });
+            } else {
+                t3c.style.display = "none";
             }
         }
 
@@ -639,11 +683,37 @@
                 let diff = homeTeam.indice - awayTeam.indice, probs = calcularProbabilidadesRealistas(diff);
                 let gInitial = probs.probHome >= probs.probAway ? homeTeam : awayTeam;
 
+                // --- BLOQUE DE SEGURIDAD TBD ---
+                let isTbdAway = awayTeam.pitcher.nombre.toLowerCase().includes("definir");
+                let isTbdHome = homeTeam.pitcher.nombre.toLowerCase().includes("definir");
+
+                if (isTbdAway || isTbdHome) {
+                    veredictoDiv.style.display = "block";
+                    veredictoDiv.innerHTML = `
+                        <div class="alerta-tbd">
+                            ⚠️ PROYECCIÓN NO VÁLIDA: Abridor TBD. El modelo requiere confirmación de rotación.
+                        </div>
+                        <div class="explicacion-humana" style="text-align:center;">
+                            Las operaciones algorítmicas han sido suspendidas para este enfrentamiento. Asignar métricas de la liga a un lanzador no confirmado contamina la proyección de victoria. <b>Si conoce al abridor, ingrese su nombre manualmente en el panel de control superior.</b>
+                        </div>
+                    `;
+                    
+                    contenedor.innerHTML = `
+                        ${crearTarjetaMatchup(awayTeam, "Visitante", "N/A", homeTeam, 'badge-prob-away', isTbdAway)}
+                        ${crearTarjetaMatchup(homeTeam, "Local", "N/A", awayTeam, 'badge-prob-home', isTbdHome)}
+                    `;
+                    
+                    document.getElementById('props-individuales').style.display = "none";
+                    estado.innerHTML = "⚠️ Operación abortada: Faltan variables monticulares.";
+                    return; // Detiene la ejecución del cálculo
+                }
+                // --- FIN DEL BLOQUE DE SEGURIDAD ---
+
                 let calibracionMLB = 1.08; 
                 let pf = homeTeam.pf;
 
-                let awayRunsEst = ((parseFloat(homeTeam.pitcher.siera) * 0.6) + (parseFloat(homeTeam.teamEra) * 0.4)) * (awayTeam.teamWrcPlus / 100) * pf * calibracionMLB;
-                let homeRunsEst = ((parseFloat(awayTeam.pitcher.siera) * 0.6) + (parseFloat(awayTeam.teamEra) * 0.4)) * (homeTeam.teamWrcPlus / 100) * pf * calibracionMLB;
+                let awayRunsEst = ((parseFloat(homeTeam.pitcher.siera) * 0.65) + (((parseFloat(homeTeam.teamEra) * 0.5) + (parseFloat(homeTeam.teamWhip) * 3.0)) / 2 * 0.35)) * (awayTeam.teamWrcPlus / 100) * pf * calibracionMLB;
+                let homeRunsEst = ((parseFloat(awayTeam.pitcher.siera) * 0.65) + (((parseFloat(awayTeam.teamEra) * 0.5) + (parseFloat(awayTeam.teamWhip) * 3.0)) / 2 * 0.35)) * (homeTeam.teamWrcPlus / 100) * pf * calibracionMLB;
                 let totalRuns = awayRunsEst + homeRunsEst;
 
                 let umbralAlta = 8.8 * pf;
@@ -687,7 +757,7 @@
 
                 let tP = templatesPitcheo[Math.floor(Math.random() * templatesPitcheo.length)] + "<br><br>";
                 let tO = templatesOfensiva[Math.floor(Math.random() * templatesOfensiva.length)] + "<br><br>";
-                let tC = `<strong>Validación:</strong> La conjunción de métricas ofensivas (xwOBA y Barrel %) y defensivas (SIERA, FIP, xwOBA en contra), con el peso ajustado 70/30 entre abridor y relevo, estructuran este pronóstico para el duelo en ${venueName} bajo ${parkDesc}.`;
+                let tC = `<strong>Validación:</strong> La conjunción de métricas ofensivas (xwOBA y Barrel %) y defensivas (SIERA, FIP, xwOBA en contra), con el peso ajustado 65/35 entre abridor y relevo, estructuran este pronóstico para el duelo en ${venueName} bajo ${parkDesc}.`;
 
                 veredictoDiv.style.display = "block";
                 veredictoDiv.innerHTML = `
@@ -712,14 +782,16 @@
             } catch (e) { estado.innerHTML = "❌ Error al cruzar la data analítica."; }
         }
 
-        function crearTarjetaMatchup(t, rol, prob, o, idBadge) {
+        function crearTarjetaMatchup(t, rol, prob, o, idBadge, isTbd = false) {
             let pi = t.pitcher, oi = o.pitcher;
             let winSiera = parseFloat(pi.siera) < parseFloat(oi.siera) ? 'color: #38bdf8;' : 'color: #94a3b8; font-weight: 500; font-size: 14px;';
             let winWrc = parseInt(t.teamWrcPlus) > parseInt(o.teamWrcPlus) ? 'color: #ffffff;' : 'color: #fdf4ff; font-weight: 500; font-size: 15px;';
             let sLabel = evaluarSIERA(pi.siera), xfLabel = evaluarxFIP(pi.xFip), wrcLabel = evaluarWRC(t.teamWrcPlus);
+            
+            let tbdClass = isTbd ? " tbd-card" : "";
 
             return `
-                <div class="matchup-card">
+                <div class="matchup-card${tbdClass}">
                     <div class="matchup-header">
                         <div>
                             <div style="font-size: 11px; color: #64748b; font-weight: 800; text-transform: uppercase;">${rol}</div>
@@ -770,7 +842,6 @@
             let pitcherHome = homeTeam.pitcher;
             let pitcherAway = awayTeam.pitcher;
 
-            // FILTRO ESTRICTO DE INNINGS LANZADOS PARA K-PROP
             let k9H = parseFloat(pitcherHome.k9);
             let whiffH = parseFloat(pitcherHome.arsenal.whiff);
             let ipH = parseFloat(pitcherHome.ip);
