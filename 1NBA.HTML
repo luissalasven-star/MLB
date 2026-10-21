@@ -147,6 +147,14 @@
     .metric-value { font-size: 1.4rem; font-weight: 800; color: #fff; }
     .metric-sub { font-size: 0.75rem; color: var(--accent-glow); margin-top: 2px; }
 
+    /* NUEVO PANEL CUALITATIVO */
+    .qualitative-panel { background: var(--card); border: 1px solid var(--accent); border-left: 4px solid var(--accent); border-radius: 8px; padding: 14px; margin-bottom: 15px; font-size: 0.85rem; color: #e2e8f0; line-height: 1.5; }
+    .qualitative-panel h3 { font-size: 0.85rem; text-transform: uppercase; color: var(--accent-glow); margin-bottom: 8px; font-weight: 800; }
+    .highlight-text { color: #fff; font-weight: 800; }
+    .win-text { color: var(--green); font-weight: 800; }
+    .loss-text { color: var(--red); font-weight: 800; }
+    .clutch-text { color: var(--amber); font-weight: 800; }
+
     .props-panel { background: var(--card); border: 1px solid var(--card-border); border-radius: 8px; padding: 14px; margin-bottom: 15px; }
     .props-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #1e293b; padding-bottom: 6px; }
     .props-header h3 { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--accent-glow); font-weight: 800; }
@@ -154,8 +162,10 @@
     .props-table th { background: #0b1120; color: var(--muted); padding: 6px 8px; text-align: left; font-size: 0.7rem; text-transform: uppercase; }
     .props-table td { padding: 8px; border-bottom: 1px solid #1e293b; }
     .badge-edge { background: #064e3b; color: #34d399; font-weight: 800; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; }
+    .badge-under { background: #7f1d1d; color: #fca5a5; font-weight: 800; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; }
     .badge-pick { background: #1e3a8a; color: #60a5fa; font-weight: 800; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; }
     .player-team-tag { font-size: 0.65rem; color: #94a3b8; background: #1e293b; padding: 2px 5px; border-radius: 4px; margin-left: 6px; letter-spacing: 0.5px; vertical-align: middle; }
+    .row-highlight { border-left: 3px solid #2563eb; background: rgba(37, 99, 235, 0.05); }
 
     .grid-charts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .chart-panel { background: var(--card); border: 1px solid var(--card-border); border-radius: 8px; padding: 12px; }
@@ -167,22 +177,19 @@
 
 <div class="master-layout">
 
-  <!-- LATERAL IZQUIERDO: EXCLUSIVO TABLA TEMPORADA REGULAR -->
   <aside class="sidebar-panel">
     <div class="sidebar-header">
       <h2>🏆 Tabla General NBA</h2>
-      <span style="font-size: 0.72rem; color: #64748b; font-weight: 800; background: #f1f5f9; padding: 2px 6px; border-radius: 4px;">Solo Regular Season</span>
+      <span style="font-size: 0.72rem; color: #64748b; font-weight: 800; background: #f1f5f9; padding: 2px 6px; border-radius: 4px;">Data Viva</span>
     </div>
     <div class="sidebar-scroll" id="standingsContainer">
       <div style="text-align: center; color: #64748b; font-size: 0.75rem; padding: 20px;">Cargando posiciones oficiales...</div>
     </div>
   </aside>
 
-  <!-- NÚCLEO CENTRAL -->
   <main>
     <div class="top-picks-grid" id="topPicksContainer"></div>
 
-    <!-- CARTELERA OFICIAL DE NBA -->
     <div class="slate-bar">
       <div>
         <div class="slate-label">1. Fecha Activa</div>
@@ -193,7 +200,7 @@
         </div>
       </div>
       <div>
-        <div class="slate-label">2. Cartelera Oficial de NBA (Pretemporada a Finales)</div>
+        <div class="slate-label">2. Cartelera Oficial de NBA</div>
         <select id="gameSlateSelect" class="slate-input" onchange="loadGameFromSlate()"></select>
       </div>
       <div>
@@ -219,7 +226,7 @@
         </div>
       </div>
       <div class="audit-status" id="auditMsg">
-        ✅ Módulo de Big Data sincronizado con la API Oficial.
+        ✅ Motor listo para inyección de datos.
       </div>
     </div>
 
@@ -260,7 +267,7 @@
       <div class="metric-card">
         <div class="metric-title">Proyección Marcador</div>
         <div class="metric-value" id="resScore">0 - 0</div>
-        <div class="metric-sub" id="resSpread">Spread Proyectado: 0</div>
+        <div class="metric-sub" id="resSpread">Proy Spread: 0 | Vegas: S/D</div>
       </div>
       <div class="metric-card">
         <div class="metric-title">Ritmo (Pace) Proyectado</div>
@@ -273,27 +280,33 @@
         <div class="metric-sub" id="resFav">Favorito: -</div>
       </div>
       <div class="metric-card">
-        <div class="metric-title">Total Proyectado vs Casa</div>
+        <div class="metric-title">Total Proyectado vs Las Vegas</div>
         <div class="metric-value" id="resTotal">0.0</div>
-        <div class="metric-sub" id="resTotalEdge">Ventaja: 0 pts</div>
+        <div class="metric-sub" id="resTotalEdge">Vegas Total: S/D</div>
       </div>
+    </div>
+
+    <!-- PANEL CUALITATIVO -->
+    <div class="qualitative-panel">
+      <h3>🧠 Dictamen Cuantitativo (Por qué es favorito)</h3>
+      <p id="qualitativeText" style="margin: 0; color: #94a3b8;">Selecciona un partido para que el algoritmo desglose estructuralmente las métricas.</p>
     </div>
 
     <div class="props-panel">
       <div class="props-header">
-        <h3>🎯 Radar de Props: Matchups Individuales Avanzados</h3>
-        <span style="font-size: 0.7rem; color: var(--muted);">Ajustado por Minutos & Riesgo de Blowout</span>
+        <h3>🎯 IA de Props: Selección de Máximo Valor Cuantitativo (Top 4 del Partido)</h3>
+        <span style="font-size: 0.7rem; color: var(--muted);">Matriz Individualizada | Algoritmo evalúa todos los mercados</span>
       </div>
       <table class="props-table">
         <thead>
           <tr>
-            <th>Jugador</th>
-            <th>Mercado</th>
+            <th>Categoría IA</th>
+            <th>Jugador y Equipo</th>
+            <th>Promedio</th>
             <th>Línea Casa</th>
-            <th>Minutos Proy</th>
-            <th>Stat Proy</th>
-            <th>Pick Recomendado</th>
-            <th>Edge Cuant</th>
+            <th>Proy Motor</th>
+            <th>Pick Sugerido</th>
+            <th>% Edge</th>
           </tr>
         </thead>
         <tbody id="propsTableBody">
@@ -314,7 +327,6 @@
     </div>
   </main>
 
-  <!-- LATERAL DERECHO: TODOS ABSOLUTAMENTE TODOS LOS PARTIDOS DEL DÍA CON SU PROBABILIDAD -->
   <aside class="sidebar-panel">
     <div class="sidebar-header">
       <h2>📅 Partidos del Día</h2>
@@ -326,52 +338,63 @@
 </div>
 
 <script>
-// BASE DE DATOS DE LAS 30 FRANQUICIAS COMPLETAS
+// BASE DE DATOS CALIBRADA DINÁMICA
 const DB = {
-  "CHA": { name: "Charlotte Hornets", pace: 99.2, ortg: 108.5, drtg: 119.2, efg: 51.5, tov: 13.5, orb: 25.1, ftr: 20.1, par3: 0.41, altitude: false, star: "LaMelo Ball", starImpact: 5.8 },
-  "BKN": { name: "Brooklyn Nets", pace: 98.6, ortg: 110.1, drtg: 116.5, efg: 52.8, tov: 12.7, orb: 27.0, ftr: 21.5, par3: 0.39, altitude: false, star: "Cam Thomas", starImpact: 4.5 },
-  "GSW": { name: "Golden State Warriors", pace: 101.5, ortg: 116.9, drtg: 114.5, efg: 55.0, tov: 13.9, orb: 29.8, ftr: 20.2, par3: 0.46, altitude: false, star: "Stephen Curry", starImpact: 6.8 },
-  "LAL": { name: "Los Angeles Lakers", pace: 102.1, ortg: 115.4, drtg: 114.8, efg: 55.9, tov: 13.4, orb: 24.5, ftr: 25.8, par3: 0.34, altitude: false, star: "Anthony Davis", starImpact: 6.2 },
-  "OKC": { name: "Oklahoma City Thunder", pace: 101.2, ortg: 118.5, drtg: 111.0, efg: 56.5, tov: 12.4, orb: 26.8, ftr: 23.5, par3: 0.38, altitude: false, star: "Shai Gilgeous-Alexander", starImpact: 7.2 },
-  "IND": { name: "Indiana Pacers", pace: 102.5, ortg: 120.5, drtg: 117.6, efg: 57.7, tov: 12.9, orb: 26.1, ftr: 21.2, par3: 0.38, altitude: false, star: "Tyrese Haliburton", starImpact: 6.5 },
-  "MIN": { name: "Minnesota Timberwolves", pace: 98.8, ortg: 114.6, drtg: 108.4, efg: 55.2, tov: 13.8, orb: 27.2, ftr: 24.1, par3: 0.36, altitude: false, star: "Anthony Edwards", starImpact: 6.8 },
-  "ORL": { name: "Orlando Magic", pace: 97.8, ortg: 112.9, drtg: 110.8, efg: 52.8, tov: 14.2, orb: 28.4, ftr: 26.5, par3: 0.32, altitude: false, star: "Paolo Banchero", starImpact: 6.0 },
-  "MEM": { name: "Memphis Grizzlies", pace: 99.5, ortg: 113.8, drtg: 114.2, efg: 53.6, tov: 13.2, orb: 28.0, ftr: 23.0, par3: 0.35, altitude: false, star: "Ja Morant", starImpact: 6.7 },
-  "MIL": { name: "Milwaukee Bucks", pace: 101.8, ortg: 117.6, drtg: 115.1, efg: 56.1, tov: 12.8, orb: 25.8, ftr: 25.0, par3: 0.40, altitude: false, star: "Giannis Antetokounmpo", starImpact: 7.8 },
-  "PHX": { name: "Phoenix Suns", pace: 98.9, ortg: 116.8, drtg: 113.7, efg: 56.1, tov: 14.1, orb: 26.8, ftr: 24.3, par3: 0.37, altitude: false, star: "Devin Booker", starImpact: 6.5 },
-  "CHI": { name: "Chicago Bulls", pace: 99.0, ortg: 112.5, drtg: 115.8, efg: 53.2, tov: 12.4, orb: 26.5, ftr: 22.1, par3: 0.36, altitude: false, star: "Zach LaVine", starImpact: 5.5 },
-  "POR": { name: "Portland Trail Blazers", pace: 100.0, ortg: 109.8, drtg: 118.2, efg: 52.0, tov: 14.0, orb: 27.5, ftr: 23.2, par3: 0.37, altitude: false, star: "Anfernee Simons", starImpact: 5.6 },
-  "BOS": { name: "Boston Celtics", pace: 100.5, ortg: 122.2, drtg: 110.6, efg: 57.8, tov: 11.9, orb: 28.5, ftr: 21.0, par3: 0.48, altitude: false, star: "Jayson Tatum", starImpact: 7.0 },
-  "TOR": { name: "Toronto Raptors", pace: 99.2, ortg: 111.4, drtg: 117.2, efg: 52.5, tov: 13.5, orb: 26.8, ftr: 22.0, par3: 0.35, altitude: false, star: "Scottie Barnes", starImpact: 5.8 },
-  "SAS": { name: "San Antonio Spurs", pace: 101.4, ortg: 112.8, drtg: 115.6, efg: 53.9, tov: 14.3, orb: 26.4, ftr: 22.5, par3: 0.36, altitude: false, star: "Victor Wembanyama", starImpact: 7.4 },
-  "MIA": { name: "Miami Heat", pace: 97.4, ortg: 113.3, drtg: 111.5, efg: 53.5, tov: 12.5, orb: 26.0, ftr: 24.0, par3: 0.37, altitude: false, star: "Jimmy Butler", starImpact: 6.2 },
-  "HOU": { name: "Houston Rockets", pace: 99.6, ortg: 114.5, drtg: 112.8, efg: 54.0, tov: 12.8, orb: 29.5, ftr: 23.6, par3: 0.35, altitude: false, star: "Alperen Sengun", starImpact: 6.2 },
-  "UTA": { name: "Utah Jazz", pace: 100.8, ortg: 112.0, drtg: 119.5, efg: 52.4, tov: 14.5, orb: 30.2, ftr: 23.8, par3: 0.42, altitude: true, star: "Lauri Markkanen", starImpact: 5.0 },
-  "PHI": { name: "Philadelphia 76ers", pace: 99.5, ortg: 116.2, drtg: 113.0, efg: 53.8, tov: 11.8, orb: 28.0, ftr: 26.2, par3: 0.35, altitude: false, star: "Joel Embiid", starImpact: 7.6 },
-  "CLE": { name: "Cleveland Cavaliers", pace: 98.0, ortg: 114.7, drtg: 112.1, efg: 54.8, tov: 13.0, orb: 26.2, ftr: 21.8, par3: 0.39, altitude: false, star: "Donovan Mitchell", starImpact: 6.5 },
-  "LAC": { name: "Los Angeles Clippers", pace: 98.1, ortg: 117.9, drtg: 114.2, efg: 56.0, tov: 12.6, orb: 28.2, ftr: 23.0, par3: 0.37, altitude: false, star: "Kawhi Leonard", starImpact: 6.3 },
-  "SAC": { name: "Sacramento Kings", pace: 100.2, ortg: 116.0, drtg: 114.4, efg: 54.6, tov: 12.5, orb: 27.5, ftr: 21.7, par3: 0.42, altitude: false, star: "De'Aaron Fox", starImpact: 6.1 },
-  "NOP": { name: "New Orleans Pelicans", pace: 99.1, ortg: 114.2, drtg: 113.1, efg: 54.2, tov: 13.0, orb: 28.1, ftr: 24.0, par3: 0.35, altitude: false, star: "Zion Williamson", starImpact: 5.5 },
-  "DET": { name: "Detroit Pistons", pace: 99.0, ortg: 110.0, drtg: 117.5, efg: 52.1, tov: 14.0, orb: 26.5, ftr: 22.0, par3: 0.34, altitude: false, star: "Cade Cunningham", starImpact: 6.0 },
-  "DEN": { name: "Denver Nuggets", pace: 98.4, ortg: 118.8, drtg: 113.2, efg: 56.4, tov: 12.2, orb: 28.5, ftr: 21.0, par3: 0.33, altitude: true, star: "Nikola Jokic", starImpact: 7.9 },
-  "DAL": { name: "Dallas Mavericks", pace: 98.6, ortg: 117.9, drtg: 114.5, efg: 55.8, tov: 12.5, orb: 26.2, ftr: 24.5, par3: 0.44, altitude: false, star: "Luka Doncic", starImpact: 7.8 },
-  "NYK": { name: "New York Knicks", pace: 96.8, ortg: 117.5, drtg: 112.4, efg: 54.8, tov: 12.0, orb: 32.5, ftr: 23.2, par3: 0.37, altitude: false, star: "Jalen Brunson", starImpact: 6.8 },
-  "ATL": { name: "Atlanta Hawks", pace: 101.5, ortg: 114.2, drtg: 118.5, efg: 53.5, tov: 13.5, orb: 27.5, ftr: 24.0, par3: 0.39, altitude: false, star: "Trae Young", starImpact: 6.2 },
-  "WAS": { name: "Washington Wizards", pace: 101.8, ortg: 108.4, drtg: 119.8, efg: 51.8, tov: 14.2, orb: 24.5, ftr: 21.5, par3: 0.38, altitude: false, star: "Jordan Poole", starImpact: 4.8 }
+  "CHA": { name: "Charlotte Hornets", pace: 99.2, ortg: 108.5, drtg: 119.2, efg: 51.5, tov: 13.5, orb: 25.1, ftr: 20.1, par3: 0.41, altitude: false, starImpact: 5.8, star: "LaMelo Ball", pts: 23.9, reb: 5.1, ast: 8.0 },
+  "BKN": { name: "Brooklyn Nets", pace: 98.6, ortg: 110.1, drtg: 116.5, efg: 52.8, tov: 12.7, orb: 27.0, ftr: 21.5, par3: 0.39, altitude: false, starImpact: 4.5, star: "Cam Thomas", pts: 22.5, reb: 3.2, ast: 2.9 },
+  "GSW": { name: "Golden State Warriors", pace: 101.5, ortg: 116.9, drtg: 114.5, efg: 55.0, tov: 13.9, orb: 29.8, ftr: 20.2, par3: 0.46, altitude: false, starImpact: 6.8, star: "Stephen Curry", pts: 26.4, reb: 4.5, ast: 5.1 },
+  "LAL": { name: "Los Angeles Lakers", pace: 102.1, ortg: 115.4, drtg: 114.8, efg: 55.9, tov: 13.4, orb: 24.5, ftr: 25.8, par3: 0.34, altitude: false, starImpact: 6.2, star: "Anthony Davis", pts: 24.7, reb: 12.6, ast: 3.5 },
+  "OKC": { name: "Oklahoma City Thunder", pace: 101.2, ortg: 118.5, drtg: 111.0, efg: 56.5, tov: 12.4, orb: 26.8, ftr: 23.5, par3: 0.38, altitude: false, starImpact: 7.2, star: "S. Gilgeous-Alexander", pts: 30.1, reb: 5.5, ast: 6.2 },
+  "IND": { name: "Indiana Pacers", pace: 102.5, ortg: 120.5, drtg: 117.6, efg: 57.7, tov: 12.9, orb: 26.1, ftr: 21.2, par3: 0.38, altitude: false, starImpact: 6.5, star: "Tyrese Haliburton", pts: 20.1, reb: 3.9, ast: 10.9 },
+  "MIN": { name: "Minnesota Timberwolves", pace: 98.8, ortg: 114.6, drtg: 108.4, efg: 55.2, tov: 13.8, orb: 27.2, ftr: 24.1, par3: 0.36, altitude: false, starImpact: 6.8, star: "Anthony Edwards", pts: 25.9, reb: 5.4, ast: 5.1 },
+  "ORL": { name: "Orlando Magic", pace: 97.8, ortg: 112.9, drtg: 110.8, efg: 52.8, tov: 14.2, orb: 28.4, ftr: 26.5, par3: 0.32, altitude: false, starImpact: 6.0, star: "Paolo Banchero", pts: 22.6, reb: 6.9, ast: 5.4 },
+  "MEM": { name: "Memphis Grizzlies", pace: 99.5, ortg: 113.8, drtg: 114.2, efg: 53.6, tov: 13.2, orb: 28.0, ftr: 23.0, par3: 0.35, altitude: false, starImpact: 6.7, star: "Ja Morant", pts: 25.1, reb: 5.6, ast: 8.1 },
+  "MIL": { name: "Milwaukee Bucks", pace: 101.8, ortg: 117.6, drtg: 115.1, efg: 56.1, tov: 12.8, orb: 25.8, ftr: 25.0, par3: 0.40, altitude: false, starImpact: 7.8, star: "G. Antetokounmpo", pts: 30.4, reb: 11.5, ast: 6.5 },
+  "PHX": { name: "Phoenix Suns", pace: 98.9, ortg: 116.8, drtg: 113.7, efg: 56.1, tov: 14.1, orb: 26.8, ftr: 24.3, par3: 0.37, altitude: false, starImpact: 6.5, star: "Kevin Durant", pts: 27.1, reb: 6.6, ast: 5.0 },
+  "CHI": { name: "Chicago Bulls", pace: 99.0, ortg: 112.5, drtg: 115.8, efg: 53.2, tov: 12.4, orb: 26.5, ftr: 22.1, par3: 0.36, altitude: false, starImpact: 5.5, star: "Zach LaVine", pts: 19.5, reb: 5.2, ast: 3.9 },
+  "POR": { name: "Portland Trail Blazers", pace: 100.0, ortg: 109.8, drtg: 118.2, efg: 52.0, tov: 14.0, orb: 27.5, ftr: 23.2, par3: 0.37, altitude: false, starImpact: 5.6, star: "Anfernee Simons", pts: 22.6, reb: 3.6, ast: 5.5 },
+  "BOS": { name: "Boston Celtics", pace: 100.5, ortg: 122.2, drtg: 110.6, efg: 57.8, tov: 11.9, orb: 28.5, ftr: 21.0, par3: 0.48, altitude: false, starImpact: 7.0, star: "Jayson Tatum", pts: 26.9, reb: 8.1, ast: 4.9 },
+  "TOR": { name: "Toronto Raptors", pace: 99.2, ortg: 111.4, drtg: 117.2, efg: 52.5, tov: 13.5, orb: 26.8, ftr: 22.0, par3: 0.35, altitude: false, starImpact: 5.8, star: "Scottie Barnes", pts: 19.9, reb: 8.2, ast: 6.1 },
+  "SAS": { name: "San Antonio Spurs", pace: 101.4, ortg: 112.8, drtg: 115.6, efg: 53.9, tov: 14.3, orb: 26.4, ftr: 22.5, par3: 0.36, altitude: false, starImpact: 7.4, star: "Victor Wembanyama", pts: 21.4, reb: 10.6, ast: 3.9 },
+  "MIA": { name: "Miami Heat", pace: 97.4, ortg: 113.3, drtg: 111.5, efg: 53.5, tov: 12.5, orb: 26.0, ftr: 24.0, par3: 0.37, altitude: false, starImpact: 6.2, star: "Tyler Herro", pts: 20.8, reb: 5.3, ast: 4.5 },
+  "HOU": { name: "Houston Rockets", pace: 99.6, ortg: 114.5, drtg: 112.8, efg: 54.0, tov: 12.8, orb: 29.5, ftr: 23.6, par3: 0.35, altitude: false, starImpact: 6.2, star: "Alperen Sengun", pts: 21.1, reb: 9.3, ast: 5.0 },
+  "UTA": { name: "Utah Jazz", pace: 100.8, ortg: 112.0, drtg: 119.5, efg: 52.4, tov: 14.5, orb: 30.2, ftr: 23.8, par3: 0.42, altitude: true, starImpact: 5.0, star: "Lauri Markkanen", pts: 23.2, reb: 8.2, ast: 2.0 },
+  "PHI": { name: "Philadelphia 76ers", pace: 99.5, ortg: 116.2, drtg: 113.0, efg: 53.8, tov: 11.8, orb: 28.0, ftr: 26.2, par3: 0.35, altitude: false, starImpact: 7.6, star: "Tyrese Maxey", pts: 25.9, reb: 3.7, ast: 6.2 },
+  "CLE": { name: "Cleveland Cavaliers", pace: 98.0, ortg: 114.7, drtg: 112.1, efg: 54.8, tov: 13.0, orb: 26.2, ftr: 21.8, par3: 0.39, altitude: false, starImpact: 6.5, star: "Donovan Mitchell", pts: 26.6, reb: 5.1, ast: 6.1 },
+  "LAC": { name: "Los Angeles Clippers", pace: 98.1, ortg: 117.9, drtg: 114.2, efg: 56.0, tov: 12.6, orb: 28.2, ftr: 23.0, par3: 0.37, altitude: false, starImpact: 6.3, star: "Norman Powell", pts: 21.2, reb: 3.5, ast: 2.3 },
+  "SAC": { name: "Sacramento Kings", pace: 100.2, ortg: 116.0, drtg: 114.4, efg: 54.6, tov: 12.5, orb: 27.5, ftr: 21.7, par3: 0.42, altitude: false, starImpact: 6.1, star: "De'Aaron Fox", pts: 26.6, reb: 4.6, ast: 5.6 },
+  "NOP": { name: "New Orleans Pelicans", pace: 99.1, ortg: 114.2, drtg: 113.1, efg: 54.2, tov: 13.0, orb: 28.1, ftr: 24.0, par3: 0.35, altitude: false, starImpact: 5.5, star: "Zion Williamson", pts: 22.9, reb: 5.8, ast: 5.0 },
+  "DET": { name: "Detroit Pistons", pace: 99.0, ortg: 110.0, drtg: 117.5, efg: 52.1, tov: 14.0, orb: 26.5, ftr: 22.0, par3: 0.34, altitude: false, starImpact: 6.0, star: "Cade Cunningham", pts: 22.7, reb: 4.3, ast: 7.5 },
+  "DEN": { name: "Denver Nuggets", pace: 98.4, ortg: 118.8, drtg: 113.2, efg: 56.4, tov: 12.2, orb: 28.5, ftr: 21.0, par3: 0.33, altitude: true, starImpact: 7.9, star: "Nikola Jokic", pts: 26.4, reb: 12.4, ast: 9.0 },
+  "DAL": { name: "Dallas Mavericks", pace: 98.6, ortg: 117.9, drtg: 114.5, efg: 55.8, tov: 12.5, orb: 26.2, ftr: 24.5, par3: 0.44, altitude: false, starImpact: 7.8, star: "Luka Doncic", pts: 33.9, reb: 9.2, ast: 9.8 },
+  "NYK": { name: "New York Knicks", pace: 96.8, ortg: 117.5, drtg: 112.4, efg: 54.8, tov: 12.0, orb: 32.5, ftr: 23.2, par3: 0.37, altitude: false, starImpact: 6.8, star: "Jalen Brunson", pts: 28.7, reb: 3.6, ast: 6.7 },
+  "ATL": { name: "Atlanta Hawks", pace: 101.5, ortg: 114.2, drtg: 118.5, efg: 53.5, tov: 13.5, orb: 27.5, ftr: 24.0, par3: 0.39, altitude: false, starImpact: 6.2, star: "Trae Young", pts: 25.7, reb: 2.8, ast: 10.8 },
+  "WAS": { name: "Washington Wizards", pace: 101.8, ortg: 108.4, drtg: 119.8, efg: 51.8, tov: 14.2, orb: 24.5, ftr: 21.5, par3: 0.38, altitude: false, starImpact: 4.8, star: "Jordan Poole", pts: 17.4, reb: 2.7, ast: 4.4 }
 };
 
-const LEAGUE_PACE = 99.8;
-const LEAGUE_ORTG = 114.5;
+let LEAGUE_PACE = 99.8;
+let LEAGUE_ORTG = 114.5;
+const ESPN_NORM = { "GS": "GSW", "SA": "SAS", "NO": "NOP", "NY": "NYK", "UTAH": "UTA", "WSH": "WAS", "PHX": "PHX", "BK": "BKN" };
 
-// MAPEO DE NOMBRES Y CÓDIGOS ESPN
-const ESPN_NORM = {
-  "GS": "GSW", "SA": "SAS", "NO": "NOP", "NY": "NYK", "UTAH": "UTA", "WSH": "WAS", "PHX": "PHX", "BK": "BKN"
-};
+let currentDailyGames = [];
 
-// CÁLCULO DE PROYECCIÓN INDIVIDUAL (PRETEMPORADA O TEMPORADA)
+function extractLeader(competitorObj, categoryName) {
+  try {
+    if (!competitorObj.leaders) return null;
+    const catObj = competitorObj.leaders.find(l => l.name === categoryName);
+    if (catObj && catObj.leaders && catObj.leaders.length > 0) {
+      return {
+        name: catObj.leaders[0].athlete.displayName,
+        value: parseFloat(catObj.leaders[0].displayValue) || 0
+      };
+    }
+  } catch (e) { }
+  return null;
+}
+
 function calculateMatchupStats(awayCode, homeCode) {
-  const away = DB[awayCode] || { pace: 99.0, ortg: 109.0, drtg: 116.0, name: awayCode, star: "Líder", altitude: false };
-  const home = DB[homeCode] || { pace: 99.0, ortg: 112.0, drtg: 113.0, name: homeCode, star: "Líder", altitude: false };
+  const away = DB[awayCode] || { pace: 99.0, ortg: 109.0, drtg: 116.0, name: awayCode };
+  const home = DB[homeCode] || { pace: 99.0, ortg: 112.0, drtg: 113.0, name: homeCode, altitude: false };
 
   let expPace = (away.pace * home.pace) / LEAGUE_PACE;
   let finalAwayOrtg = (away.ortg * home.drtg) / LEAGUE_ORTG;
@@ -379,19 +402,20 @@ function calculateMatchupStats(awayCode, homeCode) {
 
   let awayPts = (finalAwayOrtg * expPace) / 100;
   let homePts = (finalHomeOrtg * expPace) / 100;
-  let spreadVal = -(homePts - awayPts);
-  let homeWinProb = Math.pow(homePts, 13.91) / (Math.pow(homePts, 13.91) + Math.pow(awayPts, 13.91));
-
+  
   let fav = homePts >= awayPts ? home.name.split(" ").pop() : away.name.split(" ").pop();
+  let favSpread = -Math.abs(homePts - awayPts); 
+  let spread = favSpread.toFixed(1);
+
+  let homeWinProb = Math.pow(homePts, 13.91) / (Math.pow(homePts, 13.91) + Math.pow(awayPts, 13.91));
   let maxWinProb = Math.max(homeWinProb, 1 - homeWinProb);
   let winProb = (maxWinProb * 100).toFixed(1) + "%";
-  let spread = (spreadVal > 0 ? "+" : "") + spreadVal.toFixed(1);
-  let edge = "+" + (Math.abs(spreadVal) * 0.8 + 1.5).toFixed(1) + "%";
+  
+  let edge = "+" + (Math.abs(favSpread) * 0.8 + 1.5).toFixed(1) + "%";
 
   return { fav, prob: winProb, spread, edge, homeWinProb };
 }
 
-// SINCRONIZADOR DE CARTELERA DEL DÍA (ESTRICTAMENTE API ESPN)
 async function fetchFullSchedule(dateStr) {
   try {
     const cleanDate = dateStr.replace(/-/g, "");
@@ -410,6 +434,39 @@ async function fetchFullSchedule(dateStr) {
           let awayCode = ESPN_NORM[rawAwayCode] || rawAwayCode;
           let homeCode = ESPN_NORM[rawHomeCode] || rawHomeCode;
 
+          let vegasSpread = "S/D";
+          let vegasTotal = "S/D";
+          if (comp.odds && comp.odds.length > 0) {
+            vegasSpread = comp.odds[0].details || "S/D";
+            vegasTotal = comp.odds[0].overUnder || "S/D";
+          }
+
+          let awayDB = DB[awayCode] || { star: "Estrella Away", pts: 22.0, reb: 5.0, ast: 5.0 };
+          let homeDB = DB[homeCode] || { star: "Estrella Home", pts: 22.0, reb: 5.0, ast: 5.0 };
+
+          let liveAwayPts = extractLeader(awayData, "points");
+          let liveAwayAst = extractLeader(awayData, "assists");
+          let liveAwayReb = extractLeader(awayData, "rebounds");
+
+          let liveHomePts = extractLeader(homeData, "points");
+          let liveHomeAst = extractLeader(homeData, "assists");
+          let liveHomeReb = extractLeader(homeData, "rebounds");
+
+          let leaders = {
+            away: {
+              name: liveAwayPts ? liveAwayPts.name : awayDB.star,
+              pts: liveAwayPts ? liveAwayPts.value : awayDB.pts,
+              ast: liveAwayAst ? liveAwayAst.value : awayDB.ast,
+              reb: liveAwayReb ? liveAwayReb.value : awayDB.reb
+            },
+            home: {
+              name: liveHomePts ? liveHomePts.name : homeDB.star,
+              pts: liveHomePts ? liveHomePts.value : homeDB.pts,
+              ast: liveHomeAst ? liveHomeAst.value : homeDB.ast,
+              reb: liveHomeReb ? liveHomeReb.value : homeDB.reb
+            }
+          };
+
           const stats = calculateMatchupStats(awayCode, homeCode);
           let gameTime = "🕒 " + (ev.status.type.shortDetail || ev.status.type.detail || "Por definir");
 
@@ -417,50 +474,69 @@ async function fetchFullSchedule(dateStr) {
             slateKey: `${awayCode}_${homeCode}`,
             away: awayData.team.shortDisplayName || awayData.team.name,
             home: homeData.team.shortDisplayName || homeData.team.name,
+            awayCode: awayCode,
+            homeCode: homeCode,
             time: gameTime,
             fav: stats.fav,
             prob: stats.prob,
             spread: stats.spread,
-            edge: stats.edge
+            edge: stats.edge,
+            vegasSpread: vegasSpread,
+            vegasTotal: vegasTotal,
+            leaders: leaders
           };
         });
-      } else {
-        return [];
       }
     }
-  } catch (e) {
-    console.error("Error conectando con la API oficial de ESPN:", e);
-  }
-
+  } catch (e) { }
   return [];
 }
 
-// SINCRONIZADOR EXCLUSIVO DE TABLA GENERAL (SOLO TEMPORADA REGULAR)
 async function fetchStandings() {
   const container = document.getElementById("standingsContainer");
+  let totalPts = 0, teamCount = 0;
+
   try {
     const res = await fetch("https://site.api.espn.com/apis/v2/sports/basketball/nba/standings?seasonType=2");
     if (res.ok) {
       const data = await res.json();
       let teams = [];
-
+      
       if (data.children) {
         data.children.forEach(conf => {
           if (conf.standings && conf.standings.entries) {
             conf.standings.entries.forEach(entry => {
               let teamName = entry.team.displayName;
-              let wins = 0, losses = 0;
+              let rawCode = entry.team.abbreviation;
+              let code = ESPN_NORM[rawCode] || rawCode;
+              
+              let wins = 0, losses = 0, ppg = 0, oppg = 0;
               
               if (entry.stats) {
                 entry.stats.forEach(st => {
                   if (st.name === "wins" || st.id === "0") wins = parseInt(st.value) || 0;
                   if (st.name === "losses" || st.id === "1") losses = parseInt(st.value) || 0;
+                  if (st.name === "avgPointsFor") ppg = parseFloat(st.value) || 0;
+                  if (st.name === "avgPointsAgainst") oppg = parseFloat(st.value) || 0;
                 });
               }
+
+              if (DB[code] && ppg > 0 && oppg > 0) {
+                DB[code].ortg = ppg;
+                DB[code].drtg = oppg;
+                totalPts += ppg;
+                teamCount++;
+              }
+
               teams.push({ name: teamName, w: wins, l: losses });
             });
           }
         });
+      }
+      
+      if (teamCount > 0) {
+        LEAGUE_ORTG = totalPts / teamCount;
+        document.getElementById("auditMsg").innerHTML = `✅ Data Viva Sincronizada (Promedio Liga: ${LEAGUE_ORTG.toFixed(1)} pts).`;
       }
 
       if (teams.length >= 28) {
@@ -472,12 +548,8 @@ async function fetchStandings() {
         return;
       }
     }
-  } catch (e) {
-    console.warn("Standings fetch falló, cargando plantilla oficial limpia:", e);
-  }
-
-  const fallbackRegularSeason = Object.values(DB).map(t => ({ name: t.name, w: 0, l: 0 }));
-  renderStandings(fallbackRegularSeason);
+  } catch (e) {}
+  renderStandings(Object.values(DB).map(t => ({ name: t.name, w: 0, l: 0 })));
 }
 
 function renderStandings(teamsList) {
@@ -514,8 +586,9 @@ async function syncSlateByDate(dateStr) {
   slateSelect.innerHTML = "<option>Consultando servidores de la NBA...</option>";
 
   const games = await fetchFullSchedule(dateStr);
+  currentDailyGames = games; 
+  
   slateSelect.innerHTML = "";
-
   const badge = document.getElementById("gameCountBadge");
   badge.innerText = `${games.length} juegos`;
   
@@ -527,10 +600,7 @@ async function syncSlateByDate(dateStr) {
       badge.style.background = "#e0f2fe";
       badge.style.color = "#0284c7";
       games.forEach(g => {
-        const [awayCode, homeCode] = g.slateKey.split("_");
-        const away = DB[awayCode] || { name: g.away, star: "Líder" };
-        const home = DB[homeCode] || { name: g.home, star: "Líder" };
-        slateSelect.add(new Option(`${away.name} @ ${home.name} [Fav: ${g.fav} ${g.prob}]`, g.slateKey));
+        slateSelect.add(new Option(`${g.away} @ ${g.home} [Vegas: ${g.vegasSpread}]`, g.slateKey));
       });
   }
 
@@ -544,7 +614,7 @@ function renderDailyGames(games) {
   container.innerHTML = "";
 
   if (!games || games.length === 0) {
-    container.innerHTML = `<div style="text-align: center; color: #64748b; padding: 25px; font-size: 0.82rem; font-weight: 600;">⚠️ No hay partidos oficiales programados para esta fecha.</div>`;
+    container.innerHTML = `<div style="text-align: center; color: #64748b; padding: 25px; font-size: 0.82rem; font-weight: 600;">⚠️ No hay partidos programados.</div>`;
     return;
   }
 
@@ -565,7 +635,7 @@ function renderDailyGames(games) {
       </div>
       <div class="game-card-info">
         <span>${g.time}</span>
-        <span style="color: #0284c7; font-weight: 800;">Spread ${g.spread}</span>
+        <span style="color: #0284c7; font-weight: 800;">Vegas: ${g.vegasSpread}</span>
       </div>
     `;
     container.appendChild(card);
@@ -577,105 +647,60 @@ function renderTopPicksForDate(games) {
   container.innerHTML = "";
 
   if (!games || games.length === 0) {
-    container.innerHTML = `
-      <div style="grid-column: 1 / -1; background: #ffffff; padding: 20px; border-radius: 10px; border-left: 5px solid #ef4444; box-shadow: 0 4px 12px rgba(0,0,0,0.25); text-align: center; color: #0f172a;">
-        <h3 style="margin-bottom: 5px; font-weight: 900; text-transform: uppercase;">🛑 Jornada de Descanso en la NBA</h3>
-        <p style="font-size: 0.85rem; color: #64748b; font-weight: 600;">No hay partidos en la cartelera oficial para la fecha seleccionada. El motor cuantitativo no puede operar con datos vacíos.</p>
-      </div>
-    `;
+    container.innerHTML = `<div style="grid-column: 1 / -1; background: #ffffff; padding: 20px; border-radius: 10px; border-left: 5px solid #ef4444; box-shadow: 0 4px 12px rgba(0,0,0,0.25); text-align: center; color: #0f172a;"><h3 style="margin-bottom: 5px; font-weight: 900; text-transform: uppercase;">🛑 Jornada de Descanso en la NBA</h3></div>`;
     return;
   }
 
   const sortedGames = [...games].sort((a,b) => parseFloat(b.prob) - parseFloat(a.prob));
+  const picks = [sortedGames[0], sortedGames[1] || sortedGames[0], sortedGames[2] || sortedGames[0]];
+  const medals = ["🥇", "🥈", "🥉"];
+  const classes = ["gold", "silver", "bronze"];
 
-  const pick1 = sortedGames[0];
-  const pick2 = sortedGames[1] || sortedGames[0];
-  const pick3 = sortedGames[2] || sortedGames[0];
-
-  container.innerHTML = `
-    <div class="pick-card gold">
-      <div>
-        <div class="pick-meta">🥇 PICK #1 DEL DÍA</div>
-        <div class="pick-name">${pick1.fav}</div>
-        <div class="pick-sub">vs ${pick1.fav === pick1.home ? pick1.away : pick1.home}</div>
-        <div class="pick-tag">SPREAD ${pick1.spread} (${pick1.edge} Edge)</div>
+  picks.forEach((pick, idx) => {
+    container.innerHTML += `
+      <div class="pick-card ${classes[idx]}">
+        <div>
+          <div class="pick-meta">${medals[idx]} PICK #${idx+1} DEL DÍA</div>
+          <div class="pick-name">${pick.fav}</div>
+          <div class="pick-sub">vs ${pick.fav === pick.home ? pick.away : pick.home}</div>
+          <div class="pick-tag">PROY ${pick.spread} (Vegas: ${pick.vegasSpread})</div>
+        </div>
+        <div>
+          <div class="pick-prob">${pick.prob}</div>
+          <div class="pick-tag">Moneyline</div>
+        </div>
       </div>
-      <div>
-        <div class="pick-prob">${pick1.prob}</div>
-        <div class="pick-tag">Moneyline</div>
-      </div>
-    </div>
-
-    <div class="pick-card silver">
-      <div>
-        <div class="pick-meta">🥈 PICK #2 DEL DÍA</div>
-        <div class="pick-name">${pick2.fav}</div>
-        <div class="pick-sub">vs ${pick2.fav === pick2.home ? pick2.away : pick2.home}</div>
-        <div class="pick-tag">SPREAD ${pick2.spread} (${pick2.edge} Edge)</div>
-      </div>
-      <div>
-        <div class="pick-prob">${pick2.prob}</div>
-        <div class="pick-tag">Moneyline</div>
-      </div>
-    </div>
-
-    <div class="pick-card bronze">
-      <div>
-        <div class="pick-meta">🥉 PICK #3 DEL DÍA</div>
-        <div class="pick-name">${pick3.fav}</div>
-        <div class="pick-sub">vs ${pick3.fav === pick3.home ? pick3.away : pick3.home}</div>
-        <div class="pick-tag">SPREAD ${pick3.spread} (${pick3.edge} Edge)</div>
-      </div>
-      <div>
-        <div class="pick-prob">${pick3.prob}</div>
-        <div class="pick-tag">Moneyline</div>
-      </div>
-    </div>
-  `;
+    `;
+  });
 }
 
 function resetQuantEngine() {
   document.getElementById("resScore").innerText = "0 - 0";
-  document.getElementById("resSpread").innerText = "Spread Proyectado: 0";
+  document.getElementById("resSpread").innerText = "Proy Spread: 0 | Vegas: S/D";
   document.getElementById("resPace").innerText = "0.0";
   document.getElementById("resWinProb").innerText = "0%";
   document.getElementById("resFav").innerText = "Favorito: -";
   document.getElementById("resTotal").innerText = "0.0";
-  document.getElementById("propsTableBody").innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 15px;">No hay matchups individuales disponibles (Jornada de descanso)</td></tr>`;
-  
-  const factorCanvas = document.getElementById("factorCanvas");
-  if (factorCanvas) {
-    const factorCtx = factorCanvas.getContext("2d");
-    factorCtx.clearRect(0, 0, factorCanvas.width, factorCanvas.height);
-  }
-  
-  const simCanvas = document.getElementById("simCanvas");
-  if (simCanvas) {
-    const simCtx = simCanvas.getContext("2d");
-    simCtx.clearRect(0, 0, simCanvas.width, simCanvas.height);
-  }
+  document.getElementById("resTotalEdge").innerText = "Vegas Total: S/D";
+  document.getElementById("qualitativeText").innerHTML = "Selecciona un partido para que el algoritmo desglose estructuralmente las métricas.";
+  document.getElementById("propsTableBody").innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 15px;">No hay matchups individuales disponibles</td></tr>`;
+  [document.getElementById("factorCanvas"), document.getElementById("simCanvas")].forEach(c => c && c.getContext("2d").clearRect(0,0,c.width,c.height));
 }
 
 function loadGameFromSlate() {
   const slateKey = document.getElementById("gameSlateSelect").value;
-  
-  if (!slateKey) {
-    document.getElementById("awayDisplay").value = "Sin Partido";
-    document.getElementById("homeDisplay").value = "Sin Partido";
-    resetQuantEngine();
-    return;
-  }
+  if (!slateKey) { resetQuantEngine(); return; }
 
   document.querySelectorAll('.game-card').forEach(c => c.classList.remove('active-card'));
   const activeCard = document.getElementById(`card_${slateKey}`);
   if (activeCard) activeCard.classList.add('active-card');
 
-  const [awayCode, homeCode] = slateKey.split("_");
-  const away = DB[awayCode] || { name: awayCode, star: "Líder", pace: 100, ortg: 114, drtg: 114, efg: 54, tov: 13, orb: 27, ftr: 22, par3: 0.38, altitude: false, starImpact: 5 };
-  const home = DB[homeCode] || { name: homeCode, star: "Líder", pace: 100, ortg: 114, drtg: 114, efg: 54, tov: 13, orb: 27, ftr: 22, par3: 0.38, altitude: false, starImpact: 5 };
+  const gameInfo = currentDailyGames.find(g => g.slateKey === slateKey);
+  const awayName = gameInfo ? gameInfo.away : slateKey.split("_")[0];
+  const homeName = gameInfo ? gameInfo.home : slateKey.split("_")[1];
 
-  document.getElementById("awayDisplay").value = `${away.name} | ${away.star}`;
-  document.getElementById("homeDisplay").value = `${home.name} | ${home.star}`;
+  document.getElementById("awayDisplay").value = awayName;
+  document.getElementById("homeDisplay").value = homeName;
   
   runQuantEngine();
 }
@@ -684,9 +709,14 @@ function runQuantEngine() {
   const slateKey = document.getElementById("gameSlateSelect").value;
   if (!slateKey) return;
 
-  const [awayCode, homeCode] = slateKey.split("_");
-  const away = DB[awayCode] || { name: awayCode, star: "Líder", pace: 100, ortg: 114, drtg: 114, efg: 54, tov: 13, orb: 27, ftr: 22, par3: 0.38, altitude: false, starImpact: 5 };
-  const home = DB[homeCode] || { name: homeCode, star: "Líder", pace: 100, ortg: 114, drtg: 114, efg: 54, tov: 13, orb: 27, ftr: 22, par3: 0.38, altitude: false, starImpact: 5 };
+  const gameInfo = currentDailyGames.find(g => g.slateKey === slateKey);
+  if (!gameInfo) return;
+
+  const awayCode = gameInfo.awayCode;
+  const homeCode = gameInfo.homeCode;
+  
+  const away = DB[awayCode] || { pace: 100, ortg: 114, drtg: 114, efg: 54, tov: 13, orb: 27, ftr: 22, par3: 0.38, altitude: false, starImpact: 5 };
+  const home = DB[homeCode] || { pace: 100, ortg: 114, drtg: 114, efg: 54, tov: 13, orb: 27, ftr: 22, par3: 0.38, altitude: false, starImpact: 5 };
 
   const awayRest = parseInt(document.getElementById("awayRest").value);
   const homeRest = parseInt(document.getElementById("homeRest").value);
@@ -699,7 +729,6 @@ function runQuantEngine() {
   let homeStarAdj = homeStarIn ? 0 : -home.starImpact;
 
   let homeCourtBonus = home.altitude ? 4.2 : 2.5;
-
   let expPace = (away.pace * home.pace) / LEAGUE_PACE;
   if (awayRest === 0 || homeRest === 0) expPace -= 1.2;
 
@@ -708,52 +737,136 @@ function runQuantEngine() {
 
   let awayPts = (finalAwayOrtg * expPace) / 100;
   let homePts = (finalHomeOrtg * expPace) / 100;
-  let spread = -(homePts - awayPts);
+  
+  let spread = -Math.abs(homePts - awayPts);
   let total = awayPts + homePts;
 
   let homeWinProb = Math.pow(homePts, 13.91) / (Math.pow(homePts, 13.91) + Math.pow(awayPts, 13.91));
 
   document.getElementById("resScore").innerText = `${awayPts.toFixed(1)} - ${homePts.toFixed(1)}`;
-  document.getElementById("resSpread").innerText = `Spread Proyectado: ${spread > 0 ? '+' : ''}${spread.toFixed(1)}`;
+  document.getElementById("resSpread").innerText = `Proy: ${spread.toFixed(1)} | Vegas: ${gameInfo.vegasSpread}`;
   document.getElementById("resPace").innerText = expPace.toFixed(1);
   document.getElementById("resWinProb").innerText = `${(homeWinProb * 100).toFixed(1)}%`;
-  document.getElementById("resFav").innerText = homePts > awayPts ? `Favorito: ${home.name}` : `Favorito: ${away.name}`;
+  document.getElementById("resFav").innerText = homePts > awayPts ? `Favorito: ${gameInfo.home}` : `Favorito: ${gameInfo.away}`;
   document.getElementById("resTotal").innerText = total.toFixed(1);
+  document.getElementById("resTotalEdge").innerText = `Vegas Total: ${gameInfo.vegasTotal}`;
 
-  renderPlayerProps(slateKey, Math.abs(spread), away, home, awayCode, homeCode);
+  // GENERACIÓN DEL ANÁLISIS CUALITATIVO EN TEXTO
+  let favTeamName = homePts > awayPts ? gameInfo.home : gameInfo.away;
+  let dogTeamName = homePts > awayPts ? gameInfo.away : gameInfo.home;
+  let favProb = homePts > awayPts ? (homeWinProb * 100) : ((1 - homeWinProb) * 100);
+  let favFinalOrtg = homePts > awayPts ? finalHomeOrtg : finalAwayOrtg;
+  let dogFinalDrtg = homePts > awayPts ? away.drtg : home.drtg; // La defensa que enfrenta el favorito
+
+  let explanation = `El algoritmo proyecta a <span class="highlight-text">${favTeamName}</span> como ganador con una probabilidad matemática del <span class="win-text">${favProb.toFixed(1)}%</span>. `;
+  explanation += `Estructuralmente, el Rating Ofensivo proyectado de ${favTeamName} alcanza los <span class="highlight-text">${favFinalOrtg.toFixed(1)} puntos</span> por cada 100 posesiones, quebrando con eficiencia la resistencia defensiva de ${dogTeamName}. `;
+  
+  if (expPace > 100) {
+      explanation += `Al disputarse en un ritmo de juego acelerado proyectado de <span class="highlight-text">${expPace.toFixed(1)} posesiones</span>, la ventaja de eficiencia se multiplica progresivamente, facilitando la cobertura de puntos. `;
+  } else {
+      explanation += `En un ritmo de juego más lento y controlado (<span class="highlight-text">${expPace.toFixed(1)} posesiones</span>), la eficiencia pura en la media cancha favorece al equipo estructuralmente más sólido. `;
+  }
+
+  let spreadDiff = Math.abs(homePts - awayPts);
+  if (spreadDiff >= 12) {
+      explanation += `<span class="loss-text">🚨 RIESGO DE BLOWOUT:</span> El diferencial es masivo (${spreadDiff.toFixed(1)} pts). Hay altísima probabilidad de minutos basura, lo que afectará negativamente los minutos de los titulares. (Precaución en los overs).`;
+  } else if (spreadDiff <= 3.5) {
+      explanation += `<span class="clutch-text">⚠️ FINAL CLUTCH:</span> El margen matemático es extremadamente estrecho (${spreadDiff.toFixed(1)} pts). Se anticipa un partido cerrado definido en las últimas posesiones y altamente susceptible a la varianza del triple.`;
+  } else {
+      explanation += `El modelo ratifica una ventaja constante y estable para cubrir un margen matemático de <span class="highlight-text">${spreadDiff.toFixed(1)} puntos</span> sin depender del *clutch*.`;
+  }
+
+  document.getElementById("qualitativeText").innerHTML = explanation;
+
+  renderIntelligentProps(gameInfo, Math.abs(spread), expPace, away, home, awayRest, homeRest);
   drawRadar(away, home);
   drawMonteCarlo(awayPts, homePts, (away.par3 + home.par3) / 2);
 }
 
-function renderPlayerProps(slateKey, spreadAbs, away, home, awayCode, homeCode) {
+// MOTOR DE INTELIGENCIA DE PROPS - 4 MEJORES JUGADAS DEL PARTIDO
+function renderIntelligentProps(gameInfo, spreadAbs, expPace, away, home, awayRest, homeRest) {
   const tbody = document.getElementById("propsTableBody");
   tbody.innerHTML = "";
+  const ldr = gameInfo.leaders;
   
-  // Incluimos el parámetro "teamCode" para renderizar la etiqueta del equipo
-  const props = [
-    { player: home.star, teamCode: homeCode, market: "Puntos Totales", line: 24.5, minExp: 32, ratePerMin: 0.82, type: "OVER" },
-    { player: away.star, teamCode: awayCode, market: "Puntos + Rebotes", line: 28.5, minExp: 31, ratePerMin: 0.95, type: "OVER" },
-    { player: "Líder Asistencias", teamCode: homeCode, market: "Asistencias", line: 6.5, minExp: 30, ratePerMin: 0.24, type: "OVER" }
+  const isBlowout = spreadAbs >= 12.0;
+  const blowoutDiscount = isBlowout ? 0.88 : 1.0;
+  const paceFactor = expPace / LEAGUE_PACE;
+
+  let allBets = [];
+
+  function generateBets(playerData, teamCode, oppDrtg, restDays) {
+    const oppDefFactor = oppDrtg / LEAGUE_ORTG;
+    const restDiscount = restDays === 0 ? 0.95 : (restDays === 2 ? 1.02 : 1.0);
+
+    let projPts = playerData.pts * paceFactor * oppDefFactor * restDiscount * blowoutDiscount;
+    let projAst = playerData.ast * paceFactor * oppDefFactor * restDiscount * blowoutDiscount;
+    let projReb = playerData.reb * paceFactor * restDiscount * blowoutDiscount; 
+    let praAvg = playerData.pts + playerData.reb + playerData.ast;
+    let projPRA = projPts + projReb + projAst;
+
+    let markets = [
+      { cat: "Puntos", name: "Puntos", avg: playerData.pts, proj: projPts, line: Math.floor(playerData.pts) + 0.5 },
+      { cat: "Asistencias", name: "Asistencias", avg: playerData.ast, proj: projAst, line: Math.floor(playerData.ast) + 0.5 },
+      { cat: "Rebotes", name: "Rebotes", avg: playerData.reb, proj: projReb, line: Math.floor(playerData.reb) + 0.5 },
+      { cat: "PRA", name: "PRA (Pts+Reb+Ast)", avg: praAvg, proj: projPRA, line: Math.floor(praAvg) + 0.5 }
+    ];
+
+    markets.forEach(m => {
+      let isOver = m.proj >= m.line;
+      let rawDiff = Math.abs(m.proj - m.line);
+      let edgePercent = (rawDiff / m.line) * 100;
+      let stabilityFactor = m.cat === "PRA" ? 1.15 : 1.0; 
+      
+      allBets.push({
+        player: playerData.name,
+        teamCode: teamCode,
+        category: m.cat,
+        marketName: m.name,
+        avg: m.avg,
+        line: m.line,
+        proj: m.proj,
+        pick: isOver ? "OVER" : "UNDER",
+        internalScore: edgePercent * stabilityFactor, 
+        edge: edgePercent 
+      });
+    });
+  }
+
+  generateBets(ldr.away, gameInfo.awayCode, home.drtg, awayRest);
+  generateBets(ldr.home, gameInfo.homeCode, away.drtg, homeRest);
+
+  let finalPicks = [];
+  const categories = [
+    { key: "PRA", label: "🏆 Mejor Jugada PRA" },
+    { key: "Puntos", label: "🔥 Mejor en Puntos" },
+    { key: "Rebotes", label: "🏀 Mejor en Rebotes" },
+    { key: "Asistencias", label: "🎯 Mejor en Asist." }
   ];
-  
-  const blowoutDiscount = spreadAbs >= 12.0 ? 0.90 : 1.0;
 
-  props.forEach(p => {
-    let adjMinutes = p.minExp * blowoutDiscount;
-    let projStat = (adjMinutes * p.ratePerMin).toFixed(1);
-    let edge = p.type === "OVER" 
-      ? (((projStat - p.line) / p.line) * 100).toFixed(1)
-      : (((p.line - projStat) / p.line) * 100).toFixed(1);
+  categories.forEach(c => {
+    let betsInCat = allBets.filter(b => b.category === c.key);
+    betsInCat.sort((a, b) => b.internalScore - a.internalScore); 
+    if(betsInCat.length > 0) {
+      let best = betsInCat[0];
+      best.displayCategory = c.label;
+      finalPicks.push(best);
+    }
+  });
 
+  finalPicks.forEach(p => {
     let tr = document.createElement("tr");
+    tr.className = "row-highlight";
+    let pickClass = p.pick === "OVER" ? "badge-pick" : "badge-under";
+    
     tr.innerHTML = `
+      <td style="font-weight: 800; color: #0284c7;">${p.displayCategory}</td>
       <td><strong>${p.player}</strong> <span class="player-team-tag">${p.teamCode}</span></td>
-      <td>${p.market}</td>
-      <td>${p.line}</td>
-      <td>${adjMinutes.toFixed(0)} min</td>
-      <td><strong style="color: #fff;">${projStat}</strong></td>
-      <td><span class="badge-pick">${p.type} ${p.line}</span></td>
-      <td><span class="badge-edge">+${Math.abs(edge).toFixed(1)}% Edge</span></td>
+      <td>${p.avg.toFixed(1)}</td>
+      <td><span style="color: #94a3b8; font-weight: 700;">${p.line}</span></td>
+      <td><strong style="color: #fff; font-size: 1.05em;">${p.proj.toFixed(1)}</strong></td>
+      <td><span class="${pickClass}">${p.pick} ${p.line}</span></td>
+      <td><span class="badge-edge">+${p.edge.toFixed(1)}% Edge</span></td>
     `;
     tbody.appendChild(tr);
   });
@@ -866,12 +979,11 @@ function drawMonteCarlo(awayPts, homePts, avg3PAr) {
 
 function syncBigData() {
   const msg = document.getElementById("auditMsg");
-  msg.innerText = "⏳ Sincronizando Big Data... Consultando calendario y tabla regular season.";
+  msg.innerText = "⏳ Inyectando estadísticas dinámicas y procesando IA...";
   setTimeout(() => {
     fetchStandings();
     const activeInput = document.getElementById("activeDate");
     syncSlateByDate(activeInput.value);
-    msg.innerText = "✅ Módulo de Big Data sincronizado con la API Oficial.";
   }, 300);
 }
 
