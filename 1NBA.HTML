@@ -141,13 +141,12 @@
     .quant-box label { font-size: 0.68rem; text-transform: uppercase; color: var(--muted); font-weight: 700; display: block; margin-bottom: 4px; }
     .quant-box select { background: #131b2e; border: 1px solid #334155; color: #fff; padding: 5px; border-radius: 4px; width: 100%; font-size: 0.75rem; }
 
-    .grid-results { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 15px; }
-    .metric-card { background: var(--card); border: 1px solid var(--card-border); border-radius: 8px; padding: 12px; text-align: center; }
-    .metric-title { font-size: 0.68rem; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; font-weight: 700; }
-    .metric-value { font-size: 1.4rem; font-weight: 800; color: #fff; }
-    .metric-sub { font-size: 0.75rem; color: var(--accent-glow); margin-top: 2px; }
+    .grid-results { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 15px; }
+    .metric-card { background: var(--card); border: 1px solid var(--card-border); border-radius: 8px; padding: 10px; text-align: center; }
+    .metric-title { font-size: 0.65rem; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; font-weight: 700; }
+    .metric-value { font-size: 1.25rem; font-weight: 800; color: #fff; }
+    .metric-sub { font-size: 0.70rem; color: var(--accent-glow); margin-top: 2px; font-weight: 600; }
 
-    /* NUEVO PANEL CUALITATIVO */
     .qualitative-panel { background: var(--card); border: 1px solid var(--accent); border-left: 4px solid var(--accent); border-radius: 8px; padding: 14px; margin-bottom: 15px; font-size: 0.85rem; color: #e2e8f0; line-height: 1.5; }
     .qualitative-panel h3 { font-size: 0.85rem; text-transform: uppercase; color: var(--accent-glow); margin-bottom: 8px; font-weight: 800; }
     .highlight-text { color: #fff; font-weight: 800; }
@@ -265,36 +264,40 @@
 
     <div class="grid-results">
       <div class="metric-card">
-        <div class="metric-title">Proyección Marcador</div>
+        <div class="metric-title">Proy. Marcador</div>
         <div class="metric-value" id="resScore">0 - 0</div>
-        <div class="metric-sub" id="resSpread">Proy Spread: 0 | Vegas: S/D</div>
+        <div class="metric-sub" id="resSpread">Proy Spread: 0</div>
+      </div>
+      <div class="metric-card" style="border-color: #2563eb; background: #0f172a;">
+        <div class="metric-title" style="color: #60a5fa;">Victoría Directa (ML)</div>
+        <div class="metric-value" id="resWinProb" style="color: #60a5fa;">0%</div>
+        <div class="metric-sub" id="resFav">Favorito: -</div>
+      </div>
+      <div class="metric-card" style="border-color: #10b981; background: #064e3b;">
+        <div class="metric-title" style="color: #34d399;">Cobertura Spread (ATS)</div>
+        <div class="metric-value" id="resCoverProb" style="color: #34d399;">0%</div>
+        <div class="metric-sub" id="resCoverPick">Pick: -</div>
       </div>
       <div class="metric-card">
-        <div class="metric-title">Ritmo (Pace) Proyectado</div>
+        <div class="metric-title">Ritmo (Pace)</div>
         <div class="metric-value" id="resPace">0.0</div>
         <div class="metric-sub">Posesiones / 48 Min</div>
       </div>
       <div class="metric-card">
-        <div class="metric-title">Probabilidad Victoria Home</div>
-        <div class="metric-value" id="resWinProb">0%</div>
-        <div class="metric-sub" id="resFav">Favorito: -</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-title">Total Proyectado vs Las Vegas</div>
+        <div class="metric-title">Total vs Vegas</div>
         <div class="metric-value" id="resTotal">0.0</div>
         <div class="metric-sub" id="resTotalEdge">Vegas Total: S/D</div>
       </div>
     </div>
 
-    <!-- PANEL CUALITATIVO -->
     <div class="qualitative-panel">
-      <h3>🧠 Dictamen Cuantitativo (Por qué es favorito)</h3>
-      <p id="qualitativeText" style="margin: 0; color: #94a3b8;">Selecciona un partido para que el algoritmo desglose estructuralmente las métricas.</p>
+      <h3>🧠 Dictamen Cuantitativo: Moneyline vs Spread</h3>
+      <p id="qualitativeText" style="margin: 0; color: #94a3b8;">Selecciona un partido para que el algoritmo desglose las probabilidades de victoria y cobertura.</p>
     </div>
 
     <div class="props-panel">
       <div class="props-header">
-        <h3>🎯 IA de Props: Selección de Máximo Valor Cuantitativo (Top 4 del Partido)</h3>
+        <h3>🎯 IA de Props: Selección de Máximo Valor Cuantitativo (Top 4)</h3>
         <span style="font-size: 0.7rem; color: var(--muted);">Matriz Individualizada | Algoritmo evalúa todos los mercados</span>
       </div>
       <table class="props-table">
@@ -321,7 +324,7 @@
         <canvas id="factorCanvas"></canvas>
       </div>
       <div class="chart-panel">
-        <h2>Monte Carlo Estocástico (Varianza 3PAr)</h2>
+        <h2>Monte Carlo Estocástico (Simulación de Spread)</h2>
         <canvas id="simCanvas"></canvas>
       </div>
     </div>
@@ -338,7 +341,6 @@
 </div>
 
 <script>
-// BASE DE DATOS CALIBRADA DINÁMICA
 const DB = {
   "CHA": { name: "Charlotte Hornets", pace: 99.2, ortg: 108.5, drtg: 119.2, efg: 51.5, tov: 13.5, orb: 25.1, ftr: 20.1, par3: 0.41, altitude: false, starImpact: 5.8, star: "LaMelo Ball", pts: 23.9, reb: 5.1, ast: 8.0 },
   "BKN": { name: "Brooklyn Nets", pace: 98.6, ortg: 110.1, drtg: 116.5, efg: 52.8, tov: 12.7, orb: 27.0, ftr: 21.5, par3: 0.39, altitude: false, starImpact: 4.5, star: "Cam Thomas", pts: 22.5, reb: 3.2, ast: 2.9 },
@@ -407,7 +409,8 @@ function calculateMatchupStats(awayCode, homeCode) {
   let favSpread = -Math.abs(homePts - awayPts); 
   let spread = favSpread.toFixed(1);
 
-  let homeWinProb = Math.pow(homePts, 13.91) / (Math.pow(homePts, 13.91) + Math.pow(awayPts, 13.91));
+  let expPyth = 10.5;
+  let homeWinProb = Math.pow(homePts, expPyth) / (Math.pow(homePts, expPyth) + Math.pow(awayPts, expPyth));
   let maxWinProb = Math.max(homeWinProb, 1 - homeWinProb);
   let winProb = (maxWinProb * 100).toFixed(1) + "%";
   
@@ -521,10 +524,19 @@ async function fetchStandings() {
                 });
               }
 
+              let totalGames = wins + losses;
               if (DB[code] && ppg > 0 && oppg > 0) {
-                DB[code].ortg = ppg;
-                DB[code].drtg = oppg;
-                totalPts += ppg;
+                if (totalGames < 20) {
+                  let weightSample = totalGames / 25;
+                  let baseOrtg = DB[code].ortg || 114.0;
+                  let baseDrtg = DB[code].drtg || 114.0;
+                  DB[code].ortg = (baseOrtg * (1 - weightSample)) + (ppg * weightSample);
+                  DB[code].drtg = (baseDrtg * (1 - weightSample)) + (oppg * weightSample);
+                } else {
+                  DB[code].ortg = ppg;
+                  DB[code].drtg = oppg;
+                }
+                totalPts += DB[code].ortg;
                 teamCount++;
               }
 
@@ -536,7 +548,7 @@ async function fetchStandings() {
       
       if (teamCount > 0) {
         LEAGUE_ORTG = totalPts / teamCount;
-        document.getElementById("auditMsg").innerHTML = `✅ Data Viva Sincronizada (Promedio Liga: ${LEAGUE_ORTG.toFixed(1)} pts).`;
+        document.getElementById("auditMsg").innerHTML = `✅ Data Calibrada Bayesiana (Promedio Liga: ${LEAGUE_ORTG.toFixed(1)} pts).`;
       }
 
       if (teams.length >= 28) {
@@ -651,7 +663,7 @@ function renderTopPicksForDate(games) {
     return;
   }
 
-  const sortedGames = [...games].sort((a,b) => parseFloat(b.prob) - parseFloat(a.prob));
+  const sortedGames = [...games].sort((a,b) => parseFloat(b.edge.replace('+','')) - parseFloat(a.edge.replace('+','')));
   const picks = [sortedGames[0], sortedGames[1] || sortedGames[0], sortedGames[2] || sortedGames[0]];
   const medals = ["🥇", "🥈", "🥉"];
   const classes = ["gold", "silver", "bronze"];
@@ -660,14 +672,14 @@ function renderTopPicksForDate(games) {
     container.innerHTML += `
       <div class="pick-card ${classes[idx]}">
         <div>
-          <div class="pick-meta">${medals[idx]} PICK #${idx+1} DEL DÍA</div>
+          <div class="pick-meta">${medals[idx]} PICK DE VALOR #${idx+1}</div>
           <div class="pick-name">${pick.fav}</div>
           <div class="pick-sub">vs ${pick.fav === pick.home ? pick.away : pick.home}</div>
           <div class="pick-tag">PROY ${pick.spread} (Vegas: ${pick.vegasSpread})</div>
         </div>
         <div>
           <div class="pick-prob">${pick.prob}</div>
-          <div class="pick-tag">Moneyline</div>
+          <div class="pick-tag">${pick.edge} Edge</div>
         </div>
       </div>
     `;
@@ -676,10 +688,12 @@ function renderTopPicksForDate(games) {
 
 function resetQuantEngine() {
   document.getElementById("resScore").innerText = "0 - 0";
-  document.getElementById("resSpread").innerText = "Proy Spread: 0 | Vegas: S/D";
-  document.getElementById("resPace").innerText = "0.0";
+  document.getElementById("resSpread").innerText = "Proy Spread: 0";
   document.getElementById("resWinProb").innerText = "0%";
   document.getElementById("resFav").innerText = "Favorito: -";
+  document.getElementById("resCoverProb").innerText = "0%";
+  document.getElementById("resCoverPick").innerText = "Pick: -";
+  document.getElementById("resPace").innerText = "0.0";
   document.getElementById("resTotal").innerText = "0.0";
   document.getElementById("resTotalEdge").innerText = "Vegas Total: S/D";
   document.getElementById("qualitativeText").innerHTML = "Selecciona un partido para que el algoritmo desglose estructuralmente las métricas.";
@@ -740,50 +754,80 @@ function runQuantEngine() {
   
   let spread = -Math.abs(homePts - awayPts);
   let total = awayPts + homePts;
+  
+  let expPyth = 10.5;
+  let homeWinProb = Math.pow(homePts, expPyth) / (Math.pow(homePts, expPyth) + Math.pow(awayPts, expPyth));
 
-  let homeWinProb = Math.pow(homePts, 13.91) / (Math.pow(homePts, 13.91) + Math.pow(awayPts, 13.91));
+  let vegasStr = gameInfo.vegasSpread;
+  let vegasHomeSpread = 0;
+  let hasVegas = false;
+
+  if (vegasStr && vegasStr !== "S/D") {
+    if (vegasStr.toUpperCase() === "EVEN" || vegasStr.toUpperCase() === "PK") {
+      vegasHomeSpread = 0;
+      hasVegas = true;
+    } else {
+      let parts = vegasStr.split(" ");
+      let val = parseFloat(parts[parts.length - 1]); 
+      let favAbbr = parts.slice(0, parts.length - 1).join(" ").toUpperCase(); 
+      if (!isNaN(val)) {
+        hasVegas = true;
+        if (gameInfo.homeCode.toUpperCase() === favAbbr || gameInfo.home.toUpperCase().includes(favAbbr) || ESPN_NORM[favAbbr] === gameInfo.homeCode) {
+          vegasHomeSpread = val; 
+        } else {
+          vegasHomeSpread = -val; 
+        }
+      }
+    }
+  }
+
+  let covers = drawMonteCarlo(awayPts, homePts, (away.par3 + home.par3) / 2, vegasHomeSpread, hasVegas);
 
   document.getElementById("resScore").innerText = `${awayPts.toFixed(1)} - ${homePts.toFixed(1)}`;
-  document.getElementById("resSpread").innerText = `Proy: ${spread.toFixed(1)} | Vegas: ${gameInfo.vegasSpread}`;
-  document.getElementById("resPace").innerText = expPace.toFixed(1);
+  document.getElementById("resSpread").innerText = `Proy Spread: ${spread.toFixed(1)}`;
   document.getElementById("resWinProb").innerText = `${(homeWinProb * 100).toFixed(1)}%`;
-  document.getElementById("resFav").innerText = homePts > awayPts ? `Favorito: ${gameInfo.home}` : `Favorito: ${gameInfo.away}`;
+  document.getElementById("resFav").innerText = homePts > awayPts ? `Fav: ${gameInfo.homeCode}` : `Fav: ${gameInfo.awayCode}`;
+  
+  if (hasVegas) {
+      if (covers.homeCover >= covers.awayCover) {
+          document.getElementById("resCoverProb").innerText = `${covers.homeCover.toFixed(1)}%`;
+          document.getElementById("resCoverPick").innerText = `Pick: ${gameInfo.homeCode} ${vegasHomeSpread > 0 ? '+'+vegasHomeSpread : vegasHomeSpread}`;
+      } else {
+          document.getElementById("resCoverProb").innerText = `${covers.awayCover.toFixed(1)}%`;
+          let awayLine = -vegasHomeSpread;
+          document.getElementById("resCoverPick").innerText = `Pick: ${gameInfo.awayCode} ${awayLine > 0 ? '+'+awayLine : awayLine}`;
+      }
+  } else {
+      document.getElementById("resCoverProb").innerText = `S/D`;
+      document.getElementById("resCoverPick").innerText = `Sin línea oficial`;
+  }
+
+  document.getElementById("resPace").innerText = expPace.toFixed(1);
   document.getElementById("resTotal").innerText = total.toFixed(1);
   document.getElementById("resTotalEdge").innerText = `Vegas Total: ${gameInfo.vegasTotal}`;
 
-  // GENERACIÓN DEL ANÁLISIS CUALITATIVO EN TEXTO
   let favTeamName = homePts > awayPts ? gameInfo.home : gameInfo.away;
-  let dogTeamName = homePts > awayPts ? gameInfo.away : gameInfo.home;
   let favProb = homePts > awayPts ? (homeWinProb * 100) : ((1 - homeWinProb) * 100);
-  let favFinalOrtg = homePts > awayPts ? finalHomeOrtg : finalAwayOrtg;
-  let dogFinalDrtg = homePts > awayPts ? away.drtg : home.drtg; // La defensa que enfrenta el favorito
 
-  let explanation = `El algoritmo proyecta a <span class="highlight-text">${favTeamName}</span> como ganador con una probabilidad matemática del <span class="win-text">${favProb.toFixed(1)}%</span>. `;
-  explanation += `Estructuralmente, el Rating Ofensivo proyectado de ${favTeamName} alcanza los <span class="highlight-text">${favFinalOrtg.toFixed(1)} puntos</span> por cada 100 posesiones, quebrando con eficiencia la resistencia defensiva de ${dogTeamName}. `;
+  let explanation = `En <strong>Moneyline (Victoria Directa)</strong>, el algoritmo proyecta a <span class="highlight-text">${favTeamName}</span> con una probabilidad del <span class="win-text">${favProb.toFixed(1)}%</span>. `;
   
-  if (expPace > 100) {
-      explanation += `Al disputarse en un ritmo de juego acelerado proyectado de <span class="highlight-text">${expPace.toFixed(1)} posesiones</span>, la ventaja de eficiencia se multiplica progresivamente, facilitando la cobertura de puntos. `;
-  } else {
-      explanation += `En un ritmo de juego más lento y controlado (<span class="highlight-text">${expPace.toFixed(1)} posesiones</span>), la eficiencia pura en la media cancha favorece al equipo estructuralmente más sólido. `;
-  }
-
-  let spreadDiff = Math.abs(homePts - awayPts);
-  if (spreadDiff >= 12) {
-      explanation += `<span class="loss-text">🚨 RIESGO DE BLOWOUT:</span> El diferencial es masivo (${spreadDiff.toFixed(1)} pts). Hay altísima probabilidad de minutos basura, lo que afectará negativamente los minutos de los titulares. (Precaución en los overs).`;
-  } else if (spreadDiff <= 3.5) {
-      explanation += `<span class="clutch-text">⚠️ FINAL CLUTCH:</span> El margen matemático es extremadamente estrecho (${spreadDiff.toFixed(1)} pts). Se anticipa un partido cerrado definido en las últimas posesiones y altamente susceptible a la varianza del triple.`;
-  } else {
-      explanation += `El modelo ratifica una ventaja constante y estable para cubrir un margen matemático de <span class="highlight-text">${spreadDiff.toFixed(1)} puntos</span> sin depender del *clutch*.`;
+  if (hasVegas) {
+      let bestCoverPct = Math.max(covers.homeCover, covers.awayCover);
+      let bestCoverTeamName = covers.homeCover >= covers.awayCover ? gameInfo.home : gameInfo.away;
+      
+      if (bestCoverTeamName === favTeamName) {
+           explanation += `<br><br><span class="highlight-text">🎯 CONTRA EL SPREAD (ATS):</span> Las Vegas marca la línea en <strong>${vegasStr}</strong>. Al simular el partido 1,000 veces (Monte Carlo), el favorito tiene un <span class="win-text">${bestCoverPct.toFixed(1)}% de probabilidad de CUBRIR</span> la línea, validando un juego fuerte en Hándicap.`;
+      } else {
+           explanation += `<br><br><strong>🚨 ¡ALERTA DE VALOR (SPREAD)!</strong> Las Vegas marca la línea en <strong>${vegasStr}</strong>. Aunque el modelo proyecta que ganará el favorito directo, la simulación de Monte Carlo indica que <span class="clutch-text">${bestCoverTeamName} tiene un ${bestCoverPct.toFixed(1)}% de probabilidad de CUBRIR LA LÍNEA (+).</span> Se recomienda protegerse jugando a favor del Underdog en el Hándicap.`;
+      }
   }
 
   document.getElementById("qualitativeText").innerHTML = explanation;
 
   renderIntelligentProps(gameInfo, Math.abs(spread), expPace, away, home, awayRest, homeRest);
   drawRadar(away, home);
-  drawMonteCarlo(awayPts, homePts, (away.par3 + home.par3) / 2);
 }
 
-// MOTOR DE INTELIGENCIA DE PROPS - 4 MEJORES JUGADAS DEL PARTIDO
 function renderIntelligentProps(gameInfo, spreadAbs, expPace, away, home, awayRest, homeRest) {
   const tbody = document.getElementById("propsTableBody");
   tbody.innerHTML = "";
@@ -872,6 +916,70 @@ function renderIntelligentProps(gameInfo, spreadAbs, expPace, away, home, awayRe
   });
 }
 
+function drawMonteCarlo(awayPts, homePts, avg3PAr, vegasHomeSpread, hasVegas) {
+  const canvas = document.getElementById("simCanvas");
+  const ctx = canvas.getContext("2d");
+  const w = canvas.width = canvas.parentElement.clientWidth;
+  const h = canvas.height = 210;
+  ctx.clearRect(0, 0, w, h);
+
+  const stdDev = 10.0 + (avg3PAr * 8.0);
+  const diffs = [];
+
+  let homeCoverCount = 0;
+  let awayCoverCount = 0;
+
+  for (let i = 0; i < 1000; i++) {
+    let u1 = Math.random(), u2 = Math.random();
+    let z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+    let sHome = homePts + z0 * stdDev;
+    
+    let u3 = Math.random(), u4 = Math.random();
+    let z1 = Math.sqrt(-2.0 * Math.log(u3)) * Math.cos(2.0 * Math.PI * u4);
+    let sAway = awayPts + z1 * stdDev;
+
+    let margin = sHome - sAway;
+    diffs.push(margin);
+
+    if (hasVegas) {
+        if (margin + vegasHomeSpread > 0) homeCoverCount++;
+        else if (margin + vegasHomeSpread < 0) awayCoverCount++;
+    }
+  }
+
+  const bins = {};
+  for (let i = -30; i <= 30; i += 3) bins[i] = 0;
+  diffs.forEach(d => {
+    let b = Math.round(d / 3) * 3;
+    if (bins[b] !== undefined) bins[b]++;
+  });
+
+  const keys = Object.keys(bins).map(Number).sort((a,b) => a-b);
+  const maxFreq = Math.max(...Object.values(bins));
+  const barWidth = w / keys.length;
+
+  keys.forEach((k, idx) => {
+    const val = bins[k];
+    const barH = (val / maxFreq) * (h - 35);
+    const x = idx * barWidth;
+    const y = h - barH - 18;
+
+    ctx.fillStyle = k > 0 ? "#2563eb" : "#ef4444";
+    ctx.fillRect(x + 1, y, barWidth - 2, barH);
+  });
+
+  ctx.fillStyle = "#94a3b8";
+  ctx.font = "9px sans-serif";
+  ctx.fillText(`Varianza 3PAr: σ = ${stdDev.toFixed(1)}`, 15, 15);
+  ctx.fillText("Ventaja Away (-)", 45, h - 4);
+  ctx.fillText("Ventaja Home (+)", w - 55, h - 4);
+
+  let homeCover = hasVegas ? (homeCoverCount / 1000) * 100 : 0;
+  let awayCover = hasVegas ? (awayCoverCount / 1000) * 100 : 0;
+  
+  return { homeCover, awayCover };
+}
+
 function drawRadar(away, home) {
   const canvas = document.getElementById("factorCanvas");
   const ctx = canvas.getContext("2d");
@@ -927,56 +1035,6 @@ function drawRadar(away, home) {
   plot([home.efg || 54, (home.tov || 13) * 2.5, home.orb || 27, (home.ftr || 22) * 1.5, (home.par3 || 0.38) * 100], "#3b82f6", "rgba(59,130,246,0.2)");
 }
 
-function drawMonteCarlo(awayPts, homePts, avg3PAr) {
-  const canvas = document.getElementById("simCanvas");
-  const ctx = canvas.getContext("2d");
-  const w = canvas.width = canvas.parentElement.clientWidth;
-  const h = canvas.height = 210;
-  ctx.clearRect(0, 0, w, h);
-
-  const stdDev = 10.0 + (avg3PAr * 8.0);
-  const diffs = [];
-
-  for (let i = 0; i < 1000; i++) {
-    let u1 = Math.random(), u2 = Math.random();
-    let z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
-    let sHome = homePts + z0 * stdDev;
-    
-    let u3 = Math.random(), u4 = Math.random();
-    let z1 = Math.sqrt(-2.0 * Math.log(u3)) * Math.cos(2.0 * Math.PI * u4);
-    let sAway = awayPts + z1 * stdDev;
-
-    diffs.push(sHome - sAway);
-  }
-
-  const bins = {};
-  for (let i = -30; i <= 30; i += 3) bins[i] = 0;
-  diffs.forEach(d => {
-    let b = Math.round(d / 3) * 3;
-    if (bins[b] !== undefined) bins[b]++;
-  });
-
-  const keys = Object.keys(bins).map(Number).sort((a,b) => a-b);
-  const maxFreq = Math.max(...Object.values(bins));
-  const barWidth = w / keys.length;
-
-  keys.forEach((k, idx) => {
-    const val = bins[k];
-    const barH = (val / maxFreq) * (h - 35);
-    const x = idx * barWidth;
-    const y = h - barH - 18;
-
-    ctx.fillStyle = k > 0 ? "#2563eb" : "#ef4444";
-    ctx.fillRect(x + 1, y, barWidth - 2, barH);
-  });
-
-  ctx.fillStyle = "#94a3b8";
-  ctx.font = "9px sans-serif";
-  ctx.fillText(`Varianza 3PAr: σ = ${stdDev.toFixed(1)}`, 15, 15);
-  ctx.fillText("Ventaja Away (-)", 45, h - 4);
-  ctx.fillText("Ventaja Home (+)", w - 55, h - 4);
-}
-
 function syncBigData() {
   const msg = document.getElementById("auditMsg");
   msg.innerText = "⏳ Inyectando estadísticas dinámicas y procesando IA...";
@@ -997,3 +1055,6 @@ window.addEventListener("DOMContentLoaded", () => {
 </script>
 </body>
 </html>
+```<FollowUp>
+¿Pudiste copiar y pegar el código completo en tu archivo para probar la actualización?
+</FollowUp>
