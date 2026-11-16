@@ -1,965 +1,1496 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Matchup Pro - Team Salas Analytics</title>
-    <style>
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-            background-color: #f4fbfc; 
-            background-image: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2306b6d4' fill-opacity='0.04'%3E%3Cpath d='M40 0l3.5 36.5L80 40l-36.5 3.5L40 80l-3.5-36.5L0 40l36.5-3.5zM20 20l2.5 17.5L40 40l-17.5 2.5L20 60l-2.5-17.5L0 40l17.5-2.5zM60 60l2.5 17.5L80 80l-17.5 2.5L60 100l-2.5-17.5L40 80l17.5-2.5zM60 20l2.5 17.5L80 40l-17.5 2.5L60 60l-2.5-17.5L40 40l17.5-2.5zM20 60l2.5 17.5L40 80l-17.5 2.5L20 100l-2.5-17.5L0 80l17.5-2.5z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-            color: #0f172a; 
-            text-align: center; 
-            padding: 0; 
-            margin: 0;
-        }
-        
-        .api-status-bar {
-            background: #0f172a; color: #cbd5e1; padding: 10px 20px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #06b6d4; margin-bottom: 25px;
-        }
-        .api-badges { display: flex; gap: 15px; }
-        .api-badge { display: flex; align-items: center; gap: 6px; }
-        .dot { width: 8px; height: 8px; border-radius: 50%; background: #16a34a; box-shadow: 0 0 8px #16a34a; animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
-        
-        .header-container { padding: 0 20px; }
-        h2 { background: linear-gradient(135deg, #06b6d4, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 32px; font-weight: 900; margin-top:0; margin-bottom: 5px; text-transform: uppercase; letter-spacing: -0.5px; }
-        .subtitulo { font-size: 14px; color: #64748b; margin-bottom: 25px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
-        
-        @keyframes fadeInSlide { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NBA Matchup Pro v6 - Quantitative Edge Engine</title>
+  <style>
+    :root {
+      --bg: #0b1120;
+      --card: #131b2e;
+      --card-border: #1e293b;
+      --accent: #2563eb;
+      --accent-glow: #3b82f6;
+      --green: #10b981;
+      --red: #ef4444;
+      --amber: #f59e0b;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); padding: 15px; line-height: 1.4; overflow-x: hidden; }
+    
+    .master-layout {
+      display: grid;
+      grid-template-columns: 310px 1fr 340px;
+      gap: 16px;
+      max-width: 1800px;
+      margin: 0 auto;
+      align-items: flex-start;
+    }
 
-        .main-layout { display: flex; max-width: 1750px; margin: 0 auto; gap: 25px; align-items: flex-start; justify-content: center; flex-wrap: wrap; padding: 0 20px 30px; }
-        
-        .sidebar-standings, .sidebar-ranking { width: 270px; background-color: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 16px; padding: 15px; text-align: left; position: sticky; top: 20px; }
-        .sidebar-standings { border: 2px solid #e2e8f0; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
-        .sidebar-ranking { border: 2px solid #e9d5ff; box-shadow: 0 10px 30px rgba(139, 92, 246, 0.08); }
-        .content-area { flex: 2; min-width: 360px; max-width: 1100px; }
+    .sidebar-panel {
+      background: #ffffff;
+      color: #0f172a;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      overflow: hidden;
+      position: sticky;
+      top: 15px;
+      max-height: calc(100vh - 30px);
+      display: flex;
+      flex-direction: column;
+    }
+    .sidebar-header {
+      background: #f8fafc;
+      padding: 14px 16px;
+      border-bottom: 2px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .sidebar-header h2 {
+      font-size: 0.90rem;
+      font-weight: 800;
+      color: #0f172a;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .sidebar-scroll {
+      overflow-y: auto;
+      padding: 10px;
+      scrollbar-width: thin;
+    }
 
-        .sidebar-title { font-size: 14px; font-weight: 900; color: #0ea5e9; margin-bottom: 12px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .standings-list, .ranking-list { max-height: 84vh; overflow-y: auto; padding-right: 6px; }
-        .standings-list::-webkit-scrollbar, .ranking-list::-webkit-scrollbar { width: 4px; }
-        .standings-list::-webkit-scrollbar-thumb, .ranking-list::-webkit-scrollbar-thumb { background-color: #bae6fd; border-radius: 10px; }
+    .standings-item {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      padding: 8px 10px;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 0.78rem;
+      transition: background 0.15s;
+    }
+    .standings-item:hover { background: #f8fafc; }
+    .standings-rank { font-weight: 900; color: #64748b; width: 24px; }
+    .standings-team { font-weight: 700; color: #1e293b; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 5px; }
+    .standings-record { font-weight: 800; color: #0284c7; background: #e0f2fe; padding: 2px 6px; border-radius: 4px; font-size: 0.73rem; white-space: nowrap; }
 
-        .equipo-row { background: #ffffff; padding: 8px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #e0f2fe; margin-bottom: 6px; font-size: 11px; transition: all 0.2s; }
-        .equipo-row:hover { background: #f0f9ff; border-color: #3b82f6; transform: translateX(2px); box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1); }
-        .equipo-pos { font-weight: 900; color: #0ea5e9; width: 22px; }
-        .equipo-nombre { color: #0f172a; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 125px; }
-        .equipo-record { font-weight: 800; color: #0ea5e9; background: #e0f2fe; padding: 2px 5px; border-radius: 5px; font-size: 10px; white-space: nowrap; }
+    .game-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: transform 0.15s, border-color 0.15s;
+    }
+    .game-card:hover {
+      transform: translateY(-2px);
+      border-color: #0284c7;
+      background: #ffffff;
+    }
+    .game-card.active-card {
+      border: 2px solid #2563eb;
+      background: #eff6ff;
+    }
+    .game-card-match { font-size: 0.88rem; font-weight: 800; color: #0f172a; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+    .game-card-info { display: flex; justify-content: space-between; align-items: center; font-size: 0.76rem; color: #64748b; font-weight: 600; margin-top: 5px; flex-wrap: wrap; gap: 4px; }
+    .game-card-prob-badge { 
+      font-size: 0.75rem; 
+      font-weight: 900; 
+      background: linear-gradient(135deg, #10b981, #059669); 
+      color: #ffffff; 
+      padding: 3px 7px; 
+      border-radius: 5px;
+      box-shadow: 0 2px 6px rgba(16, 185, 129, 0.25);
+      white-space: nowrap;
+    }
+    .badge-hit {
+      font-size: 0.68rem;
+      font-weight: 900;
+      background: #059669;
+      color: #ffffff;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-left: 4px;
+      display: inline-block;
+    }
+    .badge-miss {
+      font-size: 0.68rem;
+      font-weight: 900;
+      background: #dc2626;
+      color: #ffffff;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-left: 4px;
+      display: inline-block;
+    }
+    .badge-push {
+      font-size: 0.68rem;
+      font-weight: 900;
+      background: #64748b;
+      color: #ffffff;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-left: 4px;
+      display: inline-block;
+    }
 
-        .ranking-item { background: #ffffff; border: 1px solid #e0f2fe; border-radius: 10px; padding: 10px; margin-bottom: 8px; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; justify-content: space-between; align-items: center; animation: fadeInSlide 0.4s ease-out forwards; }
-        .ranking-item:hover { border-color: #06b6d4; background: linear-gradient(to right, #ffffff, #ecfeff); transform: translateY(-2px); box-shadow: 0 6px 16px rgba(6, 182, 212, 0.15); border-left: 5px solid #06b6d4; }
-        .ranking-info b { font-size: 12px; color: #0f172a; }
-        .ranking-prob { font-size: 11px; font-weight: 900; background: linear-gradient(135deg, #8b5cf6, #d946ef); color: #ffffff; padding: 4px 6px; border-radius: 6px; text-align: right; min-width: 45px; box-shadow: 0 4px 10px rgba(139, 92, 246, 0.3); }
+    .audit-tracker-bar {
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      border: 1px solid #334155;
+      border-left: 5px solid #10b981;
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 15px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr auto;
+      gap: 12px;
+      align-items: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    .tracker-box {
+      background: rgba(11, 17, 32, 0.65);
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 8px 12px;
+    }
+    .tracker-title {
+      font-size: 0.66rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #94a3b8;
+      font-weight: 800;
+      margin-bottom: 3px;
+    }
+    .tracker-val {
+      font-size: 1.05rem;
+      font-weight: 900;
+      color: #f8fafc;
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+    .tracker-pct {
+      font-size: 0.80rem;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: #064e3b;
+      color: #34d399;
+    }
+    .btn-audit-range {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: #ffffff;
+      border: none;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-weight: 800;
+      font-size: 0.78rem;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4);
+      transition: background 0.15s, transform 0.1s;
+      white-space: nowrap;
+    }
+    .btn-audit-range:hover { background: linear-gradient(135deg, #1d4ed8, #1e40af); transform: translateY(-1px); }
 
-        .top3-container { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; justify-content: center; }
-        .top3-card { background: linear-gradient(145deg, #ffffff, #f8fafc); border: 2px solid #e0f2fe; border-radius: 12px; padding: 15px; flex: 1; min-width: 200px; box-shadow: 0 8px 20px rgba(0,0,0,0.05); position: relative; overflow: hidden; animation: fadeInSlide 0.5s ease-out forwards; text-align: left; }
-        .top3-card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: linear-gradient(180deg, #f59e0b, #ef4444); }
-        .top3-card.pick-1::before { background: linear-gradient(180deg, #fbbf24, #d97706); } 
-        .top3-card.pick-2::before { background: linear-gradient(180deg, #94a3b8, #475569); } 
-        .top3-card.pick-3::before { background: linear-gradient(180deg, #b45309, #78350f); } 
-        .top3-title { font-size: 10px; font-weight: 900; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
-        .top3-team { font-size: 18px; font-weight: 900; color: #0f172a; margin-bottom: 4px; display: flex; justify-content: space-between; }
-        .top3-prob { background: #fee2e2; color: #b91c1c; padding: 2px 6px; border-radius: 4px; font-size: 13px; font-weight: 900; }
-        .top3-vs { font-size: 11px; color: #475569; font-weight: 600; }
+    .top-picks-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 15px; }
+    .pick-card { background: #ffffff; color: #0f172a; border-radius: 10px; padding: 12px 14px; border-left: 5px solid #2563eb; box-shadow: 0 4px 12px rgba(0,0,0,0.25); display: flex; justify-content: space-between; align-items: center; }
+    .pick-card.gold { border-left-color: #f59e0b; }
+    .pick-card.silver { border-left-color: #94a3b8; }
+    .pick-card.bronze { border-left-color: #d97706; }
+    .pick-meta { font-size: 0.68rem; font-weight: 800; text-transform: uppercase; color: #64748b; margin-bottom: 2px; }
+    .pick-name { font-size: 1.05rem; font-weight: 800; color: #0f172a; }
+    .pick-sub { font-size: 0.75rem; color: #64748b; font-weight: 500; }
+    .pick-prob { font-size: 1.15rem; font-weight: 900; color: #16a34a; text-align: right; }
+    .pick-tag { font-size: 0.68rem; font-weight: 800; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 3px; color: #334155; }
 
-        .control-panel { background: #ffffff; padding: 20px 25px; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 1px solid #e0f2fe; display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; align-items: flex-end; }
-        .input-group { text-align: left; flex: 1; min-width: 200px; }
-        label { display: block; font-size: 11px; margin-bottom: 6px; color: #475569; font-weight: 800; text-transform: uppercase; }
-        input, select { width: 100%; padding: 10px 12px; border-radius: 8px; border: 2px solid #e2e8f0; background-color: #f8fafc; color: #0f172a; font-size: 14px; font-weight: 600; box-sizing: border-box; transition: all 0.3s ease; }
-        input:focus, select:focus { outline: none; border-color: #06b6d4; background-color: #ffffff; box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.15); }
-        
-        .btn-accion { background: linear-gradient(135deg, #06b6d4, #3b82f6); color: white; border: none; padding: 10px 20px; font-size: 14px; border-radius: 8px; cursor: pointer; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; height: 42px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 6px 15px rgba(6, 182, 212, 0.3); display: flex; align-items: center; gap: 8px;}
-        .btn-accion:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 10px 25px rgba(6, 182, 212, 0.5); }
-        .btn-sync { background: linear-gradient(135deg, #10b981, #059669); box-shadow: 0 6px 15px rgba(16, 185, 129, 0.3); }
-        .btn-sync:hover { box-shadow: 0 10px 25px rgba(16, 185, 129, 0.5); }
+    .slate-bar { background: #ffffff; color: #0f172a; border-radius: 10px; padding: 12px 16px; margin-bottom: 15px; display: grid; grid-template-columns: 240px 1fr 180px; gap: 12px; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.25); }
+    .slate-label { font-size: 0.68rem; font-weight: 800; text-transform: uppercase; color: #475569; margin-bottom: 4px; }
+    .date-nav-box { display: flex; gap: 4px; }
+    .date-nav-btn { background: #e2e8f0; border: none; padding: 6px 8px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.8rem; color: #334155; }
+    .date-nav-btn:hover { background: #cbd5e1; }
+    .slate-input { background: #f8fafc; border: 1px solid #cbd5e1; color: #0f172a; padding: 8px 10px; border-radius: 6px; font-weight: 700; width: 100%; font-size: 0.85rem; }
+    .btn-sync { background: #10b981; color: #ffffff; border: none; padding: 10px 14px; border-radius: 6px; font-weight: 800; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; text-transform: uppercase; }
+    .btn-sync:hover { background: #059669; }
 
-        #estado { font-size: 13px; color: #0284c7; width: 100%; margin-top: 8px; font-weight: 800; }
-        
-        .insight-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
-        .insight-box { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 15px; border-left: 4px solid #8b5cf6; }
-        .insight-box.runs { border-left-color: #f59e0b; }
-        .insight-box.f5 { border-left-color: #10b981; }
-        .insight-title { font-size: 11px; font-weight: 900; color: #475569; text-transform: uppercase; margin-bottom: 5px; }
-        .insight-data { font-size: 14px; font-weight: 700; color: #0f172a; line-height: 1.4; }
-        .insight-highlight { color: #f43f5e; font-weight: 900; background: #ffe4e6; padding: 2px 6px; border-radius: 4px; }
-        .insight-green { color: #16a34a; background: #dcfce7; }
+    .analysis-bar { background: #ffffff; color: #0f172a; border-radius: 10px; padding: 14px 16px; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.25); }
+    .matchup-row { display: grid; grid-template-columns: 1fr 1fr 160px; gap: 12px; align-items: flex-end; margin-bottom: 8px; }
+    .btn-analyze { background: #0284c7; color: #ffffff; border: none; padding: 9px; border-radius: 6px; font-weight: 800; font-size: 0.85rem; cursor: pointer; text-transform: uppercase; }
+    .btn-analyze:hover { background: #0369a1; }
+    .audit-status { font-size: 0.75rem; font-weight: 700; color: #059669; display: flex; align-items: center; gap: 6px; }
 
-        .veredicto-global { background: linear-gradient(145deg, #ffffff, #f0f9ff); border-left: 6px solid #06b6d4; padding: 25px; border-radius: 12px; margin-bottom: 25px; text-align: left; box-shadow: 0 12px 30px rgba(0,0,0,0.06); animation: fadeInSlide 0.5s ease-out; }
-        .veredicto-titulo { font-size: 22px; font-weight: 900; color: #0f172a; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e0f2fe; padding-bottom: 10px; text-transform: uppercase; }
-        .explicacion-humana { font-size: 14.5px; color: #334155; line-height: 1.6; padding: 18px; margin-top: 12px; background: #ffffff; border-radius: 8px; border: 1px solid #e0f2fe; font-weight: 500; }
-        
-        .tarjetas-container { display: flex; justify-content: center; gap: 20px; flex-wrap: nowrap; margin-bottom: 25px; width: 100%; }
-        @media (max-width: 900px) { .tarjetas-container { flex-wrap: wrap; } .insight-grid { grid-template-columns: 1fr; } }
-        
-        .matchup-card { background: #ffffff; border: none; border-radius: 16px; width: 100%; max-width: 520px; padding: 25px; text-align: left; box-shadow: 0 10px 40px rgba(0,0,0,0.06); box-sizing: border-box; animation: fadeInSlide 0.6s ease-out both; position: relative; overflow: hidden; flex: 1; min-width: 320px; }
-        .matchup-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 6px; background: linear-gradient(90deg, #06b6d4, #3b82f6); }
-        .matchup-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px; margin-bottom: 15px; }
-        .team-title { font-size: 22px; font-weight: 900; color: #0f172a; }
-        .team-record-badge { font-size: 15px; color: #64748b; font-weight: 700; margin-left: 6px; }
-        .prob-badge { background: linear-gradient(135deg, #06b6d4, #3b82f6); color: #ffffff; padding: 6px 14px; border-radius: 8px; font-weight: 900; font-size: 18px; box-shadow: 0 4px 12px rgba(6, 182, 212, 0.4); display: flex; align-items: center; }
-        
-        .wrc-ofensiva-box { background: linear-gradient(135deg, #8b5cf6, #d946ef); padding: 12px 16px; border-radius: 8px; margin-bottom: 15px; font-size: 15px; display: flex; justify-content: space-between; align-items: center; color: #ffffff; font-weight: 600; box-shadow: 0 6px 15px rgba(139, 92, 246, 0.25); border-left: 4px solid #fdf4ff;}
-        .wrc-ofensiva-box b { color: #fdf4ff; }
-        
-        .siera-pitching-box { background: linear-gradient(135deg, #0f172a, #1e293b); padding: 12px 16px; border-radius: 8px; margin-bottom: 18px; font-size: 15px; display: flex; justify-content: space-between; align-items: center; color: #38bdf8; font-weight: 600; box-shadow: 0 6px 15px rgba(15, 23, 42, 0.3); border-left: 4px solid #0ea5e9;}
-        .siera-pitching-box b { color: #f8fafc; }
+    .quant-bar { background: var(--card); border: 1px solid var(--card-border); border-radius: 8px; padding: 12px; margin-bottom: 15px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; font-size: 0.8rem; }
+    .quant-box { background: #0b1120; border: 1px solid #1e293b; border-radius: 6px; padding: 8px; }
+    .quant-box label { font-size: 0.68rem; text-transform: uppercase; color: var(--muted); font-weight: 700; display: block; margin-bottom: 4px; }
+    .quant-box select { background: #131b2e; border: 1px solid #334155; color: #fff; padding: 5px; border-radius: 4px; width: 100%; font-size: 0.75rem; }
 
-        .seccion-tabla-titulo { font-size: 13px; color: #0ea5e9; margin-top: 20px; margin-bottom: 8px; font-weight: 900; text-transform: uppercase; border-bottom: 2px dashed #e0f2fe; padding-bottom: 5px; display: flex; justify-content: space-between; align-items: center;}
-        .fuente-tag { font-size: 9px; background: #e2e8f0; color: #475569; padding: 2px 6px; border-radius: 4px; letter-spacing: 0.5px; }
+    .grid-results { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 15px; }
+    .metric-card { background: var(--card); border: 1px solid var(--card-border); border-radius: 8px; padding: 10px; text-align: center; }
+    .metric-title { font-size: 0.65rem; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; font-weight: 700; }
+    .metric-value { font-size: 1.25rem; font-weight: 800; color: #fff; }
+    .metric-sub { font-size: 0.70rem; color: var(--accent-glow); margin-top: 2px; font-weight: 600; }
 
-        .stats-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        .stats-table td { padding: 10px 8px; border-bottom: 1px solid #f8fafc; color: #334155; font-weight: 500; }
-        .stats-table td.val-home-away { text-align: right; color: #0f172a; font-weight: 800; font-size: 14px; }
-        .stats-table td.val-label { color: #64748b; }
-        .stats-table tr:hover { background: #f0f9ff; }
-        .biomecanica-table { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; margin-bottom: 15px;}
-        .biomecanica-table td { border-bottom: 1px solid #e2e8f0; }
+    .qualitative-panel { background: var(--card); border: 1px solid var(--accent); border-left: 4px solid var(--accent); border-radius: 8px; padding: 14px; margin-bottom: 15px; font-size: 0.85rem; color: #e2e8f0; line-height: 1.5; }
+    .qualitative-panel h3 { font-size: 0.85rem; text-transform: uppercase; color: var(--accent-glow); margin-bottom: 8px; font-weight: 800; }
+    .highlight-text { color: #fff; font-weight: 800; }
+    .win-text { color: var(--green); font-weight: 800; }
+    .loss-text { color: var(--red); font-weight: 800; }
+    .clutch-text { color: var(--amber); font-weight: 800; }
 
-        .props-titulo { font-size: 16px; font-weight: 900; color: #0f172a; border-bottom: 2px solid #e0f2fe; padding-bottom: 10px; margin-bottom: 15px; text-transform: uppercase; text-align: left;}
-        .props-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; }
-        .prop-card { background: #ffffff; border-radius: 12px; padding: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.04); border-left: 5px solid #3b82f6; text-align: left; animation: fadeInSlide 0.7s ease-out both; }
-        .prop-card.pitcher { border-left-color: #f59e0b; }
-        .prop-card.bvp-matchup { border-left-color: #10b981; }
-        .prop-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .prop-name { font-size: 15px; font-weight: 900; color: #0f172a; }
-        .prop-tag { background: #e0f2fe; color: #0369a1; padding: 3px 8px; border-radius: 6px; font-size: 10px; font-weight: 800; text-transform: uppercase; }
-        .prop-tag.bvp { background: #dcfce7; color: #15803d; }
-        .prop-metric { display: flex; justify-content: space-between; font-size: 13px; color: #475569; margin-bottom: 6px; border-bottom: 1px dashed #f1f5f9; padding-bottom: 4px;}
-        .prop-metric b { color: #0f172a; font-size: 14px; }
-        .prop-verdict { background: #f8fafc; padding: 8px; border-radius: 6px; font-size: 12.5px; font-weight: 700; color: #16a34a; margin-top: 10px; display: flex; align-items: center; gap: 6px; border: 1px solid #dcfce7; }
+    .props-panel { background: var(--card); border: 1px solid var(--card-border); border-radius: 8px; padding: 14px; margin-bottom: 15px; }
+    .props-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #1e293b; padding-bottom: 6px; }
+    .props-header h3 { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--accent-glow); font-weight: 800; }
+    .props-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+    .props-table th { background: #0b1120; color: var(--muted); padding: 6px 8px; text-align: left; font-size: 0.7rem; text-transform: uppercase; }
+    .props-table td { padding: 8px; border-bottom: 1px solid #1e293b; }
+    .badge-edge { background: #064e3b; color: #34d399; font-weight: 800; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; }
+    .badge-under { background: #7f1d1d; color: #fca5a5; font-weight: 800; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; }
+    .badge-pick { background: #1e3a8a; color: #60a5fa; font-weight: 800; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; }
+    .player-team-tag { font-size: 0.65rem; color: #94a3b8; background: #1e293b; padding: 2px 5px; border-radius: 4px; margin-left: 6px; letter-spacing: 0.5px; vertical-align: middle; }
+    .row-highlight { border-left: 3px solid #2563eb; background: rgba(37, 99, 235, 0.05); }
 
-        /* Clases para modo TBD (To Be Determined) */
-        .alerta-tbd {
-            background: linear-gradient(135deg, #ef4444, #b91c1c);
-            color: white;
-            padding: 20px;
-            border-radius: 12px;
-            font-size: 18px;
-            font-weight: 900;
-            text-align: center;
-            text-transform: uppercase;
-            box-shadow: 0 10px 25px rgba(239, 68, 68, 0.4);
-            margin-bottom: 15px;
-            border: 2px solid #fee2e2;
-        }
-        .matchup-card.tbd-card {
-            background: #f8fafc;
-            opacity: 0.8;
-            filter: grayscale(100%);
-            border: 2px dashed #cbd5e1;
-        }
-        .matchup-card.tbd-card::before {
-            background: #94a3b8;
-        }
-    </style>
+    .grid-charts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .chart-panel { background: var(--card); border: 1px solid var(--card-border); border-radius: 8px; padding: 12px; }
+    .chart-panel h2 { font-size: 0.75rem; text-transform: uppercase; color: var(--muted); letter-spacing: 0.5px; margin-bottom: 8px; }
+    canvas { width: 100%; height: 210px; background: #0b1120; border-radius: 6px; border: 1px solid #1e293b; }
+  </style>
 </head>
 <body>
 
-    <div class="api-status-bar">
-        <div>📡 TEAM SALAS - MÓDULO DE SINCRONIZACIÓN DE BIG DATA</div>
-        <div class="api-badges">
-            <div class="api-badge"><div class="dot"></div> FanGraphs API: <span id="fg-status" style="color:#10b981;">En línea</span></div>
-            <div class="api-badge"><div class="dot"></div> Statcast/Savant: <span id="sc-status" style="color:#10b981;">En línea</span></div>
-            <div class="api-badge"><div class="dot" style="background:#f59e0b; box-shadow: 0 0 8px #f59e0b;"></div> Brooks Baseball: <span style="color:#f59e0b;">Standby</span></div>
+<div class="master-layout">
+
+  <aside class="sidebar-panel">
+    <div class="sidebar-header">
+      <h2>🏆 Tabla General NBA</h2>
+      <span style="font-size: 0.72rem; color: #64748b; font-weight: 800; background: #f1f5f9; padding: 2px 6px; border-radius: 4px;">Data Viva</span>
+    </div>
+    <div class="sidebar-scroll" id="standingsContainer">
+      <div style="text-align: center; color: #64748b; font-size: 0.75rem; padding: 20px;">Cargando posiciones oficiales...</div>
+    </div>
+  </aside>
+
+  <main>
+    <div class="audit-tracker-bar">
+      <div class="tracker-box">
+        <div class="tracker-title">📅 Jornada Activa (ML / ATS)</div>
+        <div class="tracker-val">
+          <span id="dailyRecordText">0G - 0P</span>
+          <span class="tracker-pct" id="dailyRecordPct">0.0%</span>
         </div>
+      </div>
+      <div class="tracker-box">
+        <div class="tracker-title">🏆 Acumulado ML (20 Oct - Hoy)</div>
+        <div class="tracker-val">
+          <span id="cumMlText">Calculando...</span>
+          <span class="tracker-pct" id="cumMlPct">--%</span>
+        </div>
+      </div>
+      <div class="tracker-box">
+        <div class="tracker-title">🎯 Acumulado ATS (Cobertura Spread)</div>
+        <div class="tracker-val">
+          <span id="cumAtsText">Calculando...</span>
+          <span class="tracker-pct" id="cumAtsPct">--%</span>
+        </div>
+      </div>
+      <div>
+        <button class="btn-audit-range" id="btnAuditRange" onclick="auditSeasonRange('2026-10-20')">
+          📊 Auditar 20 Oct - Hoy
+        </button>
+      </div>
     </div>
 
-    <div class="header-container">
-        <h2>📊 Matchup Pro Analytics</h2>
-        <div class="subtitulo">Motor Predictivo de Alto Rendimiento: Integración FanGraphs & Statcast</div>
+    <div class="top-picks-grid" id="topPicksContainer"></div>
+
+    <div class="slate-bar">
+      <div>
+        <div class="slate-label">1. Fecha Activa</div>
+        <div class="date-nav-box">
+          <button class="date-nav-btn" onclick="shiftDate(-1)" title="Día Anterior">◀</button>
+          <input type="date" id="activeDate" class="slate-input" onchange="onDateChange()" oninput="onDateChange()">
+          <button class="date-nav-btn" onclick="shiftDate(1)" title="Día Siguiente">▶</button>
+        </div>
+      </div>
+      <div>
+        <div class="slate-label">2. Cartelera Oficial de NBA</div>
+        <select id="gameSlateSelect" class="slate-input" onchange="loadGameFromSlate()"></select>
+      </div>
+      <div>
+        <div class="slate-label">&nbsp;</div>
+        <button class="btn-sync" onclick="syncBigData()">
+          <span>🔄 Sincronizar Data</span>
+        </button>
+      </div>
     </div>
 
-    <div class="main-layout">
-        
-        <div class="sidebar-standings">
-            <div class="sidebar-title">
-                <span>🏆 Tabla General MLB</span>
-            </div>
-            <div class="standings-list" id="lista-mejores-equipos">
-                <div style="color: #64748b; font-size: 12px; text-align: center; padding: 25px; font-weight: 500;">Cargando posiciones...</div>
-            </div>
+    <div class="analysis-bar">
+      <div class="matchup-row">
+        <div>
+          <div class="slate-label">Visitante (Away)</div>
+          <input type="text" id="awayDisplay" class="slate-input" value="Sin Partido" readonly>
         </div>
-
-        <div class="content-area">
-            
-            <div id="top3-container" class="top3-container" style="display: none;"></div>
-
-            <div class="control-panel">
-                <div class="input-group">
-                    <label>1. Fecha Activa</label>
-                    <input type="date" id="fecha-mlb" onchange="cargarPartidosDelDia()">
-                </div>
-                <div class="input-group" style="flex: 2;">
-                    <label>2. Cartelera Oficial de MLB</label>
-                    <select id="select-partidos" onchange="seleccionarPartidoLista()">
-                        <option value="">-- Primero carga la fecha --</option>
-                    </select>
-                </div>
-                <button class="btn-accion btn-sync" onclick="simularSyncAPI()">
-                    🔄 Sincronizar Data CSV
-                </button>
-            </div>
-
-            <div class="control-panel">
-                <div class="input-group">
-                    <label>VISITANTE (Away)</label>
-                    <input type="text" id="team-away-input" placeholder="Equipo Visitante">
-                </div>
-                <div class="input-group">
-                    <label>LOCAL (Home)</label>
-                    <input type="text" id="team-home-input" placeholder="Equipo Local">
-                </div>
-                <button class="btn-accion" onclick="ejecutarAnalisisMatchup()">Analizar Variables</button>
-                <p id="estado"></p>
-            </div>
-
-            <div id="veredicto" class="veredicto-global" style="display: none;"></div>
-            <div class="tarjetas-container" id="tarjetas-resultado"></div>
-            
-            <div id="props-individuales" style="display: none; width: 100%; margin-top: 10px;"></div>
-
+        <div>
+          <div class="slate-label">Local (Home)</div>
+          <input type="text" id="homeDisplay" class="slate-input" value="Sin Partido" readonly>
         </div>
-
-        <div class="sidebar-ranking">
-            <div class="sidebar-title">
-                <span>📅 Partidos del Día</span>
-                <span id="sidebar-count" style="font-size: 10px; color: #0ea5e9; font-weight: 800; background: #e0f2fe; padding: 3px 6px; border-radius: 8px;">0 juegos</span>
-            </div>
-            <div class="ranking-list" id="sidebar-ranking-list">
-                <div style="color: #64748b; font-size: 12px; text-align: center; padding: 25px; font-weight: 500;">Cargando cartelera...</div>
-            </div>
+        <div>
+          <button class="btn-analyze" style="width: 100%;" onclick="runQuantEngine()">Analizar Variables</button>
         </div>
-
+      </div>
+      <div class="audit-status" id="auditMsg">
+        ✅ Motor cuantitativo v6 listo (Análisis cualitativo profundo y técnico).
+      </div>
     </div>
 
-    <script>
-        let cachePartidos = [];
-        let standingsCache = {};
-        let currentGamePk = null;
+    <div class="quant-bar">
+      <div class="quant-box">
+        <label>Descanso Away (Rest)</label>
+        <select id="awayRest" onchange="runQuantEngine()">
+          <option value="0">0 Días (Back-to-Back)</option>
+          <option value="1" selected>1 Día de Descanso</option>
+          <option value="2">2+ Días de Descanso</option>
+        </select>
+      </div>
+      <div class="quant-box">
+        <label>Descanso Home (Rest)</label>
+        <select id="homeRest" onchange="runQuantEngine()">
+          <option value="0">0 Días (Back-to-Back)</option>
+          <option value="1" selected>1 Día de Descanso</option>
+          <option value="2">2+ Días de Descanso</option>
+        </select>
+      </div>
+      <div class="quant-box">
+        <label>Estrella Away</label>
+        <select id="awayStarStatus" onchange="runQuantEngine()">
+          <option value="IN" selected>ACTIVO (En Cancha)</option>
+          <option value="OUT">BAJA (Descontar On/Off)</option>
+        </select>
+      </div>
+      <div class="quant-box">
+        <label>Estrella Home</label>
+        <select id="homeStarStatus" onchange="runQuantEngine()">
+          <option value="IN" selected>ACTIVO (En Cancha)</option>
+          <option value="OUT">BAJA (Descontar On/Off)</option>
+        </select>
+      </div>
+    </div>
 
-        window.onload = function() {
-            let hoy = new Date().toISOString().split('T')[0];
-            document.getElementById('fecha-mlb').value = hoy;
-            cargarStandingsYCartelera();
-        };
+    <div class="grid-results">
+      <div class="metric-card">
+        <div class="metric-title">Proy. Marcador</div>
+        <div class="metric-value" id="resScore">0 - 0</div>
+        <div class="metric-sub" id="resSpread">Proy Spread: 0</div>
+      </div>
+      <div class="metric-card" style="border-color: #2563eb; background: #0f172a;">
+        <div class="metric-title" style="color: #60a5fa;">Victoria Directa (ML)</div>
+        <div class="metric-value" id="resWinProb" style="color: #60a5fa;">0%</div>
+        <div class="metric-sub" id="resFav">Favorito: -</div>
+      </div>
+      <div class="metric-card" style="border-color: #10b981; background: #064e3b;">
+        <div class="metric-title" style="color: #34d399;">Cobertura Spread (ATS)</div>
+        <div class="metric-value" id="resCoverProb" style="color: #34d399;">0%</div>
+        <div class="metric-sub" id="resCoverPick">Pick: -</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-title">Ritmo (Pace)</div>
+        <div class="metric-value" id="resPace">0.0</div>
+        <div class="metric-sub">Posesiones / 48 Min</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-title">Total vs Vegas</div>
+        <div class="metric-value" id="resTotal">0.0</div>
+        <div class="metric-sub" id="resTotalEdge">Vegas Total: S/D</div>
+      </div>
+    </div>
 
-        function simularSyncAPI() {
-            let btn = document.querySelector('.btn-sync');
-            let fg = document.getElementById('fg-status');
-            let sc = document.getElementById('sc-status');
-            let estado = document.getElementById('estado');
-            
-            btn.innerHTML = "⏳ Extrayendo Archivos CSV...";
-            fg.style.color = "#f59e0b"; fg.innerText = "Sincronizando...";
-            sc.style.color = "#f59e0b"; sc.innerText = "Sincronizando...";
-            estado.innerHTML = "Conectando con servidores analíticos...";
+    <div class="qualitative-panel">
+      <h3>🧠 Dictamen Cuantitativo: Moneyline vs Spread</h3>
+      <p id="qualitativeText" style="margin: 0; color: #94a3b8;">Selecciona un partido para que el algoritmo desglose las probabilidades de victoria y cobertura.</p>
+    </div>
 
-            setTimeout(() => {
-                btn.innerHTML = "✅ Bases de Datos Actualizadas";
-                fg.style.color = "#10b981"; fg.innerText = "Actualizado";
-                sc.style.color = "#10b981"; sc.innerText = "Actualizado";
-                estado.innerHTML = "Data fresca cargada en memoria. Listo para analizar.";
-                setTimeout(() => { btn.innerHTML = "🔄 Sincronizar Data CSV"; }, 3000);
-            }, 1800);
-        }
+    <div class="props-panel">
+      <div class="props-header">
+        <h3>🎯 IA de Props: Selección de Máximo Valor Cuantitativo (Top 4)</h3>
+        <span style="font-size: 0.7rem; color: var(--muted);">Matriz Individualizada | Algoritmo evalúa todos los mercados</span>
+      </div>
+      <table class="props-table">
+        <thead>
+          <tr>
+            <th>Categoría IA</th>
+            <th>Jugador y Equipo</th>
+            <th>Promedio</th>
+            <th>Línea Casa</th>
+            <th>Proy Motor</th>
+            <th>Pick Sugerido</th>
+            <th>% Edge</th>
+          </tr>
+        </thead>
+        <tbody id="propsTableBody">
+          <tr><td colspan="7" style="text-align: center; padding: 15px;">No hay matchups individuales disponibles</td></tr>
+        </tbody>
+      </table>
+    </div>
 
-        function evaluarSIERA(val) {
-            let v = parseFloat(val); if (isNaN(v)) return "N/D";
-            if (v < 2.90) return "Élite"; if (v <= 3.39) return "Muy Bueno"; if (v <= 3.64) return "Bueno";
-            if (v <= 3.90) return "Regular"; if (v <= 4.35) return "Malo"; return "Muy Malo";
-        }
+    <div class="grid-charts">
+      <div class="chart-panel">
+        <h2>Comparativa de Factores Dean Oliver + 3PAr</h2>
+        <canvas id="factorCanvas"></canvas>
+      </div>
+      <div class="chart-panel">
+        <h2>Monte Carlo Estocástico (Simulación de Spread)</h2>
+        <canvas id="simCanvas"></canvas>
+      </div>
+    </div>
+  </main>
 
-        function evaluarxFIP(val) {
-            let v = parseFloat(val); if (isNaN(v)) return "N/D";
-            if (v < 2.90) return "Élite"; if (v <= 3.35) return "Muy Bueno"; if (v <= 3.65) return "Bueno";
-            if (v <= 3.95) return "Regular"; if (v <= 4.40) return "Malo"; return "Muy Malo";
-        }
+  <aside class="sidebar-panel">
+    <div class="sidebar-header">
+      <h2>📅 Partidos del Día</h2>
+      <span id="gameCountBadge" style="font-size: 0.75rem; background: #e0f2fe; color: #0284c7; padding: 2px 6px; border-radius: 4px; font-weight: 800;">0 juegos</span>
+    </div>
+    <div class="sidebar-scroll" id="dailyGamesContainer"></div>
+  </aside>
 
-        function evaluarWRC(val) {
-            let v = parseInt(val); if (isNaN(v)) return "N/D";
-            if (v >= 150) return "Élite"; if (v >= 125) return "Muy Bueno"; if (v >= 105) return "Bueno";
-            if (v >= 90) return "Regular"; if (v >= 76) return "Malo"; return "Muy Malo";
-        }
+</div>
 
-        function calcularProbabilidadesRealistas(diff) {
-            let rawProb = 1 / (1 + Math.exp(-diff * 0.25));
-            let probHome = 22 + (rawProb * (78 - 22));
-            return { probHome: probHome, probAway: 100 - probHome };
-        }
+<script>
+const DB = {
+  "CHA": { name: "Charlotte Hornets", pace: 99.2, ortg: 108.5, drtg: 119.2, efg: 51.5, tov: 13.5, orb: 25.1, ftr: 20.1, par3: 0.41, altitude: false, starImpact: 5.8, star: "LaMelo Ball", pts: 23.9, reb: 5.1, ast: 8.0 },
+  "BKN": { name: "Brooklyn Nets", pace: 98.6, ortg: 110.1, drtg: 116.5, efg: 52.8, tov: 12.7, orb: 27.0, ftr: 21.5, par3: 0.39, altitude: false, starImpact: 4.5, star: "Cam Thomas", pts: 22.5, reb: 3.2, ast: 2.9 },
+  "GSW": { name: "Golden State Warriors", pace: 101.5, ortg: 116.9, drtg: 114.5, efg: 55.0, tov: 13.9, orb: 29.8, ftr: 20.2, par3: 0.46, altitude: false, starImpact: 6.8, star: "Stephen Curry", pts: 26.4, reb: 4.5, ast: 5.1 },
+  "LAL": { name: "Los Angeles Lakers", pace: 102.1, ortg: 115.4, drtg: 114.8, efg: 55.9, tov: 13.4, orb: 24.5, ftr: 25.8, par3: 0.34, altitude: false, starImpact: 6.2, star: "Anthony Davis", pts: 24.7, reb: 12.6, ast: 3.5 },
+  "OKC": { name: "Oklahoma City Thunder", pace: 101.2, ortg: 118.5, drtg: 111.0, efg: 56.5, tov: 12.4, orb: 26.8, ftr: 23.5, par3: 0.38, altitude: false, starImpact: 7.2, star: "S. Gilgeous-Alexander", pts: 30.1, reb: 5.5, ast: 6.2 },
+  "IND": { name: "Indiana Pacers", pace: 102.5, ortg: 120.5, drtg: 117.6, efg: 57.7, tov: 12.9, orb: 26.1, ftr: 21.2, par3: 0.38, altitude: false, starImpact: 6.5, star: "Tyrese Haliburton", pts: 20.1, reb: 3.9, ast: 10.9 },
+  "MIN": { name: "Minnesota Timberwolves", pace: 98.8, ortg: 114.6, drtg: 108.4, efg: 55.2, tov: 13.8, orb: 27.2, ftr: 24.1, par3: 0.36, altitude: false, starImpact: 6.8, star: "Anthony Edwards", pts: 25.9, reb: 5.4, ast: 5.1 },
+  "ORL": { name: "Orlando Magic", pace: 97.8, ortg: 112.9, drtg: 110.8, efg: 52.8, tov: 14.2, orb: 28.4, ftr: 26.5, par3: 0.32, altitude: false, starImpact: 6.0, star: "Paolo Banchero", pts: 22.6, reb: 6.9, ast: 5.4 },
+  "MEM": { name: "Memphis Grizzlies", pace: 99.5, ortg: 113.8, drtg: 114.2, efg: 53.6, tov: 13.2, orb: 28.0, ftr: 23.0, par3: 0.35, altitude: false, starImpact: 6.7, star: "Ja Morant", pts: 25.1, reb: 5.6, ast: 8.1 },
+  "MIL": { name: "Milwaukee Bucks", pace: 101.8, ortg: 117.6, drtg: 115.1, efg: 56.1, tov: 12.8, orb: 25.8, ftr: 25.0, par3: 0.40, altitude: false, starImpact: 7.8, star: "G. Antetokounmpo", pts: 30.4, reb: 11.5, ast: 6.5 },
+  "PHX": { name: "Phoenix Suns", pace: 98.9, ortg: 116.8, drtg: 113.7, efg: 56.1, tov: 14.1, orb: 26.8, ftr: 24.3, par3: 0.37, altitude: false, starImpact: 6.5, star: "Kevin Durant", pts: 27.1, reb: 6.6, ast: 5.0 },
+  "CHI": { name: "Chicago Bulls", pace: 99.0, ortg: 112.5, drtg: 115.8, efg: 53.2, tov: 12.4, orb: 26.5, ftr: 22.1, par3: 0.36, altitude: false, starImpact: 5.5, star: "Zach LaVine", pts: 19.5, reb: 5.2, ast: 3.9 },
+  "POR": { name: "Portland Trail Blazers", pace: 100.0, ortg: 109.8, drtg: 118.2, efg: 52.0, tov: 14.0, orb: 27.5, ftr: 23.2, par3: 0.37, altitude: false, starImpact: 5.6, star: "Anfernee Simons", pts: 22.6, reb: 3.6, ast: 5.5 },
+  "BOS": { name: "Boston Celtics", pace: 100.5, ortg: 122.2, drtg: 110.6, efg: 57.8, tov: 11.9, orb: 28.5, ftr: 21.0, par3: 0.48, altitude: false, starImpact: 7.0, star: "Jayson Tatum", pts: 26.9, reb: 8.1, ast: 4.9 },
+  "TOR": { name: "Toronto Raptors", pace: 99.2, ortg: 111.4, drtg: 117.2, efg: 52.5, tov: 13.5, orb: 26.8, ftr: 22.0, par3: 0.35, altitude: false, starImpact: 5.8, star: "Scottie Barnes", pts: 19.9, reb: 8.2, ast: 6.1 },
+  "SAS": { name: "San Antonio Spurs", pace: 101.4, ortg: 112.8, drtg: 115.6, efg: 53.9, tov: 14.3, orb: 26.4, ftr: 22.5, par3: 0.36, altitude: false, starImpact: 7.4, star: "Victor Wembanyama", pts: 21.4, reb: 10.6, ast: 3.9 },
+  "MIA": { name: "Miami Heat", pace: 97.4, ortg: 113.3, drtg: 111.5, efg: 53.5, tov: 12.5, orb: 26.0, ftr: 24.0, par3: 0.37, altitude: false, starImpact: 6.2, star: "Tyler Herro", pts: 20.8, reb: 5.3, ast: 4.5 },
+  "HOU": { name: "Houston Rockets", pace: 99.6, ortg: 114.5, drtg: 112.8, efg: 54.0, tov: 12.8, orb: 29.5, ftr: 23.6, par3: 0.35, altitude: false, starImpact: 6.2, star: "Alperen Sengun", pts: 21.1, reb: 9.3, ast: 5.0 },
+  "UTA": { name: "Utah Jazz", pace: 100.8, ortg: 112.0, drtg: 119.5, efg: 52.4, tov: 14.5, orb: 30.2, ftr: 23.8, par3: 0.42, altitude: true, starImpact: 5.0, star: "Lauri Markkanen", pts: 23.2, reb: 8.2, ast: 2.0 },
+  "PHI": { name: "Philadelphia 76ers", pace: 99.5, ortg: 116.2, drtg: 113.0, efg: 53.8, tov: 11.8, orb: 28.0, ftr: 26.2, par3: 0.35, altitude: false, starImpact: 7.6, star: "Tyrese Maxey", pts: 25.9, reb: 3.7, ast: 6.2 },
+  "CLE": { name: "Cleveland Cavaliers", pace: 98.0, ortg: 114.7, drtg: 112.1, efg: 54.8, tov: 13.0, orb: 26.2, ftr: 21.8, par3: 0.39, altitude: false, starImpact: 6.5, star: "Donovan Mitchell", pts: 26.6, reb: 5.1, ast: 6.1 },
+  "LAC": { name: "Los Angeles Clippers", pace: 98.1, ortg: 117.9, drtg: 114.2, efg: 56.0, tov: 12.6, orb: 28.2, ftr: 23.0, par3: 0.37, altitude: false, starImpact: 6.3, star: "Norman Powell", pts: 21.2, reb: 3.5, ast: 2.3 },
+  "SAC": { name: "Sacramento Kings", pace: 100.2, ortg: 116.0, drtg: 114.4, efg: 54.6, tov: 12.5, orb: 27.5, ftr: 21.7, par3: 0.42, altitude: false, starImpact: 6.1, star: "De'Aaron Fox", pts: 26.6, reb: 4.6, ast: 5.6 },
+  "NOP": { name: "New Orleans Pelicans", pace: 99.1, ortg: 114.2, drtg: 113.1, efg: 54.2, tov: 13.0, orb: 28.1, ftr: 24.0, par3: 0.35, altitude: false, starImpact: 5.5, star: "Zion Williamson", pts: 22.9, reb: 5.8, ast: 5.0 },
+  "DET": { name: "Detroit Pistons", pace: 99.0, ortg: 110.0, drtg: 117.5, efg: 52.1, tov: 14.0, orb: 26.5, ftr: 22.0, par3: 0.34, altitude: false, starImpact: 6.0, star: "Cade Cunningham", pts: 22.7, reb: 4.3, ast: 7.5 },
+  "DEN": { name: "Denver Nuggets", pace: 98.4, ortg: 118.8, drtg: 113.2, efg: 56.4, tov: 12.2, orb: 28.5, ftr: 21.0, par3: 0.33, altitude: true, starImpact: 7.9, star: "Nikola Jokic", pts: 26.4, reb: 12.4, ast: 9.0 },
+  "DAL": { name: "Dallas Mavericks", pace: 98.6, ortg: 117.9, drtg: 114.5, efg: 55.8, tov: 12.5, orb: 26.2, ftr: 24.5, par3: 0.44, altitude: false, starImpact: 7.8, star: "Luka Doncic", pts: 33.9, reb: 9.2, ast: 9.8 },
+  "NYK": { name: "New York Knicks", pace: 96.8, ortg: 117.5, drtg: 112.4, efg: 54.8, tov: 12.0, orb: 32.5, ftr: 23.2, par3: 0.37, altitude: false, starImpact: 6.8, star: "Jalen Brunson", pts: 28.7, reb: 3.6, ast: 6.7 },
+  "ATL": { name: "Atlanta Hawks", pace: 101.5, ortg: 114.2, drtg: 118.5, efg: 53.5, tov: 13.5, orb: 27.5, ftr: 24.0, par3: 0.39, altitude: false, starImpact: 6.2, star: "Trae Young", pts: 25.7, reb: 2.8, ast: 10.8 },
+  "WAS": { name: "Washington Wizards", pace: 101.8, ortg: 108.4, drtg: 119.8, efg: 51.8, tov: 14.2, orb: 24.5, ftr: 21.5, par3: 0.38, altitude: false, starImpact: 4.8, star: "Jordan Poole", pts: 17.4, reb: 2.7, ast: 4.4 }
+};
 
-        async function cargarStandingsYCartelera() {
-            let añoActual = document.getElementById('fecha-mlb').value.substring(0,4) || "2026";
+Object.keys(DB).forEach(k => {
+  DB[k].baseOrtg = DB[k].ortg;
+  DB[k].baseDrtg = DB[k].drtg;
+});
+
+let LEAGUE_PACE = 99.8;
+let LEAGUE_ORTG = 114.5;
+const ESPN_NORM = { "GS": "GSW", "SA": "SAS", "NO": "NOP", "NY": "NYK", "UTAH": "UTA", "WSH": "WAS", "PHX": "PHX", "BK": "BKN" };
+
+let currentDailyGames = [];
+
+function normalCDF(x) {
+  const t = 1 / (1 + 0.2316419 * Math.abs(x));
+  const d = 0.3989423 * Math.exp(-x * x / 2);
+  let prob = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
+  if (x > 0) prob = 1 - prob;
+  return prob;
+}
+
+function clamp(val, min, max) {
+  return Math.max(min, Math.min(max, val));
+}
+
+function extractLeader(competitorObj, categoryName) {
+  try {
+    if (!competitorObj.leaders) return null;
+    const catObj = competitorObj.leaders.find(l => l.name === categoryName);
+    if (catObj && catObj.leaders && catObj.leaders.length > 0) {
+      return {
+        name: catObj.leaders[0].athlete.displayName,
+        value: parseFloat(catObj.leaders[0].displayValue) || 0
+      };
+    }
+  } catch (e) { }
+  return null;
+}
+
+function parseVegasHomeSpread(vegasSpreadStr, homeCode, homeName = "", fallbackHomeSpread = -2.5) {
+  if (!vegasSpreadStr || vegasSpreadStr === "S/D") {
+    return parseFloat(fallbackHomeSpread.toFixed(1));
+  }
+  let clean = vegasSpreadStr.replace("🔒", "").replace("Est.", "").trim();
+  if (!clean || clean === "S/D") return parseFloat(fallbackHomeSpread.toFixed(1));
+  if (clean.toUpperCase() === "EVEN" || clean.toUpperCase() === "PK") return 0;
+
+  let parts = clean.split(" ");
+  let val = parseFloat(parts[parts.length - 1]);
+  let favAbbr = parts.slice(0, parts.length - 1).join(" ").toUpperCase();
+  if (isNaN(val)) return parseFloat(fallbackHomeSpread.toFixed(1));
+
+  let normFav = ESPN_NORM[favAbbr] || favAbbr;
+  if (homeCode.toUpperCase() === normFav || (homeName && homeName.toUpperCase().includes(favAbbr))) {
+    return val;
+  } else {
+    return -val;
+  }
+}
+
+function hasRealVegasLine(vegasSpreadStr) {
+  if (!vegasSpreadStr || vegasSpreadStr === "S/D") return false;
+  let clean = vegasSpreadStr.replace("🔒", "").replace("Est.", "").trim();
+  return clean !== "" && clean !== "S/D";
+}
+
+function calculateMatchupStats(awayCode, homeCode, vegasSpreadStr = "S/D") {
+  const away = DB[awayCode] || { pace: 99.0, ortg: 110.0, drtg: 115.0, name: awayCode };
+  const home = DB[homeCode] || { pace: 99.0, ortg: 112.0, drtg: 113.0, name: homeCode, altitude: false };
+
+  let expPace = clamp((away.pace * home.pace) / LEAGUE_PACE, 94.0, 106.0);
+  let rawAwayOrtg = (away.ortg * home.drtg) / LEAGUE_ORTG;
+  let rawHomeOrtg = ((home.ortg * away.drtg) / LEAGUE_ORTG) + (home.altitude ? 3.5 : 2.2);
+
+  let rawAwayPts = (rawAwayOrtg * expPace) / 100;
+  let rawHomePts = (rawHomeOrtg * expPace) / 100;
+  let rawModelHomeSpread = rawAwayPts - rawHomePts;
+
+  let isRealLine = hasRealVegasLine(vegasSpreadStr);
+  let vHomeSpread = parseVegasHomeSpread(vegasSpreadStr, homeCode, home.name, rawModelHomeSpread);
+
+  let awayPts = rawAwayPts;
+  let homePts = rawHomePts;
+  if (isRealLine) {
+    let vegasImpliedDiff = -vHomeSpread;
+    let rawDiff = rawHomePts - rawAwayPts;
+    let blendedDiff = (rawDiff * 0.65) + (vegasImpliedDiff * 0.35);
+    let totalPts = rawAwayPts + rawHomePts;
+    homePts = (totalPts + blendedDiff) / 2;
+    awayPts = (totalPts - blendedDiff) / 2;
+  }
+
+  let homeIsFav = homePts >= awayPts;
+  let fav = homeIsFav ? home.name.split(" ").pop() : away.name.split(" ").pop();
+  let favCode = homeIsFav ? homeCode : awayCode;
+  
+  let modelHomeSpread = awayPts - homePts;
+  let favSpread = -Math.abs(homePts - awayPts);
+  let spread = `${favCode} ${favSpread.toFixed(1)}`;
+
+  let expPyth = 10.5;
+  let homeWinProb = Math.pow(homePts, expPyth) / (Math.pow(homePts, expPyth) + Math.pow(awayPts, expPyth));
+  let maxWinProb = clamp(Math.max(homeWinProb, 1 - homeWinProb), 0.501, 0.920);
+  let winProb = (maxWinProb * 100).toFixed(1) + "%";
+  
+  let coverDiff = (homePts - awayPts) + vHomeSpread;
+  let rawCoverProb = normalCDF(coverDiff / 13.5);
+  let bestCoverProb = clamp(Math.max(rawCoverProb, 1 - rawCoverProb), 0.505, 0.725);
+  let edgeVal = clamp((bestCoverProb - 0.50) * 100 * 0.65, 0.5, 14.5);
+
+  let atsPickLabel = "";
+  if (coverDiff >= 0) {
+    atsPickLabel = `${homeCode} ${vHomeSpread > 0 ? '+' + vHomeSpread.toFixed(1) : vHomeSpread.toFixed(1)}`;
+  } else {
+    let awayLine = -vHomeSpread;
+    atsPickLabel = `${awayCode} ${awayLine > 0 ? '+' + awayLine.toFixed(1) : awayLine.toFixed(1)}`;
+  }
+
+  let edge = "+" + edgeVal.toFixed(1) + "%";
+
+  return {
+    fav,
+    favCode,
+    homeIsFav,
+    prob: winProb,
+    spread,
+    favSpread: favSpread.toFixed(1),
+    modelHomeSpread,
+    edge,
+    edgeNum: edgeVal,
+    atsPickLabel,
+    homeWinProb,
+    awayPts,
+    homePts,
+    vHomeSpreadUsed: vHomeSpread
+  };
+}
+
+function evaluateGameAudit(g) {
+  let result = { mlStatus: null, atsStatus: null };
+  if (!g.isFinal || g.homeScore === g.awayScore) return result;
+
+  let actualHomeWon = g.homeScore > g.awayScore;
+  let modelHomeWon = g.homeIsFav;
+  result.mlStatus = (actualHomeWon === modelHomeWon) ? "HIT" : "MISS";
+
+  let vHomeSpread = parseVegasHomeSpread(g.vegasSpread, g.homeCode, g.home, g.modelHomeSpread);
+  let actualCoverMargin = (g.homeScore - g.awayScore) + vHomeSpread;
+  let projCoverMargin = (-g.modelHomeSpread) + vHomeSpread;
+  
+  if (Math.abs(actualCoverMargin) < 0.01) {
+    result.atsStatus = "PUSH";
+  } else {
+    let homeCovered = actualCoverMargin > 0;
+    let modelPickedHomeCover = projCoverMargin >= 0;
+    result.atsStatus = (homeCovered === modelPickedHomeCover) ? "HIT" : "MISS";
+  }
+  return result;
+}
+
+async function fetchFullSchedule(dateStr) {
+  try {
+    const cleanDate = dateStr.replace(/-/g, "");
+    const res = await fetch(`https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard?dates=${cleanDate}`);
+    if (res.ok) {
+      const data = await res.json();
+      
+      if (data.events && data.events.length > 0) {
+        return data.events.map(ev => {
+          const comp = ev.competitions[0];
+          const awayData = comp.competitors.find(c => c.homeAway === "away");
+          const homeData = comp.competitors.find(c => c.homeAway === "home");
+
+          let rawAwayCode = awayData.team.abbreviation;
+          let rawHomeCode = homeData.team.abbreviation;
+          let awayCode = ESPN_NORM[rawAwayCode] || rawAwayCode;
+          let homeCode = ESPN_NORM[rawHomeCode] || rawHomeCode;
+          let slateKey = `${awayCode}_${homeCode}`;
+
+          let vegasSpread = "S/D";
+          let vegasTotal = "S/D";
+          if (comp.odds && comp.odds.length > 0) {
+            vegasSpread = comp.odds[0].details || "S/D";
+            vegasTotal = comp.odds[0].overUnder || "S/D";
+          }
+
+          let storageKey = `matchup_pro_line_${cleanDate}_${slateKey}`;
+          if (vegasSpread !== "S/D") {
             try {
-                let res = await fetch(`https://statsapi.mlb.com/api/v1/standings?leagueId=103,104&season=${añoActual}`);
-                let data = await res.json();
-                let lista = [];
-                if (data.records) {
-                    data.records.forEach(rec => {
-                        rec.teamRecords.forEach(tr => {
-                            let hw=0, hl=0, aw=0, al=0;
-                            if(tr.records && tr.records.splitRecords) {
-                                tr.records.splitRecords.forEach(split => {
-                                    if(split.type==="home") { hw=split.wins; hl=split.losses; }
-                                    if(split.type==="away") { aw=split.wins; al=split.losses; }
-                                });
-                            }
-                            standingsCache[tr.team.id] = { wins: tr.wins||0, losses: tr.losses||0, homeRecord: `${hw}-${hl}`, awayRecord: `${aw}-${al}` };
-                            standingsCache[tr.team.name.toLowerCase()] = standingsCache[tr.team.id];
-                            lista.push({ name: tr.team.name, wins: tr.wins||0, losses: tr.losses||0 });
-                        });
-                    });
-                }
-                lista.sort((a, b) => (b.wins !== a.wins) ? b.wins - a.wins : b.losses - a.losses);
-                let c = document.getElementById('lista-mejores-equipos'); c.innerHTML = "";
-                lista.forEach((eq, idx) => {
-                    c.innerHTML += `<div class="equipo-row"><div style="display: flex; align-items: center;"><span class="equipo-pos">#${idx + 1}</span><span class="equipo-nombre" title="${eq.name}">${eq.name}</span></div><span class="equipo-record">${eq.wins}G - ${eq.losses}P</span></div>`;
+              localStorage.setItem(storageKey, JSON.stringify({ spread: vegasSpread, total: vegasTotal }));
+            } catch(e) {}
+          } else {
+            try {
+              let cached = localStorage.getItem(storageKey);
+              if (cached) {
+                let parsed = JSON.parse(cached);
+                vegasSpread = parsed.spread ? `🔒 ${parsed.spread}` : "S/D";
+                vegasTotal = parsed.total ? `🔒 ${parsed.total}` : "S/D";
+              }
+            } catch(e) {}
+          }
+
+          let awayScore = parseFloat(awayData.score) || 0;
+          let homeScore = parseFloat(homeData.score) || 0;
+          let isFinal = Boolean(ev.status && ev.status.type && ev.status.type.completed);
+
+          let awayDB = DB[awayCode] || { star: "Estrella Away", pts: 22.0, reb: 5.0, ast: 5.0 };
+          let homeDB = DB[homeCode] || { star: "Estrella Home", pts: 22.0, reb: 5.0, ast: 5.0 };
+
+          let liveAwayPts = extractLeader(awayData, "points");
+          let liveAwayAst = extractLeader(awayData, "assists");
+          let liveAwayReb = extractLeader(awayData, "rebounds");
+
+          let liveHomePts = extractLeader(homeData, "points");
+          let liveHomeAst = extractLeader(homeData, "assists");
+          let liveHomeReb = extractLeader(homeData, "rebounds");
+
+          let leaders = {
+            away: {
+              name: liveAwayPts ? liveAwayPts.name : awayDB.star,
+              pts: liveAwayPts ? liveAwayPts.value : awayDB.pts,
+              ast: liveAwayAst ? liveAwayAst.value : awayDB.ast,
+              reb: liveAwayReb ? liveAwayReb.value : awayDB.reb
+            },
+            home: {
+              name: liveHomePts ? liveHomePts.name : homeDB.star,
+              pts: liveHomePts ? liveHomePts.value : homeDB.pts,
+              ast: liveHomeAst ? liveHomeAst.value : homeDB.ast,
+              reb: liveHomeReb ? liveHomeReb.value : homeDB.reb
+            }
+          };
+
+          const stats = calculateMatchupStats(awayCode, homeCode, vegasSpread);
+          let scoreTag = isFinal ? ` (${awayScore}-${homeScore})` : "";
+          let gameTime = "🕒 " + (ev.status.type.shortDetail || ev.status.type.detail || "Por definir") + scoreTag;
+
+          let displayVegasSpread = vegasSpread !== "S/D" ? vegasSpread : `Est. ${stats.spread}`;
+
+          let gameObj = {
+            slateKey: slateKey,
+            away: awayData.team.shortDisplayName || awayData.team.name,
+            home: homeData.team.shortDisplayName || homeData.team.name,
+            awayCode: awayCode,
+            homeCode: homeCode,
+            time: gameTime,
+            fav: stats.fav,
+            favCode: stats.favCode,
+            homeIsFav: stats.homeIsFav,
+            prob: stats.prob,
+            spread: stats.spread,
+            favSpread: stats.favSpread,
+            modelHomeSpread: stats.modelHomeSpread,
+            atsPickLabel: stats.atsPickLabel,
+            edge: stats.edge,
+            edgeNum: stats.edgeNum,
+            vegasSpread: displayVegasSpread,
+            vegasTotal: vegasTotal,
+            leaders: leaders,
+            isFinal: isFinal,
+            awayScore: awayScore,
+            homeScore: homeScore
+          };
+          gameObj.audit = evaluateGameAudit(gameObj);
+          return gameObj;
+        });
+      }
+    }
+  } catch (e) { }
+  return [];
+}
+
+async function fetchStandings() {
+  let totalOrtg = 0, teamCount = 0;
+
+  try {
+    const res = await fetch("https://site.api.espn.com/apis/v2/sports/basketball/nba/standings?seasonType=2");
+    if (res.ok) {
+      const data = await res.json();
+      let teams = [];
+      
+      if (data.children) {
+        data.children.forEach(conf => {
+          if (conf.standings && conf.standings.entries) {
+            conf.standings.entries.forEach(entry => {
+              let teamName = entry.team.displayName;
+              let rawCode = entry.team.abbreviation;
+              let code = ESPN_NORM[rawCode] || rawCode;
+              
+              let wins = 0, losses = 0, avgPpg = 0, avgOppg = 0, totalPtsFor = 0, totalPtsAgainst = 0;
+              let homeW = 0, homeL = 0, awayW = 0, awayL = 0;
+              
+              if (entry.stats) {
+                entry.stats.forEach(st => {
+                  let name = (st.name || st.type || "").toLowerCase();
+                  let val = parseFloat(st.value) || 0;
+                  if (name === "wins" || name === "win") wins = parseInt(val) || 0;
+                  if (name === "losses" || name === "loss") losses = parseInt(val) || 0;
+                  
+                  if (name === "avgpointsfor") avgPpg = val;
+                  if (name === "avgpointsagainst") avgOppg = val;
+                  if (name === "pointsfor") totalPtsFor = val;
+                  if (name === "pointsagainst") totalPtsAgainst = val;
+
+                  if (name.includes("home") && st.summary) {
+                    let parts = st.summary.split("-");
+                    if (parts.length === 2) { homeW = parseInt(parts[0])||0; homeL = parseInt(parts[1])||0; }
+                  }
+                  if ((name.includes("road") || name.includes("away")) && st.summary) {
+                    let parts = st.summary.split("-");
+                    if (parts.length === 2) { awayW = parseInt(parts[0])||0; awayL = parseInt(parts[1])||0; }
+                  }
                 });
-                await cargarPartidosDelDia();
-            } catch (e) {}
-        }
+              }
 
-        async function cargarPartidosDelDia() {
-            let fecha = document.getElementById('fecha-mlb').value;
-            let select = document.getElementById('select-partidos');
-            if (!fecha) return;
-            try {
-                let res = await fetch(`https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=${fecha}&hydrate=probablePitcher`);
-                let data = await res.json();
-                select.innerHTML = `<option value="">-- Selecciona un encuentro --</option>`;
-                cachePartidos = [];
-                if (!data.dates || data.dates.length === 0 || !data.dates[0].games.length) return document.getElementById('estado').innerHTML = `⚠️ Sin juegos hoy.`;
-                
-                data.dates[0].games.forEach((g, i) => {
-                    let homeP = g.teams.home.probablePitcher ? g.teams.home.probablePitcher.fullName : "Por definir";
-                    let awayP = g.teams.away.probablePitcher ? g.teams.away.probablePitcher.fullName : "Por definir";
-                    let homePid = g.teams.home.probablePitcher ? g.teams.home.probablePitcher.id : null;
-                    let awayPid = g.teams.away.probablePitcher ? g.teams.away.probablePitcher.id : null;
-                    let time = g.gameDate ? new Date(g.gameDate).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true }) : "N/D";
-                    
-                    cachePartidos.push({ 
-                        gamePk: g.gamePk, 
-                        homeTeam: g.teams.home.team.name, 
-                        awayTeam: g.teams.away.team.name, 
-                        homeTeamId: g.teams.home.team.id,
-                        awayTeamId: g.teams.away.team.id,
-                        homePitcher: homeP, 
-                        awayPitcher: awayP, 
-                        homePitcherId: homePid,
-                        awayPitcherId: awayPid,
-                        gameTime: time, 
-                        venue: g.venue ? g.venue.name : "estadio", 
-                        dayNight: g.dayNight || "N" 
-                    });
-                    let option = document.createElement('option'); option.value = i; option.textContent = `${g.teams.away.team.name} (${awayP}) @ ${g.teams.home.team.name} (${homeP})`;
-                    select.appendChild(option);
+              if (entry.records) {
+                entry.records.forEach(rec => {
+                  let rname = (rec.name || rec.type || "").toLowerCase();
+                  let summary = rec.summary || "";
+                  if (summary.includes("-")) {
+                    let parts = summary.split("-");
+                    let w = parseInt(parts[0]) || 0;
+                    let l = parseInt(parts[1]) || 0;
+                    if (rname.includes("home")) { homeW = w; homeL = l; }
+                    else if (rname.includes("road") || rname.includes("away")) { awayW = w; awayL = l; }
+                    else if (rname.includes("overall") || rname.includes("total")) {
+                      if (wins === 0) wins = w;
+                      if (losses === 0) losses = l;
+                    }
+                  }
                 });
-                await calcularProbabilidadesCartelera();
-            } catch (error) {}
-        }
+              }
 
-        function generarArsenal(fip) {
-            let lanzamientos = ["4-Seam Fastball", "Sinker", "Sweeper", "Slider", "Changeup", "Curveball", "Cutter"];
-            let primario = lanzamientos[Math.floor(Math.random() * lanzamientos.length)];
-            let veloBase = primario.includes("Fastball") || primario === "Sinker" ? 94 : (primario === "Cutter" ? 89 : 83);
-            let velo = (veloBase + (Math.random() * 4)).toFixed(1) + " mph";
-            let whiffBase = primario.includes("Fastball") ? 22 : 32;
-            let whiff = (whiffBase + ((4.5 - parseFloat(fip)) * 8)).toFixed(1) + "%";
-            return { tipo: primario, velo: velo, whiff: whiff };
-        }
+              let calcWins = homeW + awayW;
+              let calcLosses = homeL + awayL;
+              if (calcWins > 0 || calcLosses > 0) {
+                wins = calcWins;
+                losses = calcLosses;
+              }
 
-        async function calcularIndiceCompleto(nombreEquipo, nombrePitcher) {
-            let añoActual = document.getElementById('fecha-mlb').value.substring(0,4) || "2026";
-            let resEquipos = await fetch(`https://statsapi.mlb.com/api/v1/teams?sportId=1`);
-            let dataEquipos = await resEquipos.json();
-            let eq = dataEquipos.teams.find(t => t.name.toLowerCase().includes(nombreEquipo.toLowerCase()) || t.teamName.toLowerCase().includes(nombreEquipo.toLowerCase()));
-            let rec = eq ? (standingsCache[eq.id] || {wins:75, losses:75, homeRecord:"38-38", awayRecord:"37-37"}) : {wins:75, losses:75, homeRecord:"38-38", awayRecord:"37-37"};
-            
-            let teamWoba=".318", teamEra="4.20", teamWhip="1.30", teamWrcPlus=100, teamBarrelPct="7.5%", teamHardHitPct="39.2%", teamExitVelo="88.5 mph", teamXwoba=".318", pWins=0, pLosses=0, eraVal=4.20, whip="1.25", k9="8.2", bb9="2.8", xEraVal=4.10, fipVal="4.00", sieraVal="4.00", xFipVal="4.00", xwobaVal=".315", xbaVal=".240", hhVal="38.5%", evVal="88.5 mph", mejorBateador="Líder Ofensivo", pitcherIdEncontrado=null, pitcherHand="R", ipVal="0.0"; 
-            
-            if (eq) {
-                try {
-                    let resTeamStats = await fetch(`https://statsapi.mlb.com/api/v1/teams/${eq.id}/stats?stats=season&group=hitting,pitching&season=${añoActual}`);
-                    let dataTeamStats = await resTeamStats.json();
-                    if (dataTeamStats.stats) {
-                        dataTeamStats.stats.forEach(st => {
-                            if (st.group.displayName === "hitting" && st.splits.length > 0) {
-                                let bm = st.splits[0].stat; let pa = parseInt(bm.plateAppearances) || 1;
-                                let exactWoba = ((0.69*(Math.max(0, (parseInt(bm.baseOnBalls)||0)-(parseInt(bm.intentionalWalks)||0))))+(0.72*(parseInt(bm.hitByPitch)||0))+(0.89*((parseInt(bm.hits)||0)-(parseInt(bm.doubles)||0)-(parseInt(bm.triples)||0)-(parseInt(bm.homeRuns)||0)))+(1.27*(parseInt(bm.doubles)||0))+(1.62*(parseInt(bm.triples)||0))+(2.10*(parseInt(bm.homeRuns)||0)))/pa;
-                                teamWoba = exactWoba.toFixed(3); teamXwoba = exactWoba.toFixed(3); teamWrcPlus = Math.round((exactWoba/0.318)*100); 
+              let totalGames = wins + losses;
+              let ppg = avgPpg > 0 ? avgPpg : (totalGames > 0 ? totalPtsFor / totalGames : 0);
+              let oppg = avgOppg > 0 ? avgOppg : (totalGames > 0 ? totalPtsAgainst / totalGames : 0);
 
-                                let diffWoba = exactWoba - 0.315; 
-                                teamExitVelo = (88.5 + (diffWoba * 45)).toFixed(1) + " mph";
-                                teamHardHitPct = (39.2 + (diffWoba * 120)).toFixed(1) + "%";
-                                teamBarrelPct = Math.max(2.0, (7.5 + (diffWoba * 45))).toFixed(1) + "%";
-                            }
-                            if (st.group.displayName === "pitching" && st.splits.length > 0) {
-                                let pm = st.splits[0].stat; teamEra = parseFloat(pm.era||4.20).toFixed(2); teamWhip = parseFloat(pm.whip||1.30).toFixed(2);
-                            }
-                        });
-                    }
-                } catch (e) {}
+              if (ppg > 150 && totalGames > 0) ppg = ppg / totalGames;
+              if (oppg > 150 && totalGames > 0) oppg = oppg / totalGames;
 
-                try {
-                    let resAdvTeam = await fetch(`https://statsapi.mlb.com/api/v1/teams/${eq.id}/stats?stats=expectedStatistics,statcast&group=hitting&season=${añoActual}&gameType=R`);
-                    let dataAdvTeam = await resAdvTeam.json();
-                    if (dataAdvTeam.stats) {
-                        dataAdvTeam.stats.forEach(st => {
-                            if (st.splits && st.splits.length > 0) {
-                                let ts = st.splits[0].stat;
-                                if(ts.estimatedWoba) teamXwoba = parseFloat(ts.estimatedWoba).toFixed(3);
-                                if(ts.hardHitPercent !== undefined) teamHardHitPct = (parseFloat(ts.hardHitPercent)*100).toFixed(1)+"%";
-                                if(ts.barrelPercent !== undefined) teamBarrelPct = (parseFloat(ts.barrelPercent)*100).toFixed(1)+"%";
-                                let ev = ts.launchSpeed || ts.exitVelocity || ts.avgExitVelocity; 
-                                if(ev !== undefined) teamExitVelo = parseFloat(ev).toFixed(1)+" mph";
-                            }
-                        });
-                    }
-                } catch(e) {}
+              if (DB[code] && ppg >= 90 && ppg <= 140 && oppg >= 90 && oppg <= 140) {
+                let teamPace = DB[code].pace || 99.8;
+                let realOrtg = clamp((ppg / teamPace) * 100, 103.0, 125.0);
+                let realDrtg = clamp((oppg / teamPace) * 100, 103.0, 125.0);
 
-                try {
-                    let resLeaders = await fetch(`https://statsapi.mlb.com/api/v1/teams/${eq.id}/leaders?leaderCategories=ops&season=${añoActual}`);
-                    let dataLeaders = await resLeaders.json();
-                    if (dataLeaders.teamLeaders && dataLeaders.teamLeaders.length > 0 && dataLeaders.teamLeaders[0].leaders.length > 0) {
-                        mejorBateador = dataLeaders.teamLeaders[0].leaders[0].person.fullName;
-                    }
-                } catch (e) {}
-            }
+                let weightSample = Math.min(0.65, totalGames / 18);
+                let baseOrtg = DB[code].baseOrtg || 114.0;
+                let baseDrtg = DB[code].baseDrtg || 114.0;
 
-            if (nombrePitcher && nombrePitcher !== "Por definir") {
-                try {
-                    let resBusq = await fetch(`https://statsapi.mlb.com/api/v1/people/search?names=${nombrePitcher}`);
-                    let dataBusq = await resBusq.json();
-                    if (dataBusq.people && dataBusq.people.length > 0) {
-                        let pid = dataBusq.people[0].id;
-                        pitcherIdEncontrado = pid;
-                        if(dataBusq.people[0].pitchHand && dataBusq.people[0].pitchHand.code) {
-                            pitcherHand = dataBusq.people[0].pitchHand.code;
-                        }
-                        let resBase = await fetch(`https://statsapi.mlb.com/api/v1/people/${pid}/stats?stats=season&group=pitching&season=${añoActual}`); 
-                        let dataBase = await resBase.json();
-                        
-                        if (dataBase.stats && dataBase.stats[0].splits.length > 0) {
-                            let m = dataBase.stats[0].splits[0].stat;
-                            pWins=m.wins||0; pLosses=m.losses||0; eraVal=parseFloat(m.era)||4.20; whip=parseFloat(m.whip||1.25).toFixed(2); k9=parseFloat(m.strikeoutsPer9Inn||8.2).toFixed(1); bb9=parseFloat(m.walksPer9Inn||2.8).toFixed(1);
-                            let hrP=m.homeRuns||0, bbP=m.baseOnBalls||0, hbpP=m.hitByPitch||0, kP=m.strikeOuts||0, ipStr = m.inningsPitched ? m.inningsPitched.toString() : "1.0";
-                            
-                            let ipParts = ipStr.split('.');
-                            let ipP = parseInt(ipParts[0]) + (ipParts[1] ? (parseInt(ipParts[1]) === 1 ? 0.333 : (parseInt(ipParts[1]) === 2 ? 0.666 : parseInt(ipParts[1])/10)) : 0);
-                            if (ipP === 0) ipP = 0.333;
-                            ipVal = ipP.toFixed(1);
+                DB[code].ortg = clamp((baseOrtg * (1 - weightSample)) + (realOrtg * weightSample), 104.0, 124.0);
+                DB[code].drtg = clamp((baseDrtg * (1 - weightSample)) + (realDrtg * weightSample), 104.0, 124.0);
 
-                            let fipReal = (((13*hrP)+(3*(bbP+hbpP))-(2*kP))/ipP)+3.15; fipVal = Math.min(8.50, Math.max(1.50, fipReal)).toFixed(2); 
-                            xEraVal = Math.max(2.10, Math.min(6.50, eraVal*0.95));
-                            let hr9 = (hrP/ipP)*9; let xFipReal = fipReal - ((hr9-1.10)*0.7); xFipVal = Math.min(8.50, Math.max(1.50, xFipReal)).toFixed(2);
-                            let sieraReal = 2.80 + (0.33*parseFloat(bb9)) - (0.15*parseFloat(k9)) + (0.10*parseFloat(xFipVal)); sieraVal = Math.min(8.50, Math.max(1.50, sieraReal)).toFixed(2);
-                            
-                            let sieraNum = parseFloat(sieraVal);
-                            let proxyXwoba = 0.315 + ((sieraNum - 4.00) * 0.033);
-                            xwobaVal = proxyXwoba.toFixed(3);
-                            xbaVal = (0.240 + ((sieraNum - 4.00) * 0.015)).toFixed(3);
-                        }
-                        
-                        try {
-                            let resAdv = await fetch(`https://statsapi.mlb.com/api/v1/people/${pid}/stats?stats=expectedStatistics,statcast&group=pitching&season=${añoActual}&gameType=R`); let dataAdv = await resAdv.json();
-                            if (dataAdv.stats) {
-                                dataAdv.stats.forEach(st => {
-                                    if (st.splits && st.splits.length > 0) {
-                                        let as = st.splits[0].stat;
-                                        if(as.estimatedWoba) xwobaVal = parseFloat(as.estimatedWoba).toFixed(3); 
-                                        if(as.estimatedBa) xbaVal = parseFloat(as.estimatedBa).toFixed(3);
-                                        if(as.hardHitPercent !== undefined) hhVal = (parseFloat(as.hardHitPercent)*100).toFixed(1)+"%";
-                                        let ev = as.launchSpeed || as.exitVelocity || as.avgExitVelocity; if(ev!==undefined) evVal=parseFloat(ev).toFixed(1)+" mph";
-                                    }
-                                });
-                            }
-                        } catch(e){}
-                    }
-                } catch (e) {}
-            }
+                totalOrtg += DB[code].ortg;
+                teamCount++;
+              }
 
-            let arsenal = generarArsenal(sieraVal);
-            let kMinusBbVal = (parseFloat(k9) - parseFloat(bb9)).toFixed(1);
-            
-            let parkFactors = {
-                "Coors Field": 1.35, "Great American Ball Park": 1.15, "Fenway Park": 1.12, "Yankee Stadium": 1.05,
-                "Dodger Stadium": 1.02, "Chase Field": 1.00, "Citi Field": 0.95, "Petco Park": 0.90, "T-Mobile Park": 0.90, "Oracle Park": 0.90
-            };
-            let venueBuscado = cachePartidos.find(game => game.homeTeam === nombreEquipo || game.awayTeam === nombreEquipo)?.venue || "Neutral";
-            let pf = parkFactors[venueBuscado] || 1.00;
-
-            let poderAbridor = ((4.00 - parseFloat(sieraVal)) * 2.8) + 
-                               ((0.320 - parseFloat(xwobaVal)) * 35.0) + 
-                               ((4.00 - parseFloat(xFipVal)) * 1.2) + 
-                               (parseFloat(kMinusBbVal) * 0.15);
-                               
-            let poderBullpen = ((4.20 - parseFloat(teamEra)) * 1.5) + 
-                               ((1.30 - parseFloat(teamWhip)) * 6.0); 
-                               
-            let basePitching = (poderAbridor * 0.65) + (poderBullpen * 0.35);
-            
-            let baseHitting = ((teamWrcPlus - 100) * 0.12) + 
-                              ((parseFloat(teamXwoba) - 0.315) * 40.0) + 
-                              ((parseFloat(teamBarrelPct) - 7.0) * 1.2) + 
-                              ((parseFloat(teamHardHitPct) - 38.0) * 0.2);
-                              
-            let indice = parseFloat((basePitching + baseHitting).toFixed(2));
-
-            return {
-                id: eq ? eq.id : null,
-                name: eq ? eq.name : nombreEquipo, 
-                mejorBateador: mejorBateador !== "Líder Ofensivo" ? mejorBateador : `Líder Ofensivo ${nombreEquipo.split(' ').pop()}`,
-                wins: rec.wins, losses: rec.losses, homeRecord: rec.homeRecord, awayRecord: rec.awayRecord, teamWoba, teamWrcPlus, teamEra, teamWhip, teamBarrelPct, teamHardHitPct, teamExitVelo, teamXwoba, pf,
-                pitcher: { id: pitcherIdEncontrado, hand: pitcherHand, nombre: nombrePitcher || "Rotación", wins: pWins, losses: pLosses, era: eraVal, xERA: xEraVal.toFixed(2), whip, k9, bb9, kMinusBb: kMinusBbVal, siera: sieraVal, xFip: xFipVal, fip: fipVal, xwoba: xwobaVal, xba: xbaVal, hardHitPct: hhVal, exitVelo: evVal, arsenal: arsenal, ip: ipVal },
-                indice
-            };
-        }
-
-        async function obtenerMejorBateadorVsPitcher(teamId, teamName, pitcherObj) {
-            let añoActual = document.getElementById('fecha-mlb').value.substring(0,4) || "2026";
-            let pitcherId = pitcherObj.id;
-            let pitcherName = pitcherObj.nombre;
-            let pitcherHand = pitcherObj.hand || "R";
-
-            try {
-                if (teamId) {
-                    let resRoster = await fetch(`https://statsapi.mlb.com/api/v1/teams/${teamId}/roster?rosterType=40Man&season=${añoActual}`);
-                    let dataRoster = await resRoster.json();
-
-                    if (dataRoster.roster && dataRoster.roster.length > 0) {
-                        let bateadores = dataRoster.roster.filter(p => p.position && p.position.code !== "1");
-                        let candidatosDirectos = [];
-
-                        if (pitcherId) {
-                            for (let i = 0; i < bateadores.length; i += 5) {
-                                let chunk = bateadores.slice(i, i + 5);
-                                let promesas = chunk.map(async (b) => {
-                                    try {
-                                        let rH2H = await fetch(`https://statsapi.mlb.com/api/v1/people/${b.person.id}/stats?stats=vsPlayer&opposingPlayerId=${pitcherId}&group=hitting`);
-                                        let dH2H = await rH2H.json();
-                                        if (dH2H.stats && dH2H.stats[0] && dH2H.stats[0].splits && dH2H.stats[0].splits.length > 0) {
-                                            
-                                            let totalAB = 0, totalPA = 0, totalH = 0, totalBB = 0, totalHBP = 0, total2B = 0, total3B = 0, totalHR = 0;
-                                            
-                                            dH2H.stats[0].splits.forEach(split => {
-                                                let s = split.stat;
-                                                totalAB += parseInt(s.atBats) || 0;
-                                                totalPA += parseInt(s.plateAppearances) || parseInt(s.atBats) || 0;
-                                                totalH += parseInt(s.hits) || 0;
-                                                totalBB += parseInt(s.baseOnBalls) || 0;
-                                                totalHBP += parseInt(s.hitByPitch) || 0;
-                                                total2B += parseInt(s.doubles) || 0;
-                                                total3B += parseInt(s.triples) || 0;
-                                                totalHR += parseInt(s.homeRuns) || 0;
-                                            });
-                                            
-                                            if (totalPA >= 3) {
-                                                let sng = Math.max(0, totalH - (total2B + total3B + totalHR));
-                                                let wobaCalc = ((0.69 * totalBB) + (0.72 * totalHBP) + (0.89 * sng) + (1.27 * total2B) + (1.62 * total3B) + (2.10 * totalHR)) / totalPA;
-                                                let avgCalc = totalAB > 0 ? (totalH / totalAB).toFixed(3).replace(/^0/, '') : ".000";
-
-                                                if (wobaCalc > 0.000) {
-                                                    return {
-                                                        nombre: b.person.fullName,
-                                                        woba: wobaCalc.toFixed(3),
-                                                        pa: totalPA,
-                                                        ab: totalAB,
-                                                        h: totalH,
-                                                        avg: avgCalc,
-                                                        tipo: "H2H Directo"
-                                                    };
-                                                }
-                                            }
-                                        }
-                                    } catch (e) {}
-                                    return null;
-                                });
-                                let resultados = await Promise.all(promesas);
-                                candidatosDirectos.push(...resultados.filter(r => r !== null));
-                            }
-                        }
-
-                        if (candidatosDirectos.length > 0) {
-                            candidatosDirectos.sort((a, b) => parseFloat(b.woba) - parseFloat(a.woba));
-                            let mejorH2H = candidatosDirectos[0];
-                            return {
-                                nombre: mejorH2H.nombre,
-                                pitcherFrente: pitcherName,
-                                wobaVs: mejorH2H.woba,
-                                detalle: `<b>${mejorH2H.h} Hits en ${mejorH2H.ab} AB</b> (PA: ${mejorH2H.pa} | AVG ${mejorH2H.avg})`,
-                                veredicto: `🔥 Dominio Probado vs ${pitcherName}`
-                            };
-                        }
-
-                        let manoTexto = pitcherHand === "L" ? "Zurdos (vs LHP)" : "Derechos (vs RHP)";
-                        let resSplit = await fetch(`https://statsapi.mlb.com/api/v1/teams/${teamId}/leaders?leaderCategories=ops&season=${añoActual}`);
-                        let dSplit = await resSplit.json();
-                        let liderName = (dSplit.teamLeaders && dSplit.teamLeaders[0] && dSplit.teamLeaders[0].leaders[0]) 
-                            ? dSplit.teamLeaders[0].leaders[0].person.fullName 
-                            : bateadores[0].person.fullName;
-
-                        let wobaProyectado = (0.345 + (Math.random() * 0.040)).toFixed(3);
-                        return {
-                            nombre: liderName,
-                            pitcherFrente: pitcherName,
-                            wobaVs: wobaProyectado,
-                            detalle: `Split proyectado ${manoTexto}`,
-                            veredicto: `⚡ Mayor wOBA ante perfil de ${pitcherName}`
-                        };
-                    }
-                }
-            } catch (err) {}
-
-            return {
-                nombre: `Líder Ofensivo ${teamName.split(' ').pop()}`,
-                pitcherFrente: pitcherName,
-                wobaVs: ".355",
-                detalle: "Proyección calculada de Statcast",
-                veredicto: `🎯 Matchup Favorable vs ${pitcherName}`
-            };
-        }
-
-        async function calcularProbabilidadesCartelera() {
-            let listaPartidos = [];
-            for (let i = 0; i < cachePartidos.length; i++) {
-                let p = cachePartidos[i];
-                try {
-                    let awayObj = await calcularIndiceCompleto(p.awayTeam, p.awayPitcher); let homeObj = await calcularIndiceCompleto(p.homeTeam, p.homePitcher);
-                    let diff = homeObj.indice - awayObj.indice; let probs = calcularProbabilidadesRealistas(diff);
-                    let maxProb = Math.max(probs.probHome, probs.probAway); let eqFav = probs.probHome >= probs.probAway ? p.homeTeam : p.awayTeam; let isHomeFav = probs.probHome >= probs.probAway;
-                    
-                    // Identificador de juego TBD
-                    let isTbd = p.homePitcher.toLowerCase().includes("definir") || p.awayPitcher.toLowerCase().includes("definir");
-                    
-                    listaPartidos.push({ indexOriginal: i, awayTeamShort: p.awayTeam.split(' ').pop(), homeTeamShort: p.homeTeam.split(' ').pop(), favorecido: eqFav.split(' ').pop(), probabilidad: maxProb, hora: p.gameTime, isHomeFav: isHomeFav, isTbd: isTbd });
-                } catch (e) {}
-            }
-            
-            let sb = document.getElementById('sidebar-ranking-list'); sb.innerHTML = ""; document.getElementById('sidebar-count').textContent = `${listaPartidos.length} juegos`;
-            listaPartidos.forEach((item) => {
-                let div = document.createElement('div'); div.className = 'ranking-item';
-                let probText = item.isTbd ? "N/A" : item.probabilidad.toFixed(1) + "%";
-                let favText = item.isTbd ? "TBD" : item.favorecido;
-                
-                div.onclick = function() { document.getElementById('select-partidos').value = item.indexOriginal; seleccionarPartidoLista(); ejecutarAnalisisMatchup(); window.scrollTo({ top: 0, behavior: 'smooth' }); };
-                div.innerHTML = `<div class="ranking-info"><b>${item.awayTeamShort} @ ${item.homeTeamShort}</b><div style="font-size: 10px; color: #0ea5e9; margin-top: 4px; font-weight: 800; text-transform: uppercase;">🕒 ${item.hora} | Fav: ${favText}</div></div><span class="ranking-prob" ${item.isTbd ? 'style="background: #94a3b8;"' : ''}>${probText}</span>`;
-                sb.appendChild(div);
+              teams.push({ name: teamName, code: code, w: wins, l: losses, homeW: homeW, homeL: homeL, awayW: awayW, awayL: awayL });
             });
+          }
+        });
+      }
+      
+      if (teamCount > 0) {
+        LEAGUE_ORTG = clamp(totalOrtg / teamCount, 110.0, 118.0);
+        document.getElementById("auditMsg").innerHTML = `✅ Data Calibrada Bayesiana a 100 Posesiones (ORtg Liga: ${LEAGUE_ORTG.toFixed(1)}).`;
+      }
 
-            // Filtro para excluir juegos TBD del Top 3
-            let top3 = [...listaPartidos].filter(p => !p.isTbd).sort((a,b) => b.probabilidad - a.probabilidad).slice(0, 3);
-            let t3c = document.getElementById('top3-container'); t3c.innerHTML = "";
-            if(top3.length > 0) {
-                t3c.style.display = "flex";
-                top3.forEach((pick, index) => {
-                    let medal = index === 0 ? "🥇" : (index === 1 ? "🥈" : "🥉"); let pickClass = index === 0 ? "pick-1" : (index === 1 ? "pick-2" : "pick-3"); let opp = pick.isHomeFav ? pick.awayTeamShort : pick.homeTeamShort;
-                    t3c.innerHTML += `<div class="top3-card ${pickClass}"><div class="top3-title">${medal} Pick #${index + 1} del Día</div><div class="top3-team"><span>${pick.favorecido}</span><span class="top3-prob">${pick.probabilidad.toFixed(1)}%</span></div><div class="top3-vs">vs ${opp}</div></div>`;
-                });
-            } else {
-                t3c.style.display = "none";
-            }
+      if (teams.length >= 28) {
+        teams.sort((a,b) => {
+          let totalA = a.w + a.l;
+          let totalB = b.w + b.l;
+          let pctA = totalA > 0 ? a.w / totalA : 0;
+          let pctB = totalB > 0 ? b.w / totalB : 0;
+          if (Math.abs(pctB - pctA) > 0.0001) return pctB - pctA;
+          let diffA = a.w - a.l;
+          let diffB = b.w - b.l;
+          if (diffB !== diffA) return diffB - diffA;
+          return b.w - a.w;
+        });
+        renderStandings(teams);
+        return;
+      }
+    }
+  } catch (e) {}
+  renderStandings(Object.values(DB).map(t => ({ name: t.name, w: 0, l: 0, homeW: 0, homeL: 0, awayW: 0, awayL: 0 })));
+}
+
+function renderStandings(teamsList) {
+  const container = document.getElementById("standingsContainer");
+  container.innerHTML = "";
+  teamsList.forEach((t, idx) => {
+    const item = document.createElement("div");
+    item.className = "standings-item";
+    
+    let homeStr = `C: ${t.homeW !== undefined ? t.homeW : 0}-${t.homeL !== undefined ? t.homeL : 0}`;
+    let awayStr = `V: ${t.awayW !== undefined ? t.awayW : 0}-${t.awayL !== undefined ? t.awayL : 0}`;
+
+    item.innerHTML = `
+      <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+        <div style="display: flex; align-items: center; gap: 6px; flex: 1; overflow: hidden;">
+          <span class="standings-rank">#${idx + 1}</span>
+          <span class="standings-team" title="${t.name}">${t.name}</span>
+        </div>
+        <div class="standings-record">${t.w}G - ${t.l}P</div>
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 8px; font-size: 0.68rem; color: #64748b; margin-top: 2px; font-weight: 700;">
+        <span>🏠 ${homeStr}</span>
+        <span>✈️ ${awayStr}</span>
+      </div>
+    `;
+    container.appendChild(item);
+  });
+}
+
+function shiftDate(days) {
+  const input = document.getElementById("activeDate");
+  const curr = new Date(input.value + "T12:00:00");
+  curr.setDate(curr.getDate() + days);
+  input.value = curr.toISOString().split("T")[0];
+  onDateChange();
+}
+
+function onDateChange() {
+  const selectedDate = document.getElementById("activeDate").value;
+  if (!selectedDate) return;
+  syncSlateByDate(selectedDate);
+}
+
+async function syncSlateByDate(dateStr) {
+  const slateSelect = document.getElementById("gameSlateSelect");
+  slateSelect.innerHTML = "<option>Consultando servidores de la NBA...</option>";
+
+  const games = await fetchFullSchedule(dateStr);
+  currentDailyGames = games; 
+  
+  slateSelect.innerHTML = "";
+  const badge = document.getElementById("gameCountBadge");
+  badge.innerText = `${games.length} juegos`;
+  
+  if (games.length === 0) {
+      badge.style.background = "#fee2e2";
+      badge.style.color = "#b91c1c";
+      slateSelect.add(new Option("-- Sin partidos programados --", ""));
+  } else {
+      badge.style.background = "#e0f2fe";
+      badge.style.color = "#0284c7";
+      games.forEach(g => {
+        slateSelect.add(new Option(`${g.away} @ ${g.home} [Vegas: ${g.vegasSpread}]`, g.slateKey));
+      });
+  }
+
+  renderDailyGames(games);
+  renderTopPicksForDate(games);
+  loadGameFromSlate();
+}
+
+function renderDailyGames(games) {
+  const container = document.getElementById("dailyGamesContainer");
+  container.innerHTML = "";
+
+  let mlHits = 0, mlMisses = 0;
+  let atsHits = 0, atsMisses = 0;
+
+  if (!games || games.length === 0) {
+    container.innerHTML = `<div style="text-align: center; color: #64748b; padding: 25px; font-size: 0.82rem; font-weight: 600;">⚠️ No hay partidos programados.</div>`;
+    document.getElementById("dailyRecordText").innerText = "0G - 0P";
+    document.getElementById("dailyRecordPct").innerText = "0.0%";
+    return;
+  }
+
+  games.forEach((g, idx) => {
+    const card = document.createElement("div");
+    card.className = `game-card ${idx === 0 ? 'active-card' : ''}`;
+    card.id = `card_${g.slateKey}`;
+    card.onclick = () => {
+      document.querySelectorAll('.game-card').forEach(c => c.classList.remove('active-card'));
+      card.classList.add('active-card');
+      document.getElementById("gameSlateSelect").value = g.slateKey;
+      loadGameFromSlate();
+    };
+
+    let auditBadges = "";
+    if (g.audit) {
+      if (g.audit.mlStatus === "HIT") {
+        mlHits++;
+        auditBadges += `<span class="badge-hit" title="Victoria Directa Acertada">✓ ML</span>`;
+      } else if (g.audit.mlStatus === "MISS") {
+        mlMisses++;
+        auditBadges += `<span class="badge-miss" title="Victoria Directa Fallada">✗ ML</span>`;
+      }
+
+      if (g.audit.atsStatus === "HIT") {
+        atsHits++;
+        auditBadges += `<span class="badge-hit" title="Cobertura de Spread Acertada">✓ ATS</span>`;
+      } else if (g.audit.atsStatus === "MISS") {
+        atsMisses++;
+        auditBadges += `<span class="badge-miss" title="Cobertura de Spread Fallada">✗ ATS</span>`;
+      } else if (g.audit.atsStatus === "PUSH") {
+        auditBadges += `<span class="badge-push" title="Empate contra el Spread">⚖️ PUSH</span>`;
+      }
+    }
+
+    card.innerHTML = `
+      <div class="game-card-match">
+        <span>${g.away} @ ${g.home}</span>
+        <span class="game-card-prob-badge">${g.fav} ${g.prob}</span>
+      </div>
+      <div class="game-card-info">
+        <span>${g.time} ${auditBadges}</span>
+        <span style="color: #0284c7; font-weight: 800;">Vegas: ${g.vegasSpread}</span>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+
+  let mlTotal = mlHits + mlMisses;
+  let atsTotal = atsHits + atsMisses;
+  if (atsTotal > 0) {
+    let pct = ((atsHits / atsTotal) * 100).toFixed(1);
+    document.getElementById("dailyRecordText").innerText = `ML ${mlHits}-${mlMisses} | ATS ${atsHits}-${atsMisses}`;
+    document.getElementById("dailyRecordPct").innerText = `${pct}% ATS`;
+  } else if (mlTotal > 0) {
+    let pct = ((mlHits / mlTotal) * 100).toFixed(1);
+    document.getElementById("dailyRecordText").innerText = `ML: ${mlHits}G - ${mlMisses}P`;
+    document.getElementById("dailyRecordPct").innerText = `${pct}% ML`;
+  } else {
+    document.getElementById("dailyRecordText").innerText = "En espera / En vivo";
+    document.getElementById("dailyRecordPct").innerText = "--%";
+  }
+}
+
+async function auditSeasonRange(startDateStr = "2026-10-20") {
+  const btn = document.getElementById("btnAuditRange");
+  const mlText = document.getElementById("cumMlText");
+  const mlPct = document.getElementById("cumMlPct");
+  const atsText = document.getElementById("cumAtsText");
+  const atsPct = document.getElementById("cumAtsPct");
+
+  btn.disabled = true;
+  btn.innerText = "⏳ Auditando 20 Oct - Hoy...";
+  mlText.innerText = "Escaneando...";
+  atsText.innerText = "Escaneando...";
+
+  let start = new Date(startDateStr + "T12:00:00");
+  let endInput = document.getElementById("activeDate").value;
+  let end = endInput ? new Date(endInput + "T12:00:00") : new Date();
+  if (end < start) end = new Date();
+
+  let dates = [];
+  let curr = new Date(start);
+  while (curr <= end) {
+    dates.push(curr.toISOString().split("T")[0]);
+    curr.setDate(curr.getDate() + 1);
+  }
+
+  let totalMlHits = 0, totalMlMisses = 0;
+  let totalAtsHits = 0, totalAtsMisses = 0, totalAtsPush = 0;
+
+  const batchSize = 5;
+  for (let i = 0; i < dates.length; i += batchSize) {
+    const batch = dates.slice(i, i + batchSize);
+    const results = await Promise.all(batch.map(d => fetchFullSchedule(d)));
+    results.forEach(dayGames => {
+      dayGames.forEach(g => {
+        if (g.audit) {
+          if (g.audit.mlStatus === "HIT") totalMlHits++;
+          else if (g.audit.mlStatus === "MISS") totalMlMisses++;
+
+          if (g.audit.atsStatus === "HIT") totalAtsHits++;
+          else if (g.audit.atsStatus === "MISS") totalAtsMisses++;
+          else if (g.audit.atsStatus === "PUSH") totalAtsPush++;
         }
+      });
+    });
+  }
 
-        function seleccionarPartidoLista() {
-            let idx = document.getElementById('select-partidos').value; if (idx === "") return;
-            let p = cachePartidos[idx];
-            if (p) {
-                currentGamePk = p.gamePk; document.getElementById('team-away-input').value = `${p.awayTeam} | ${p.awayPitcher}`; document.getElementById('team-home-input').value = `${p.homeTeam} | ${p.homePitcher}`;
-            }
-        }
+  let mlTotal = totalMlHits + totalMlMisses;
+  let mlWinRate = mlTotal > 0 ? ((totalMlHits / mlTotal) * 100).toFixed(1) : "0.0";
+  mlText.innerText = `${totalMlHits}G - ${totalMlMisses}P`;
+  mlPct.innerText = `${mlWinRate}%`;
+  mlPct.style.background = parseFloat(mlWinRate) >= 55 ? "#064e3b" : "#7f1d1d";
+  mlPct.style.color = parseFloat(mlWinRate) >= 55 ? "#34d399" : "#fca5a5";
 
-        async function ejecutarAnalisisMatchup() {
-            let aInput = document.getElementById('team-away-input').value, hInput = document.getElementById('team-home-input').value;
-            let estado = document.getElementById('estado'), contenedor = document.getElementById('tarjetas-resultado'), veredictoDiv = document.getElementById('veredicto');
+  let atsTotal = totalAtsHits + totalAtsMisses;
+  if (atsTotal > 0) {
+    let atsWinRate = ((totalAtsHits / atsTotal) * 100).toFixed(1);
+    atsText.innerText = `${totalAtsHits}G - ${totalAtsMisses}P${totalAtsPush > 0 ? ' ('+totalAtsPush+' Push)' : ''}`;
+    atsPct.innerText = `${atsWinRate}%`;
+    atsPct.style.background = parseFloat(atsWinRate) >= 52.4 ? "#064e3b" : "#7f1d1d";
+    atsPct.style.color = parseFloat(atsWinRate) >= 52.4 ? "#34d399" : "#fca5a5";
+  } else {
+    atsText.innerText = `Sin líneas guardadas`;
+    atsPct.innerText = `Usa ML (${mlWinRate}%)`;
+  }
 
-            if (!aInput || !hInput) return estado.innerHTML = "⚠️ Selecciona un partido.";
-            estado.innerHTML = "⏳ Cruzando historial BvP (Career Total), Statcast y FanGraphs...";
-            contenedor.innerHTML = ""; veredictoDiv.style.display = "none";
+  btn.disabled = false;
+  btn.innerText = "📊 Auditar 20 Oct - Hoy";
+}
 
-            try {
-                let awayTeam = await calcularIndiceCompleto(aInput.split('|')[0].trim(), aInput.split('|')[1] ? aInput.split('|')[1].trim() : "");
-                let homeTeam = await calcularIndiceCompleto(hInput.split('|')[0].trim(), hInput.split('|')[1] ? hInput.split('|')[1].trim() : "");
-                
-                let diff = homeTeam.indice - awayTeam.indice, probs = calcularProbabilidadesRealistas(diff);
-                let gInitial = probs.probHome >= probs.probAway ? homeTeam : awayTeam;
+function renderTopPicksForDate(games) {
+  const container = document.getElementById("topPicksContainer");
+  container.innerHTML = "";
 
-                // --- BLOQUE DE SEGURIDAD TBD ---
-                let isTbdAway = awayTeam.pitcher.nombre.toLowerCase().includes("definir");
-                let isTbdHome = homeTeam.pitcher.nombre.toLowerCase().includes("definir");
+  if (!games || games.length === 0) {
+    container.innerHTML = `<div style="grid-column: 1 / -1; background: #ffffff; padding: 20px; border-radius: 10px; border-left: 5px solid #ef4444; box-shadow: 0 4px 12px rgba(0,0,0,0.25); text-align: center; color: #0f172a;"><h3 style="margin-bottom: 5px; font-weight: 900; text-transform: uppercase;">🛑 Jornada de Descanso en la NBA</h3></div>`;
+    return;
+  }
 
-                if (isTbdAway || isTbdHome) {
-                    veredictoDiv.style.display = "block";
-                    veredictoDiv.innerHTML = `
-                        <div class="alerta-tbd">
-                            ⚠️ PROYECCIÓN NO VÁLIDA: Abridor TBD. El modelo requiere confirmación de rotación.
-                        </div>
-                        <div class="explicacion-humana" style="text-align:center;">
-                            Las operaciones algorítmicas han sido suspendidas para este enfrentamiento. Asignar métricas de la liga a un lanzador no confirmado contamina la proyección de victoria. <b>Si conoce al abridor, ingrese su nombre manualmente en el panel de control superior.</b>
-                        </div>
-                    `;
-                    
-                    contenedor.innerHTML = `
-                        ${crearTarjetaMatchup(awayTeam, "Visitante", "N/A", homeTeam, 'badge-prob-away', isTbdAway)}
-                        ${crearTarjetaMatchup(homeTeam, "Local", "N/A", awayTeam, 'badge-prob-home', isTbdHome)}
-                    `;
-                    
-                    document.getElementById('props-individuales').style.display = "none";
-                    estado.innerHTML = "⚠️ Operación abortada: Faltan variables monticulares.";
-                    return; // Detiene la ejecución del cálculo
-                }
-                // --- FIN DEL BLOQUE DE SEGURIDAD ---
+  const sortedGames = [...games].sort((a,b) => b.edgeNum - a.edgeNum);
+  const picks = [sortedGames[0], sortedGames[1] || sortedGames[0], sortedGames[2] || sortedGames[0]];
+  const medals = ["🥇", "🥈", "🥉"];
+  const classes = ["gold", "silver", "bronze"];
 
-                let calibracionMLB = 1.08; 
-                let pf = homeTeam.pf;
+  picks.forEach((pick, idx) => {
+    container.innerHTML += `
+      <div class="pick-card ${classes[idx]}">
+        <div>
+          <div class="pick-meta">${medals[idx]} PICK DE VALOR #${idx+1}</div>
+          <div class="pick-name">${pick.atsPickLabel}</div>
+          <div class="pick-sub">${pick.away} @ ${pick.home}</div>
+          <div class="pick-tag">PROY ${pick.spread} (Vegas: ${pick.vegasSpread})</div>
+        </div>
+        <div>
+          <div class="pick-prob">${pick.prob}</div>
+          <div class="pick-tag">${pick.edge} Edge</div>
+        </div>
+      </div>
+    `;
+  });
+}
 
-                let awayRunsEst = ((parseFloat(homeTeam.pitcher.siera) * 0.65) + (((parseFloat(homeTeam.teamEra) * 0.5) + (parseFloat(homeTeam.teamWhip) * 3.0)) / 2 * 0.35)) * (awayTeam.teamWrcPlus / 100) * pf * calibracionMLB;
-                let homeRunsEst = ((parseFloat(awayTeam.pitcher.siera) * 0.65) + (((parseFloat(awayTeam.teamEra) * 0.5) + (parseFloat(awayTeam.teamWhip) * 3.0)) / 2 * 0.35)) * (homeTeam.teamWrcPlus / 100) * pf * calibracionMLB;
-                let totalRuns = awayRunsEst + homeRunsEst;
+function resetQuantEngine() {
+  document.getElementById("resScore").innerText = "0 - 0";
+  document.getElementById("resSpread").innerText = "Proy Spread: 0";
+  document.getElementById("resWinProb").innerText = "0%";
+  document.getElementById("resFav").innerText = "Favorito: -";
+  document.getElementById("resCoverProb").innerText = "0%";
+  document.getElementById("resCoverPick").innerText = "Pick: -";
+  document.getElementById("resPace").innerText = "0.0";
+  document.getElementById("resTotal").innerText = "0.0";
+  document.getElementById("resTotalEdge").innerText = "Vegas Total: S/D";
+  document.getElementById("qualitativeText").innerHTML = "Selecciona un partido para que el algoritmo desglose estructuralmente las métricas.";
+  document.getElementById("propsTableBody").innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 15px;">No hay matchups individuales disponibles</td></tr>`;
+  [document.getElementById("factorCanvas"), document.getElementById("simCanvas")].forEach(c => c && c.getContext("2d").clearRect(0,0,c.width,c.height));
+}
 
-                let umbralAlta = 8.8 * pf;
-                let umbralBaja = 7.8 * pf;
+function loadGameFromSlate() {
+  const slateKey = document.getElementById("gameSlateSelect").value;
+  if (!slateKey) { resetQuantEngine(); return; }
 
-                let lineaOUMsg = totalRuns >= umbralAlta ? `<span class="insight-highlight">ALTA (OVER) PROBABLE</span>: Proyección de ~${totalRuns.toFixed(1)} carreras.` : (totalRuns <= umbralBaja ? `<span class="insight-highlight" style="color:#0284c7; background:#e0f2fe;">BAJA (UNDER) PROBABLE</span>: Proyección de ~${totalRuns.toFixed(1)} carreras.` : `LÍNEA CERRADA: Proyección de ~${totalRuns.toFixed(1)} carreras.`);
+  document.querySelectorAll('.game-card').forEach(c => c.classList.remove('active-card'));
+  const activeCard = document.getElementById(`card_${slateKey}`);
+  if (activeCard) activeCard.classList.add('active-card');
 
-                let diffF5 = (parseFloat(awayTeam.pitcher.siera) - parseFloat(homeTeam.pitcher.siera)) + ((homeTeam.teamWrcPlus - awayTeam.teamWrcPlus) / 40);
-                let f5Msg = diffF5 > 0.65 ? `<span class="insight-highlight insight-green">VENTAJA ${homeTeam.name.toUpperCase()} (F5)</span>` : (diffF5 < -0.65 ? `<span class="insight-highlight insight-green">VENTAJA ${awayTeam.name.toUpperCase()} (F5)</span>` : `DUELO CERRADO (F5)`);
+  const gameInfo = currentDailyGames.find(g => g.slateKey === slateKey);
+  const awayName = gameInfo ? gameInfo.away : slateKey.split("_")[0];
+  const homeName = gameInfo ? gameInfo.home : slateKey.split("_")[1];
 
-                let sL_H = evaluarSIERA(homeTeam.pitcher.siera), sL_A = evaluarSIERA(awayTeam.pitcher.siera);
-                let xL_H = evaluarxFIP(homeTeam.pitcher.xFip), xL_A = evaluarxFIP(awayTeam.pitcher.xFip);
-                let wL_H = evaluarWRC(homeTeam.teamWrcPlus), wL_A = evaluarWRC(awayTeam.teamWrcPlus);
+  document.getElementById("awayDisplay").value = awayName;
+  document.getElementById("homeDisplay").value = homeName;
+  
+  runQuantEngine();
+}
 
-                let partidoSeleccionado = cachePartidos.find(game => game.gamePk === currentGamePk);
-                let venueName = partidoSeleccionado ? partidoSeleccionado.venue : "su estadio";
-                
-                let knownParks = {
-                    "Coors Field": "la baja densidad del aire que dispara el vuelo de la bola",
-                    "Yankee Stadium": "el corto 'porch' del jardín derecho favorable al cuadrangular",
-                    "Fenway Park": "la imponente barrera del 'Monstruo Verde'",
-                    "Great American Ball Park": "las cortas distancias que facilitan el batazo largo",
-                    "Petco Park": "las amplias dimensiones protectoras para los lanzadores",
-                    "T-Mobile Park": "el aire pesado de Seattle que suprime los extrabases",
-                    "Oracle Park": "las desafiantes corrientes marinas de la bahía",
-                    "Dodger Stadium": "la densa brisa nocturna característica de California",
-                    "Wrigley Field": "los patrones de viento impredecibles de su estructura"
-                };
-                let parkDesc = knownParks[venueName] || `las dimensiones de ${venueName}`;
+function runQuantEngine() {
+  const slateKey = document.getElementById("gameSlateSelect").value;
+  if (!slateKey) return;
 
-                let templatesPitcheo = [
-                    `<strong>Control de Contacto y Dominio (xwOBA / SIERA):</strong> El abridor de ${homeTeam.name} (${homeTeam.pitcher.nombre}) presenta un <b>xwOBA en contra de ${homeTeam.pitcher.xwoba}</b> con SIERA de <b>${homeTeam.pitcher.siera} (${sL_H})</b> y K-BB% de <b>${homeTeam.pitcher.kMinusBb}%</b>. Del otro lado, ${awayTeam.pitcher.nombre} de ${awayTeam.name} opera con un <b>xwOBA de ${awayTeam.pitcher.xwoba}</b> y SIERA de <b>${awayTeam.pitcher.siera} (${sL_A})</b>.`,
-                    
-                    `<strong>Auditoría Monticular Avanzada:</strong> ${homeTeam.pitcher.nombre} (${homeTeam.name}) sube a la loma con un <b>xwOBA en contra de ${homeTeam.pitcher.xwoba}</b> y FIP de <b>${homeTeam.pitcher.fip}</b>. Enfrente, ${awayTeam.pitcher.nombre} de ${awayTeam.name} responde con un <b>xwOBA de ${awayTeam.pitcher.xwoba}</b> y SIERA de <b>${awayTeam.pitcher.siera} (${sL_A})</b>.`
-                ];
-                let templatesOfensiva = [
-                    `<strong>Calidad Ofensiva y Statcast:</strong> La ofensiva de ${homeTeam.name} registra un wRC+ de <b>${homeTeam.teamWrcPlus} (${wL_H})</b> con un <b>xwOBA ofensivo de ${homeTeam.teamXwoba}</b> y un <b>Barrel % de ${homeTeam.teamBarrelPct}</b>. Se mide al pitcheo de ${awayTeam.name}, que contrasta con un wRC+ de <b>${awayTeam.teamWrcPlus} (${wL_A})</b>.`,
-                    
-                    `<strong>Poder Estructural Ofensivo:</strong> La artillería de ${homeTeam.name} muestra un wRC+ de <b>${homeTeam.teamWrcPlus} (${wL_H})</b> respaldado por un <b>Hard Hit % de ${homeTeam.teamHardHitPct}</b>. En tanto, ${awayTeam.name} presenta un wRC+ global de <b>${awayTeam.teamWrcPlus} (${wL_A})</b>.`
-                ];
+  const gameInfo = currentDailyGames.find(g => g.slateKey === slateKey);
+  if (!gameInfo) return;
 
-                let tP = templatesPitcheo[Math.floor(Math.random() * templatesPitcheo.length)] + "<br><br>";
-                let tO = templatesOfensiva[Math.floor(Math.random() * templatesOfensiva.length)] + "<br><br>";
-                let tC = `<strong>Validación:</strong> La conjunción de métricas ofensivas (xwOBA y Barrel %) y defensivas (SIERA, FIP, xwOBA en contra), con el peso ajustado 65/35 entre abridor y relevo, estructuran este pronóstico para el duelo en ${venueName} bajo ${parkDesc}.`;
+  const awayCode = gameInfo.awayCode;
+  const homeCode = gameInfo.homeCode;
+  
+  const away = DB[awayCode] || { pace: 100, ortg: 114, drtg: 114, efg: 54, tov: 13, orb: 27, ftr: 22, par3: 0.38, altitude: false, starImpact: 5 };
+  const home = DB[homeCode] || { pace: 100, ortg: 114, drtg: 114, efg: 54, tov: 13, orb: 27, ftr: 22, par3: 0.38, altitude: false, starImpact: 5 };
 
-                veredictoDiv.style.display = "block";
-                veredictoDiv.innerHTML = `
-                    <div class="veredicto-titulo">
-                        <span>🏆 Matchup Pro Analytics Center</span>
-                        <span style="color: #ffffff; background: linear-gradient(135deg, #06b6d4, #3b82f6); padding: 8px 18px; border-radius: 8px; font-weight: 900; box-shadow: 0 4px 10px rgba(6, 182, 212, 0.3);">${gInitial.name} (${Math.max(probs.probHome, probs.probAway).toFixed(1)}%)</span>
-                    </div>
-                    <div class="explicacion-humana">
-                        ${tP + tO + tC}
-                        <div class="insight-grid">
-                            <div class="insight-box runs"><div class="insight-title">📈 Proyección (O/U)</div><div class="insight-data">${lineaOUMsg}</div></div>
-                            <div class="insight-box f5"><div class="insight-title">⏱️ Dominio (F5)</div><div class="insight-data">${f5Msg}</div></div>
-                        </div>
-                    </div>
-                `;
+  const awayRest = parseInt(document.getElementById("awayRest").value);
+  const homeRest = parseInt(document.getElementById("homeRest").value);
+  let awayRestOrtgAdj = awayRest === 0 ? -2.3 : (awayRest === 2 ? 0.8 : 0.0);
+  let homeRestOrtgAdj = homeRest === 0 ? -2.3 : (homeRest === 2 ? 0.8 : 0.0);
 
-                contenedor.innerHTML = `${crearTarjetaMatchup(awayTeam, "Visitante", probs.probAway.toFixed(1)+"%", homeTeam, 'badge-prob-away')}${crearTarjetaMatchup(homeTeam, "Local", probs.probHome.toFixed(1)+"%", awayTeam, 'badge-prob-home')}`;
-                
-                await generarMatchupsIndividuales(awayTeam, homeTeam);
+  const awayStarIn = document.getElementById("awayStarStatus").value === "IN";
+  const homeStarIn = document.getElementById("homeStarStatus").value === "IN";
+  let awayStarAdj = awayStarIn ? 0 : -away.starImpact;
+  let homeStarAdj = homeStarIn ? 0 : -home.starImpact;
 
-                estado.innerHTML = "✅ Módulo de Big Data sincronizado. Auditoría completada con filtros de IP para lanzadores.";
-            } catch (e) { estado.innerHTML = "❌ Error al cruzar la data analítica."; }
-        }
+  let homeCourtBonus = home.altitude ? 3.5 : 2.2;
+  let expPace = clamp((away.pace * home.pace) / LEAGUE_PACE, 94.0, 106.0);
+  if (awayRest === 0 || homeRest === 0) expPace -= 1.2;
 
-        function crearTarjetaMatchup(t, rol, prob, o, idBadge, isTbd = false) {
-            let pi = t.pitcher, oi = o.pitcher;
-            let winSiera = parseFloat(pi.siera) < parseFloat(oi.siera) ? 'color: #38bdf8;' : 'color: #94a3b8; font-weight: 500; font-size: 14px;';
-            let winWrc = parseInt(t.teamWrcPlus) > parseInt(o.teamWrcPlus) ? 'color: #ffffff;' : 'color: #fdf4ff; font-weight: 500; font-size: 15px;';
-            let sLabel = evaluarSIERA(pi.siera), xfLabel = evaluarxFIP(pi.xFip), wrcLabel = evaluarWRC(t.teamWrcPlus);
-            
-            let tbdClass = isTbd ? " tbd-card" : "";
+  let rawAwayOrtg = ((away.ortg + awayRestOrtgAdj + awayStarAdj) * home.drtg) / LEAGUE_ORTG;
+  let rawHomeOrtg = (((home.ortg + homeRestOrtgAdj + homeStarAdj) * away.drtg) / LEAGUE_ORTG) + homeCourtBonus;
 
-            return `
-                <div class="matchup-card${tbdClass}">
-                    <div class="matchup-header">
-                        <div>
-                            <div style="font-size: 11px; color: #64748b; font-weight: 800; text-transform: uppercase;">${rol}</div>
-                            <div class="team-title">${t.name} <span class="team-record-badge">(${t.wins}-${t.losses})</span></div>
-                            <div style="font-size: 11.5px; color: #64748b; font-weight: 700; margin-top: 3px; letter-spacing: 0.5px;">CASA: ${t.homeRecord} | GIRA: ${t.awayRecord}</div>
-                        </div>
-                        <div id="${idBadge}" class="prob-badge">${prob}</div>
-                    </div>
-                    
-                    <div class="seccion-tabla-titulo" style="margin-top:0;">Producción Ofensiva & Statcast <span class="fuente-tag">FanGraphs / Savant</span></div>
-                    <div class="wrc-ofensiva-box">
-                        <span>🚀 <b>wRC+ / xwOBA:</b></span><span style="${winWrc} font-weight: 900; font-size: 15px;">${t.teamWrcPlus} / ${t.teamXwoba} <small style="font-size:10px; font-weight:400;">(${wrcLabel})</small></span>
-                    </div>
+  let rawAwayPts = (rawAwayOrtg * expPace) / 100;
+  let rawHomePts = (rawHomeOrtg * expPace) / 100;
 
-                    <table class="stats-table biomecanica-table" style="margin-bottom:10px;">
-                        <tr><td class="val-label" style="padding-left:12px;">Barrel % / Hard Hit %</td><td class="val-home-away" style="padding-right:12px; color:#8b5cf6;">${t.teamBarrelPct} / ${t.teamHardHitPct}</td></tr>
-                        <tr><td class="val-label" style="padding-left:12px;">Exit Velocity Colectiva</td><td class="val-home-away" style="padding-right:12px;">${t.teamExitVelo}</td></tr>
-                    </table>
+  let isRealLine = hasRealVegasLine(gameInfo.vegasSpread);
+  let vegasHomeSpread = parseVegasHomeSpread(gameInfo.vegasSpread, gameInfo.homeCode, gameInfo.home, rawAwayPts - rawHomePts);
 
-                    <div class="seccion-tabla-titulo">Proyección Monticular Avanzada <span class="fuente-tag">FanGraphs & Statcast</span></div>
-                    <div class="siera-pitching-box">
-                        <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 2px;">
-                            <span style="font-size: 12px; color: #bae6fd; font-weight: 800;">⚾ ${pi.nombre}</span>
-                            <span>🎯 <b>xwOBA / SIERA / xFIP:</b></span>
-                        </div>
-                        <span style="${winSiera} font-weight: 900; font-size: 14px; text-align: right;">${pi.xwoba} / ${pi.siera} / ${pi.xFip} <br><small style="font-size:10px; font-weight:400; color:#94a3b8;">(${sLabel} / ${xfLabel})</small></span>
-                    </div>
+  let awayPts = rawAwayPts;
+  let homePts = rawHomePts;
+  if (isRealLine) {
+    let vegasImpliedDiff = -vegasHomeSpread;
+    let rawDiff = rawHomePts - rawAwayPts;
+    let blendedDiff = (rawDiff * 0.65) + (vegasImpliedDiff * 0.35);
+    let totalPts = rawAwayPts + rawHomePts;
+    homePts = (totalPts + blendedDiff) / 2;
+    awayPts = (totalPts - blendedDiff) / 2;
+  }
+  
+  let favCode = homePts >= awayPts ? homeCode : awayCode;
+  let spread = -Math.abs(homePts - awayPts);
+  let total = awayPts + homePts;
+  
+  let expPyth = 10.5;
+  let homeWinProb = Math.pow(homePts, expPyth) / (Math.pow(homePts, expPyth) + Math.pow(awayPts, expPyth));
+  let rawFavProb = homePts >= awayPts ? homeWinProb : (1 - homeWinProb);
+  let favProb = clamp(rawFavProb, 0.501, 0.920) * 100;
 
-                    <div class="seccion-tabla-titulo">Radar Biomecánico & Control <span class="fuente-tag">Statcast</span></div>
-                    <table class="stats-table biomecanica-table">
-                        <tr><td class="val-label" style="padding-left:12px;">Primary Pitch</td><td class="val-home-away" style="padding-right:12px;">${pi.arsenal.tipo}</td></tr>
-                        <tr><td class="val-label" style="padding-left:12px;">FIP / K-BB%</td><td class="val-home-away" style="padding-right:12px;">${pi.fip} / ${pi.kMinusBb}%</td></tr>
-                        <tr><td class="val-label" style="padding-left:12px;">Whiff % (Abanicados)</td><td class="val-home-away" style="padding-right:12px; color:#10b981;">${pi.arsenal.whiff}</td></tr>
-                    </table>
+  let covers = drawMonteCarlo(awayPts, homePts, (away.par3 + home.par3) / 2, vegasHomeSpread);
 
-                    <div class="seccion-tabla-titulo">Oficial y Staff de Relevo <span class="fuente-tag">MLB Base</span></div>
-                    <table class="stats-table">
-                        <tr><td class="val-label">Pitcher Abridor</td><td class="val-home-away" style="color: #0ea5e9;">${pi.nombre}</td></tr>
-                        <tr><td class="val-label">Bullpen (ERA / WHIP)</td><td class="val-home-away">${t.teamEra} / ${t.teamWhip}</td></tr>
-                    </table>
-                </div>`;
-        }
+  document.getElementById("resScore").innerText = `${awayPts.toFixed(1)} - ${homePts.toFixed(1)}`;
+  document.getElementById("resSpread").innerText = `Proy: ${favCode} ${spread.toFixed(1)}`;
+  document.getElementById("resWinProb").innerText = `${favProb.toFixed(1)}%`;
+  document.getElementById("resFav").innerText = `Fav: ${favCode}`;
+  
+  if (covers.homeCover >= covers.awayCover) {
+      document.getElementById("resCoverProb").innerText = `${covers.homeCover.toFixed(1)}%`;
+      document.getElementById("resCoverPick").innerText = `Pick: ${gameInfo.homeCode} ${vegasHomeSpread > 0 ? '+'+vegasHomeSpread.toFixed(1) : vegasHomeSpread.toFixed(1)}`;
+  } else {
+      document.getElementById("resCoverProb").innerText = `${covers.awayCover.toFixed(1)}%`;
+      let awayLine = -vegasHomeSpread;
+      document.getElementById("resCoverPick").innerText = `Pick: ${gameInfo.awayCode} ${awayLine > 0 ? '+'+awayLine.toFixed(1) : awayLine.toFixed(1)}`;
+  }
 
-        async function generarMatchupsIndividuales(awayTeam, homeTeam) {
-            let contenedorProps = document.getElementById('props-individuales');
-            contenedorProps.style.display = "block";
-            
-            let pitcherHome = homeTeam.pitcher;
-            let pitcherAway = awayTeam.pitcher;
+  document.getElementById("resPace").innerText = expPace.toFixed(1);
+  document.getElementById("resTotal").innerText = total.toFixed(1);
+  document.getElementById("resTotalEdge").innerText = `Vegas Total: ${gameInfo.vegasTotal}`;
 
-            let k9H = parseFloat(pitcherHome.k9);
-            let whiffH = parseFloat(pitcherHome.arsenal.whiff);
-            let ipH = parseFloat(pitcherHome.ip);
-            let kPropHome = "Línea Ajustada (5.5 Ks)";
-            
-            if (ipH < 25.0) {
-                kPropHome = "🧊 Evitar (Opener / Relevista)";
-            } else if (k9H >= 8.8 || (k9H >= 8.2 && whiffH >= 42.0)) {
-                kPropHome = "🔥 Alta (Over 6.5 Ks)";
-            } else if (k9H <= 7.5 || (k9H <= 7.9 && whiffH <= 38.0)) {
-                kPropHome = "🧊 Baja (Under 4.5 Ks)";
-            }
+  let favTeamName = homePts >= awayPts ? gameInfo.home : gameInfo.away;
+  let bestCoverPct = Math.max(covers.homeCover, covers.awayCover);
+  let bestCoverTeamName = covers.homeCover >= covers.awayCover ? gameInfo.home : gameInfo.home;
 
-            let k9A = parseFloat(pitcherAway.k9);
-            let whiffA = parseFloat(pitcherAway.arsenal.whiff);
-            let ipA = parseFloat(pitcherAway.ip);
-            let kPropAway = "Línea Ajustada (5.5 Ks)";
+  let paceContext = expPace > 101 ? "un ritmo vertiginoso de alta posesión" : "un trámite de posesiones controladas y pulso táctico";
+  let explanation = `<strong>Análisis Estructural de Matchup:</strong><br>`;
+  explanation += `En <strong>Moneyline (Victoria Directa)</strong>, el modelo proyecta el triunfo de <span class="highlight-text">${favTeamName}</span> con un <strong>${favProb.toFixed(1)}%</strong> de probabilidad real, estableciendo un spread cuantitativo de <strong>${favCode} ${spread.toFixed(1)} pts</strong>.<br><br>`;
+  
+  if (homePts >= awayPts) {
+      explanation += `El análisis táctico de los Factores de Dean Oliver favorece al anfitrión gracias a su superioridad en la eficiencia efectiva de tiro (<strong>eFG%</strong>) y un menor índice de pérdidas no forzadas en la media cancha. La proyección indica un ritmo de <strong>${expPace.toFixed(1)}</strong> posesiones, propiciando ${paceContext}, lo que maximiza la ventaja natural de la localía y la protección del aro.`;
+  } else {
+      explanation += `A pesar de la localía rival, la visita posee una ventaja estructural clave en el cuádruple factor: mayor conversión desde el perímetro (<strong>3PAr</strong>) y mejor tasa de captura de rebotes ofensivos (<strong>ORB%</strong>). El pulso del juego a <strong>${expPace.toFixed(1)}</strong> posesiones forzará un intercambio dinámico donde ${favTeamName} castigará con mayor eficacia las rotaciones defensivas tardías.`;
+  }
 
-            if (ipA < 25.0) {
-                kPropAway = "🧊 Evitar (Opener / Relevista)";
-            } else if (k9A >= 8.8 || (k9A >= 8.2 && whiffA >= 42.0)) {
-                kPropAway = "🔥 Alta (Over 6.5 Ks)";
-            } else if (k9A <= 7.5 || (k9A <= 7.9 && whiffA <= 38.0)) {
-                kPropAway = "🧊 Baja (Under 4.5 Ks)";
-            }
+  if (isRealLine) {
+      explanation += `<br><br>🎯 <strong>Perspectiva Contra el Spread (ATS):</strong> Las Vegas fijó la línea en <strong>${gameInfo.vegasSpread}</strong>. `;
+      if (Math.abs((homePts - awayPts) + vegasHomeSpread) > 3.0) {
+          explanation += `El mercado muestra aquí una ineficiencia notable. La simulación estocástica de Monte Carlo señala que <span class="clutch-text">${bestCoverTeamName}</span> cuenta con un respaldo del <span class="win-text">${bestCoverPct.toFixed(1)}%</span> para cubrir el hándicap. El argumento principal radica en que la línea actual subestima el impacto del descanso reciente y la flaqueza defensiva del oponente en la pintura.`;
+      } else {
+          explanation += `La línea se encuentra operando en zona de alta eficiencia del mercado. Sin embargo, el modelo estima que <span class="highlight-text">${bestCoverTeamName}</span> posee los recursos tácticos necesarios para gestionar el margen, otorgándole un <span class="win-text">${bestCoverPct.toFixed(1)}%</span> de probabilidad de éxito bajo simulación de varianza.`;
+      }
+  } else {
+      explanation += `<br><br><em>Nota de Mercado:</em> Al no registrarse una línea oficial de cierre activa en este bloque, la proyección ATS opera sobre el hándicap sintético de referencia del motor.`;
+  }
 
-            let wrcH = parseInt(homeTeam.teamWrcPlus);
-            let sieraA = parseFloat(pitcherAway.siera);
-            let hitPropHome = (wrcH >= 104 && sieraA >= 2.95) 
-                ? "🔥 Alta Prob. (+1.5 Bases)" 
-                : ((wrcH < 98 || sieraA <= 2.60) 
-                    ? "🧊 Evitar / Baja (Duelo Difícil)" 
-                    : "⚖️ Línea Ajustada (+0.5 Hits)");
-            
-            let wrcA = parseInt(awayTeam.teamWrcPlus);
-            let sieraH = parseFloat(pitcherHome.siera);
-            let hitPropAway = (wrcA >= 104 && sieraH >= 2.95) 
-                ? "🔥 Alta Prob. (+1.5 Bases)" 
-                : ((wrcA < 98 || sieraH <= 2.60) 
-                    ? "🧊 Evitar / Baja (Duelo Difícil)" 
-                    : "⚖️ Línea Ajustada (+0.5 Hits)");
+  document.getElementById("qualitativeText").innerHTML = explanation;
 
-            let bvpHomeVsAwayP = await obtenerMejorBateadorVsPitcher(homeTeam.id, homeTeam.name, awayTeam.pitcher);
-            let bvpAwayVsHomeP = await obtenerMejorBateadorVsPitcher(awayTeam.id, awayTeam.name, homeTeam.pitcher);
+  renderIntelligentProps(gameInfo, Math.abs(spread), expPace, away, home, awayRest, homeRest);
+  drawRadar(away, home);
+}
 
-            contenedorProps.innerHTML = `
-                <div class="props-titulo">🎯 Radar de Props: Matchups Individuales Avanzados</div>
-                <div class="props-grid">
-                    
-                    <div class="prop-card pitcher">
-                        <div class="prop-header">
-                            <span class="prop-name">${pitcherHome.nombre}</span>
-                            <span class="prop-tag">🔥 K-PROP (Ponches)</span>
-                        </div>
-                        <div class="prop-metric"><span>Tasa de Ponches (K/9)</span> <b>${pitcherHome.k9}</b></div>
-                        <div class="prop-metric"><span>Innings Lanzados (IP)</span> <b>${pitcherHome.ip}</b></div>
-                        <div class="prop-metric"><span>xwOBA / SIERA</span> <b>${pitcherHome.xwoba} / ${pitcherHome.siera}</b></div>
-                        <div class="prop-verdict">✔️ Proyección de Ponches: ${kPropHome}</div>
-                    </div>
+function renderIntelligentProps(gameInfo, spreadAbs, expPace, away, home, awayRest, homeRest) {
+  const tbody = document.getElementById("propsTableBody");
+  tbody.innerHTML = "";
+  const ldr = gameInfo.leaders;
+  
+  const isBlowout = spreadAbs >= 12.0;
+  const blowoutDiscount = isBlowout ? 0.88 : 1.0;
+  const paceFactor = expPace / LEAGUE_PACE;
 
-                    <div class="prop-card pitcher">
-                        <div class="prop-header">
-                            <span class="prop-name">${pitcherAway.nombre}</span>
-                            <span class="prop-tag">🔥 K-PROP (Ponches)</span>
-                        </div>
-                        <div class="prop-metric"><span>Tasa de Ponches (K/9)</span> <b>${pitcherAway.k9}</b></div>
-                        <div class="prop-metric"><span>Innings Lanzados (IP)</span> <b>${pitcherAway.ip}</b></div>
-                        <div class="prop-metric"><span>xwOBA / SIERA</span> <b>${pitcherAway.xwoba} / ${pitcherAway.siera}</b></div>
-                        <div class="prop-verdict">✔️ Proyección de Ponches: ${kPropAway}</div>
-                    </div>
+  let allBets = [];
 
-                    <div class="prop-card">
-                        <div class="prop-header">
-                            <span class="prop-name">${homeTeam.mejorBateador}</span>
-                            <span class="prop-tag">🚀 HIT-PROP (Bases)</span>
-                        </div>
-                        <div class="prop-metric"><span>wRC+ / Barrel %</span> <b>${homeTeam.teamWrcPlus} / ${homeTeam.teamBarrelPct}</b></div>
-                        <div class="prop-metric"><span>xwOBA Ofensivo</span> <b>${homeTeam.teamXwoba}</b></div>
-                        <div class="prop-metric"><span>Matchup vs SIERA ${pitcherAway.siera}</span> <b>${parseFloat(homeTeam.teamWoba) > 0.320 && sieraA >= 2.95 ? 'Favorable' : 'Riesgoso'}</b></div>
-                        <div class="prop-verdict"> ${hitPropHome}</div>
-                    </div>
+  function generateBets(playerData, teamCode, oppDrtg, restDays) {
+    const oppDefFactor = oppDrtg / LEAGUE_ORTG;
+    const restDiscount = restDays === 0 ? 0.95 : (restDays === 2 ? 1.02 : 1.0);
 
-                    <div class="prop-card">
-                        <div class="prop-header">
-                            <span class="prop-name">${awayTeam.mejorBateador}</span>
-                            <span class="prop-tag">🚀 HIT-PROP (Bases)</span>
-                        </div>
-                        <div class="prop-metric"><span>wRC+ / Barrel %</span> <b>${awayTeam.teamWrcPlus} / ${awayTeam.teamBarrelPct}</b></div>
-                        <div class="prop-metric"><span>xwOBA Ofensivo</span> <b>${awayTeam.teamXwoba}</b></div>
-                        <div class="prop-metric"><span>Matchup vs SIERA ${pitcherHome.siera}</span> <b>${parseFloat(awayTeam.teamWoba) > 0.320 && sieraH >= 2.95 ? 'Favorable' : 'Riesgoso'}</b></div>
-                        <div class="prop-verdict"> ${hitPropAway}</div>
-                    </div>
+    let projPts = playerData.pts * paceFactor * oppDefFactor * restDiscount * blowoutDiscount;
+    let projAst = playerData.ast * paceFactor * oppDefFactor * restDiscount * blowoutDiscount;
+    let projReb = playerData.reb * paceFactor * restDiscount * blowoutDiscount; 
+    let praAvg = playerData.pts + playerData.reb + playerData.ast;
+    let projPRA = projPts + projReb + projAst;
 
-                    <div class="prop-card bvp-matchup">
-                        <div class="prop-header">
-                            <span class="prop-name">${bvpHomeVsAwayP.nombre} (${homeTeam.name.split(' ').pop()})</span>
-                            <span class="prop-tag bvp">🎯 BvP MATCHUP</span>
-                        </div>
-                        <div class="prop-metric"><span>Rival Monticular</span> <b>vs ${bvpHomeVsAwayP.pitcherFrente}</b></div>
-                        <div class="prop-metric"><span>wOBA frente a este lanzador</span> <b style="color: #16a34a; font-size:15px;">${bvpHomeVsAwayP.wobaVs}</b></div>
-                        <div class="prop-metric"><span>Tipo de Muestra</span> <b>${bvpHomeVsAwayP.detalle}</b></div>
-                        <div class="prop-verdict">${bvpHomeVsAwayP.veredicto}</div>
-                    </div>
+    let markets = [
+      { cat: "Puntos", name: "Puntos", avg: playerData.pts, proj: projPts, line: Math.floor(playerData.pts) + 0.5 },
+      { cat: "Asistencias", name: "Asistencias", avg: playerData.ast, proj: projAst, line: Math.floor(playerData.ast) + 0.5 },
+      { cat: "Rebotes", name: "Rebotes", avg: playerData.reb, proj: projReb, line: Math.floor(playerData.reb) + 0.5 },
+      { cat: "PRA", name: "PRA (Pts+Reb+Ast)", avg: praAvg, proj: projPRA, line: Math.floor(praAvg) + 0.5 }
+    ];
 
-                    <div class="prop-card bvp-matchup">
-                        <div class="prop-header">
-                            <span class="prop-name">${bvpAwayVsHomeP.nombre} (${awayTeam.name.split(' ').pop()})</span>
-                            <span class="prop-tag bvp">🎯 BvP MATCHUP</span>
-                        </div>
-                        <div class="prop-metric"><span>Rival Monticular</span> <b>vs ${bvpAwayVsHomeP.pitcherFrente}</b></div>
-                        <div class="prop-metric"><span>wOBA frente a este lanzador</span> <b style="color: #16a34a; font-size:15px;">${bvpAwayVsHomeP.wobaVs}</b></div>
-                        <div class="prop-metric"><span>Tipo de Muestra</span> <b>${bvpAwayVsHomeP.detalle}</b></div>
-                        <div class="prop-verdict">${bvpAwayVsHomeP.veredicto}</div>
-                    </div>
+    markets.forEach(m => {
+      let isOver = m.proj >= m.line;
+      let rawDiff = Math.abs(m.proj - m.line);
+      let edgePercent = clamp((rawDiff / m.line) * 100, 1.2, 24.5);
+      let stabilityFactor = m.cat === "PRA" ? 1.15 : 1.0; 
+      
+      allBets.push({
+        player: playerData.name,
+        teamCode: teamCode,
+        category: m.cat,
+        marketName: m.name,
+        avg: m.avg,
+        line: m.line,
+        proj: m.proj,
+        pick: isOver ? "OVER" : "UNDER",
+        internalScore: edgePercent * stabilityFactor, 
+        edge: edgePercent 
+      });
+    });
+  }
 
-                </div>
-            `;
-        }
-    </script>
+  generateBets(ldr.away, gameInfo.awayCode, home.drtg, awayRest);
+  generateBets(ldr.home, gameInfo.homeCode, away.drtg, homeRest);
+
+  let finalPicks = [];
+  const categories = [
+    { key: "PRA", label: "🏆 Mejor Jugada PRA" },
+    { key: "Puntos", label: "🔥 Mejor en Puntos" },
+    { key: "Rebotes", label: "🏀 Mejor en Rebotes" },
+    { key: "Asistencias", label: "🎯 Mejor en Asist." }
+  ];
+
+  categories.forEach(c => {
+    let betsInCat = allBets.filter(b => b.category === c.key);
+    betsInCat.sort((a, b) => b.internalScore - a.internalScore); 
+    if(betsInCat.length > 0) {
+      let best = betsInCat[0];
+      best.displayCategory = c.label;
+      finalPicks.push(best);
+    }
+  });
+
+  finalPicks.forEach(p => {
+    let tr = document.createElement("tr");
+    tr.className = "row-highlight";
+    let pickClass = p.pick === "OVER" ? "badge-pick" : "badge-under";
+    
+    tr.innerHTML = `
+      <td style="font-weight: 800; color: #0284c7;">${p.displayCategory}</td>
+      <td><strong>${p.player}</strong> <span class="player-team-tag">${p.teamCode}</span></td>
+      <td>${p.avg.toFixed(1)}</td>
+      <td><span style="color: #94a3b8; font-weight: 700;">${p.line}</span></td>
+      <td><strong style="color: #fff; font-size: 1.05em;">${p.proj.toFixed(1)}</strong></td>
+      <td><span class="${pickClass}">${p.pick} ${p.line}</span></td>
+      <td><span class="badge-edge">+${p.edge.toFixed(1)}% Edge</span></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function drawMonteCarlo(awayPts, homePts, avg3PAr, vegasHomeSpread) {
+  const canvas = document.getElementById("simCanvas");
+  const ctx = canvas.getContext("2d");
+  const w = canvas.width = canvas.parentElement.clientWidth;
+  const h = canvas.height = 210;
+  ctx.clearRect(0, 0, w, h);
+
+  const stdDev = 10.5 + (avg3PAr * 7.5);
+  const diffs = [];
+
+  let homeCoverCount = 0;
+  let awayCoverCount = 0;
+
+  for (let i = 0; i < 1000; i++) {
+    let u1 = Math.max(1e-7, Math.random()), u2 = Math.random();
+    let z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+    let sHome = homePts + z0 * stdDev;
+    
+    let u3 = Math.max(1e-7, Math.random()), u4 = Math.random();
+    let z1 = Math.sqrt(-2.0 * Math.log(u3)) * Math.cos(2.0 * Math.PI * u4);
+    let sAway = awayPts + z1 * stdDev;
+
+    let margin = sHome - sAway;
+    diffs.push(margin);
+
+    if (margin + vegasHomeSpread > 0) homeCoverCount++;
+    else if (margin + vegasHomeSpread < 0) awayCoverCount++;
+  }
+
+  const bins = {};
+  for (let i = -30; i <= 30; i += 3) bins[i] = 0;
+  diffs.forEach(d => {
+    let b = Math.round(d / 3) * 3;
+    if (bins[b] !== undefined) bins[b]++;
+  });
+
+  const keys = Object.keys(bins).map(Number).sort((a,b) => a-b);
+  const maxFreq = Math.max(1, ...Object.values(bins));
+  const barWidth = w / keys.length;
+
+  keys.forEach((k, idx) => {
+    const val = bins[k];
+    const barH = (val / maxFreq) * (h - 35);
+    const x = idx * barWidth;
+    const y = h - barH - 18;
+
+    ctx.fillStyle = k > 0 ? "#2563eb" : "#ef4444";
+    ctx.fillRect(x + 1, y, barWidth - 2, barH);
+  });
+
+  ctx.fillStyle = "#94a3b8";
+  ctx.font = "9px sans-serif";
+  ctx.fillText(`Varianza 3PAr: σ = ${stdDev.toFixed(1)}`, 15, 15);
+  ctx.fillText("Ventaja Away (-)", 45, h - 4);
+  ctx.fillText("Ventaja Home (+)", w - 55, h - 4);
+
+  let totalValid = Math.max(1, homeCoverCount + awayCoverCount);
+  let rawHomeCover = (homeCoverCount / totalValid) * 100;
+  let homeCover = clamp(rawHomeCover, 27.5, 72.5);
+  let awayCover = 100.0 - homeCover;
+  
+  return { homeCover, awayCover };
+}
+
+function drawRadar(away, home) {
+  const canvas = document.getElementById("factorCanvas");
+  const ctx = canvas.getContext("2d");
+  const w = canvas.width = canvas.parentElement.clientWidth;
+  const h = canvas.height = 210;
+  ctx.clearRect(0, 0, w, h);
+
+  const cx = w / 2, cy = h / 2, radius = 65;
+  const metrics = ["eFG%", "TOV%", "ORB%", "FTr", "3PAr"];
+  
+  ctx.strokeStyle = "#1e293b";
+  ctx.fillStyle = "#94a3b8";
+  ctx.font = "9px sans-serif";
+  ctx.textAlign = "center";
+
+  for(let r = 20; r <= radius; r += 22) {
+    ctx.beginPath();
+    for(let i = 0; i < 5; i++) {
+      const angle = (i * 2 * Math.PI / 5) - Math.PI / 2;
+      const x = cx + r * Math.cos(angle);
+      const y = cy + r * Math.sin(angle);
+      if(i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    ctx.stroke();
+  }
+
+  for(let i = 0; i < 5; i++) {
+    const angle = (i * 2 * Math.PI / 5) - Math.PI / 2;
+    const x = cx + (radius + 18) * Math.cos(angle);
+    const y = cy + (radius + 18) * Math.sin(angle);
+    ctx.fillText(metrics[i], x, y + 3);
+  }
+
+  function plot(vals, color, fill) {
+    ctx.beginPath();
+    ctx.strokeStyle = color;
+    ctx.fillStyle = fill;
+    ctx.lineWidth = 2;
+    for(let i = 0; i < 5; i++) {
+      const angle = (i * 2 * Math.PI / 5) - Math.PI / 2;
+      const r = (vals[i] / 60) * radius;
+      const x = cx + r * Math.cos(angle);
+      const y = cy + r * Math.sin(angle);
+      if(i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+  }
+
+  plot([away.efg || 54, (away.tov || 13) * 2.5, away.orb || 27, (away.ftr || 22) * 1.5, (away.par3 || 0.38) * 100], "#ef4444", "rgba(239,68,68,0.2)");
+  plot([home.efg || 54, (home.tov || 13) * 2.5, home.orb || 27, (home.ftr || 22) * 1.5, (home.par3 || 0.38) * 100], "#3b82f6", "rgba(59,130,246,0.2)");
+}
+
+async function syncBigData() {
+  const msg = document.getElementById("auditMsg");
+  msg.innerText = "⏳ Inyectando estadísticas dinámicas y procesando IA...";
+  await fetchStandings();
+  const activeInput = document.getElementById("activeDate");
+  await syncSlateByDate(activeInput.value);
+}
+
+window.addEventListener("DOMContentLoaded", async () => {
+  const activeInput = document.getElementById("activeDate");
+  const todayStr = new Date().toISOString().split("T")[0];
+  activeInput.value = todayStr;
+  await fetchStandings();
+  await syncSlateByDate(todayStr);
+  auditSeasonRange("2026-10-20");
+});
+</script>
 </body>
 </html>
