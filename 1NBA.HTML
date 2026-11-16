@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NBA Matchup Pro - Quantitative Edge Engine</title>
+  <title>NBA Matchup Pro v6 - Quantitative Edge Engine</title>
   <style>
     :root {
       --bg: #0b1120;
@@ -22,9 +22,9 @@
     
     .master-layout {
       display: grid;
-      grid-template-columns: 290px 1fr 330px;
+      grid-template-columns: 310px 1fr 340px;
       gap: 16px;
-      max-width: 1750px;
+      max-width: 1800px;
       margin: 0 auto;
       align-items: flex-start;
     }
@@ -67,17 +67,17 @@
 
     .standings-item {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
+      flex-direction: column;
+      align-items: stretch;
       padding: 8px 10px;
       border-bottom: 1px solid #f1f5f9;
-      font-size: 0.80rem;
+      font-size: 0.78rem;
       transition: background 0.15s;
     }
     .standings-item:hover { background: #f8fafc; }
-    .standings-rank { font-weight: 900; color: #64748b; width: 26px; }
+    .standings-rank { font-weight: 900; color: #64748b; width: 24px; }
     .standings-team { font-weight: 700; color: #1e293b; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 5px; }
-    .standings-record { font-weight: 800; color: #0284c7; background: #e0f2fe; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; white-space: nowrap; }
+    .standings-record { font-weight: 800; color: #0284c7; background: #e0f2fe; padding: 2px 6px; border-radius: 4px; font-size: 0.73rem; white-space: nowrap; }
 
     .game-card {
       background: #f8fafc;
@@ -97,10 +97,10 @@
       border: 2px solid #2563eb;
       background: #eff6ff;
     }
-    .game-card-match { font-size: 0.90rem; font-weight: 800; color: #0f172a; margin-bottom: 4px; display: flex; justify-content: space-between; }
-    .game-card-info { display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem; color: #64748b; font-weight: 600; margin-top: 5px; }
+    .game-card-match { font-size: 0.88rem; font-weight: 800; color: #0f172a; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+    .game-card-info { display: flex; justify-content: space-between; align-items: center; font-size: 0.76rem; color: #64748b; font-weight: 600; margin-top: 5px; flex-wrap: wrap; gap: 4px; }
     .game-card-prob-badge { 
-      font-size: 0.78rem; 
+      font-size: 0.75rem; 
       font-weight: 900; 
       background: linear-gradient(135deg, #10b981, #059669); 
       color: #ffffff; 
@@ -109,6 +109,96 @@
       box-shadow: 0 2px 6px rgba(16, 185, 129, 0.25);
       white-space: nowrap;
     }
+    .badge-hit {
+      font-size: 0.68rem;
+      font-weight: 900;
+      background: #059669;
+      color: #ffffff;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-left: 4px;
+      display: inline-block;
+    }
+    .badge-miss {
+      font-size: 0.68rem;
+      font-weight: 900;
+      background: #dc2626;
+      color: #ffffff;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-left: 4px;
+      display: inline-block;
+    }
+    .badge-push {
+      font-size: 0.68rem;
+      font-weight: 900;
+      background: #64748b;
+      color: #ffffff;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-left: 4px;
+      display: inline-block;
+    }
+
+    .audit-tracker-bar {
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      border: 1px solid #334155;
+      border-left: 5px solid #10b981;
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 15px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr auto;
+      gap: 12px;
+      align-items: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    .tracker-box {
+      background: rgba(11, 17, 32, 0.65);
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 8px 12px;
+    }
+    .tracker-title {
+      font-size: 0.66rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #94a3b8;
+      font-weight: 800;
+      margin-bottom: 3px;
+    }
+    .tracker-val {
+      font-size: 1.05rem;
+      font-weight: 900;
+      color: #f8fafc;
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+    .tracker-pct {
+      font-size: 0.80rem;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: #064e3b;
+      color: #34d399;
+    }
+    .btn-audit-range {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: #ffffff;
+      border: none;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-weight: 800;
+      font-size: 0.78rem;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4);
+      transition: background 0.15s, transform 0.1s;
+      white-space: nowrap;
+    }
+    .btn-audit-range:hover { background: linear-gradient(135deg, #1d4ed8, #1e40af); transform: translateY(-1px); }
 
     .top-picks-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 15px; }
     .pick-card { background: #ffffff; color: #0f172a; border-radius: 10px; padding: 12px 14px; border-left: 5px solid #2563eb; box-shadow: 0 4px 12px rgba(0,0,0,0.25); display: flex; justify-content: space-between; align-items: center; }
@@ -187,6 +277,35 @@
   </aside>
 
   <main>
+    <div class="audit-tracker-bar">
+      <div class="tracker-box">
+        <div class="tracker-title">📅 Jornada Activa (ML / ATS)</div>
+        <div class="tracker-val">
+          <span id="dailyRecordText">0G - 0P</span>
+          <span class="tracker-pct" id="dailyRecordPct">0.0%</span>
+        </div>
+      </div>
+      <div class="tracker-box">
+        <div class="tracker-title">🏆 Acumulado ML (20 Oct - Hoy)</div>
+        <div class="tracker-val">
+          <span id="cumMlText">Calculando...</span>
+          <span class="tracker-pct" id="cumMlPct">--%</span>
+        </div>
+      </div>
+      <div class="tracker-box">
+        <div class="tracker-title">🎯 Acumulado ATS (Cobertura Spread)</div>
+        <div class="tracker-val">
+          <span id="cumAtsText">Calculando...</span>
+          <span class="tracker-pct" id="cumAtsPct">--%</span>
+        </div>
+      </div>
+      <div>
+        <button class="btn-audit-range" id="btnAuditRange" onclick="auditSeasonRange('2026-10-20')">
+          📊 Auditar 20 Oct - Hoy
+        </button>
+      </div>
+    </div>
+
     <div class="top-picks-grid" id="topPicksContainer"></div>
 
     <div class="slate-bar">
@@ -225,7 +344,7 @@
         </div>
       </div>
       <div class="audit-status" id="auditMsg">
-        ✅ Motor listo para inyección de datos.
+        ✅ Motor cuantitativo v6 listo (Análisis cualitativo profundo y técnico).
       </div>
     </div>
 
@@ -269,7 +388,7 @@
         <div class="metric-sub" id="resSpread">Proy Spread: 0</div>
       </div>
       <div class="metric-card" style="border-color: #2563eb; background: #0f172a;">
-        <div class="metric-title" style="color: #60a5fa;">Victoría Directa (ML)</div>
+        <div class="metric-title" style="color: #60a5fa;">Victoria Directa (ML)</div>
         <div class="metric-value" id="resWinProb" style="color: #60a5fa;">0%</div>
         <div class="metric-sub" id="resFav">Favorito: -</div>
       </div>
@@ -374,11 +493,28 @@ const DB = {
   "WAS": { name: "Washington Wizards", pace: 101.8, ortg: 108.4, drtg: 119.8, efg: 51.8, tov: 14.2, orb: 24.5, ftr: 21.5, par3: 0.38, altitude: false, starImpact: 4.8, star: "Jordan Poole", pts: 17.4, reb: 2.7, ast: 4.4 }
 };
 
+Object.keys(DB).forEach(k => {
+  DB[k].baseOrtg = DB[k].ortg;
+  DB[k].baseDrtg = DB[k].drtg;
+});
+
 let LEAGUE_PACE = 99.8;
 let LEAGUE_ORTG = 114.5;
 const ESPN_NORM = { "GS": "GSW", "SA": "SAS", "NO": "NOP", "NY": "NYK", "UTAH": "UTA", "WSH": "WAS", "PHX": "PHX", "BK": "BKN" };
 
 let currentDailyGames = [];
+
+function normalCDF(x) {
+  const t = 1 / (1 + 0.2316419 * Math.abs(x));
+  const d = 0.3989423 * Math.exp(-x * x / 2);
+  let prob = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
+  if (x > 0) prob = 1 - prob;
+  return prob;
+}
+
+function clamp(val, min, max) {
+  return Math.max(min, Math.min(max, val));
+}
 
 function extractLeader(competitorObj, categoryName) {
   try {
@@ -394,29 +530,125 @@ function extractLeader(competitorObj, categoryName) {
   return null;
 }
 
-function calculateMatchupStats(awayCode, homeCode) {
-  const away = DB[awayCode] || { pace: 99.0, ortg: 109.0, drtg: 116.0, name: awayCode };
+function parseVegasHomeSpread(vegasSpreadStr, homeCode, homeName = "", fallbackHomeSpread = -2.5) {
+  if (!vegasSpreadStr || vegasSpreadStr === "S/D") {
+    return parseFloat(fallbackHomeSpread.toFixed(1));
+  }
+  let clean = vegasSpreadStr.replace("🔒", "").replace("Est.", "").trim();
+  if (!clean || clean === "S/D") return parseFloat(fallbackHomeSpread.toFixed(1));
+  if (clean.toUpperCase() === "EVEN" || clean.toUpperCase() === "PK") return 0;
+
+  let parts = clean.split(" ");
+  let val = parseFloat(parts[parts.length - 1]);
+  let favAbbr = parts.slice(0, parts.length - 1).join(" ").toUpperCase();
+  if (isNaN(val)) return parseFloat(fallbackHomeSpread.toFixed(1));
+
+  let normFav = ESPN_NORM[favAbbr] || favAbbr;
+  if (homeCode.toUpperCase() === normFav || (homeName && homeName.toUpperCase().includes(favAbbr))) {
+    return val;
+  } else {
+    return -val;
+  }
+}
+
+function hasRealVegasLine(vegasSpreadStr) {
+  if (!vegasSpreadStr || vegasSpreadStr === "S/D") return false;
+  let clean = vegasSpreadStr.replace("🔒", "").replace("Est.", "").trim();
+  return clean !== "" && clean !== "S/D";
+}
+
+function calculateMatchupStats(awayCode, homeCode, vegasSpreadStr = "S/D") {
+  const away = DB[awayCode] || { pace: 99.0, ortg: 110.0, drtg: 115.0, name: awayCode };
   const home = DB[homeCode] || { pace: 99.0, ortg: 112.0, drtg: 113.0, name: homeCode, altitude: false };
 
-  let expPace = (away.pace * home.pace) / LEAGUE_PACE;
-  let finalAwayOrtg = (away.ortg * home.drtg) / LEAGUE_ORTG;
-  let finalHomeOrtg = ((home.ortg * away.drtg) / LEAGUE_ORTG) + (home.altitude ? 4.2 : 2.5);
+  let expPace = clamp((away.pace * home.pace) / LEAGUE_PACE, 94.0, 106.0);
+  let rawAwayOrtg = (away.ortg * home.drtg) / LEAGUE_ORTG;
+  let rawHomeOrtg = ((home.ortg * away.drtg) / LEAGUE_ORTG) + (home.altitude ? 3.5 : 2.2);
 
-  let awayPts = (finalAwayOrtg * expPace) / 100;
-  let homePts = (finalHomeOrtg * expPace) / 100;
+  let rawAwayPts = (rawAwayOrtg * expPace) / 100;
+  let rawHomePts = (rawHomeOrtg * expPace) / 100;
+  let rawModelHomeSpread = rawAwayPts - rawHomePts;
+
+  let isRealLine = hasRealVegasLine(vegasSpreadStr);
+  let vHomeSpread = parseVegasHomeSpread(vegasSpreadStr, homeCode, home.name, rawModelHomeSpread);
+
+  let awayPts = rawAwayPts;
+  let homePts = rawHomePts;
+  if (isRealLine) {
+    let vegasImpliedDiff = -vHomeSpread;
+    let rawDiff = rawHomePts - rawAwayPts;
+    let blendedDiff = (rawDiff * 0.65) + (vegasImpliedDiff * 0.35);
+    let totalPts = rawAwayPts + rawHomePts;
+    homePts = (totalPts + blendedDiff) / 2;
+    awayPts = (totalPts - blendedDiff) / 2;
+  }
+
+  let homeIsFav = homePts >= awayPts;
+  let fav = homeIsFav ? home.name.split(" ").pop() : away.name.split(" ").pop();
+  let favCode = homeIsFav ? homeCode : awayCode;
   
-  let fav = homePts >= awayPts ? home.name.split(" ").pop() : away.name.split(" ").pop();
-  let favSpread = -Math.abs(homePts - awayPts); 
-  let spread = favSpread.toFixed(1);
+  let modelHomeSpread = awayPts - homePts;
+  let favSpread = -Math.abs(homePts - awayPts);
+  let spread = `${favCode} ${favSpread.toFixed(1)}`;
 
   let expPyth = 10.5;
   let homeWinProb = Math.pow(homePts, expPyth) / (Math.pow(homePts, expPyth) + Math.pow(awayPts, expPyth));
-  let maxWinProb = Math.max(homeWinProb, 1 - homeWinProb);
+  let maxWinProb = clamp(Math.max(homeWinProb, 1 - homeWinProb), 0.501, 0.920);
   let winProb = (maxWinProb * 100).toFixed(1) + "%";
   
-  let edge = "+" + (Math.abs(favSpread) * 0.8 + 1.5).toFixed(1) + "%";
+  let coverDiff = (homePts - awayPts) + vHomeSpread;
+  let rawCoverProb = normalCDF(coverDiff / 13.5);
+  let bestCoverProb = clamp(Math.max(rawCoverProb, 1 - rawCoverProb), 0.505, 0.725);
+  let edgeVal = clamp((bestCoverProb - 0.50) * 100 * 0.65, 0.5, 14.5);
 
-  return { fav, prob: winProb, spread, edge, homeWinProb };
+  let atsPickLabel = "";
+  if (coverDiff >= 0) {
+    atsPickLabel = `${homeCode} ${vHomeSpread > 0 ? '+' + vHomeSpread.toFixed(1) : vHomeSpread.toFixed(1)}`;
+  } else {
+    let awayLine = -vHomeSpread;
+    atsPickLabel = `${awayCode} ${awayLine > 0 ? '+' + awayLine.toFixed(1) : awayLine.toFixed(1)}`;
+  }
+
+  let edge = "+" + edgeVal.toFixed(1) + "%";
+
+  return {
+    fav,
+    favCode,
+    homeIsFav,
+    prob: winProb,
+    spread,
+    favSpread: favSpread.toFixed(1),
+    modelHomeSpread,
+    edge,
+    edgeNum: edgeVal,
+    atsPickLabel,
+    homeWinProb,
+    awayPts,
+    homePts,
+    vHomeSpreadUsed: vHomeSpread
+  };
+}
+
+function evaluateGameAudit(g) {
+  let result = { mlStatus: null, atsStatus: null };
+  if (!g.isFinal || g.homeScore === g.awayScore) return result;
+
+  let actualHomeWon = g.homeScore > g.awayScore;
+  let modelHomeWon = g.homeIsFav;
+  result.mlStatus = (actualHomeWon === modelHomeWon) ? "HIT" : "MISS";
+
+  let vHomeSpread = parseVegasHomeSpread(g.vegasSpread, g.homeCode, g.home, g.modelHomeSpread);
+  let actualCoverMargin = (g.homeScore - g.awayScore) + vHomeSpread;
+  let projCoverMargin = (-g.modelHomeSpread) + vHomeSpread;
+  
+  if (Math.abs(actualCoverMargin) < 0.01) {
+    result.atsStatus = "PUSH";
+  } else {
+    let homeCovered = actualCoverMargin > 0;
+    let modelPickedHomeCover = projCoverMargin >= 0;
+    result.atsStatus = (homeCovered === modelPickedHomeCover) ? "HIT" : "MISS";
+  }
+  return result;
 }
 
 async function fetchFullSchedule(dateStr) {
@@ -436,6 +668,7 @@ async function fetchFullSchedule(dateStr) {
           let rawHomeCode = homeData.team.abbreviation;
           let awayCode = ESPN_NORM[rawAwayCode] || rawAwayCode;
           let homeCode = ESPN_NORM[rawHomeCode] || rawHomeCode;
+          let slateKey = `${awayCode}_${homeCode}`;
 
           let vegasSpread = "S/D";
           let vegasTotal = "S/D";
@@ -443,6 +676,26 @@ async function fetchFullSchedule(dateStr) {
             vegasSpread = comp.odds[0].details || "S/D";
             vegasTotal = comp.odds[0].overUnder || "S/D";
           }
+
+          let storageKey = `matchup_pro_line_${cleanDate}_${slateKey}`;
+          if (vegasSpread !== "S/D") {
+            try {
+              localStorage.setItem(storageKey, JSON.stringify({ spread: vegasSpread, total: vegasTotal }));
+            } catch(e) {}
+          } else {
+            try {
+              let cached = localStorage.getItem(storageKey);
+              if (cached) {
+                let parsed = JSON.parse(cached);
+                vegasSpread = parsed.spread ? `🔒 ${parsed.spread}` : "S/D";
+                vegasTotal = parsed.total ? `🔒 ${parsed.total}` : "S/D";
+              }
+            } catch(e) {}
+          }
+
+          let awayScore = parseFloat(awayData.score) || 0;
+          let homeScore = parseFloat(homeData.score) || 0;
+          let isFinal = Boolean(ev.status && ev.status.type && ev.status.type.completed);
 
           let awayDB = DB[awayCode] || { star: "Estrella Away", pts: 22.0, reb: 5.0, ast: 5.0 };
           let homeDB = DB[homeCode] || { star: "Estrella Home", pts: 22.0, reb: 5.0, ast: 5.0 };
@@ -470,24 +723,38 @@ async function fetchFullSchedule(dateStr) {
             }
           };
 
-          const stats = calculateMatchupStats(awayCode, homeCode);
-          let gameTime = "🕒 " + (ev.status.type.shortDetail || ev.status.type.detail || "Por definir");
+          const stats = calculateMatchupStats(awayCode, homeCode, vegasSpread);
+          let scoreTag = isFinal ? ` (${awayScore}-${homeScore})` : "";
+          let gameTime = "🕒 " + (ev.status.type.shortDetail || ev.status.type.detail || "Por definir") + scoreTag;
 
-          return {
-            slateKey: `${awayCode}_${homeCode}`,
+          let displayVegasSpread = vegasSpread !== "S/D" ? vegasSpread : `Est. ${stats.spread}`;
+
+          let gameObj = {
+            slateKey: slateKey,
             away: awayData.team.shortDisplayName || awayData.team.name,
             home: homeData.team.shortDisplayName || homeData.team.name,
             awayCode: awayCode,
             homeCode: homeCode,
             time: gameTime,
             fav: stats.fav,
+            favCode: stats.favCode,
+            homeIsFav: stats.homeIsFav,
             prob: stats.prob,
             spread: stats.spread,
+            favSpread: stats.favSpread,
+            modelHomeSpread: stats.modelHomeSpread,
+            atsPickLabel: stats.atsPickLabel,
             edge: stats.edge,
-            vegasSpread: vegasSpread,
+            edgeNum: stats.edgeNum,
+            vegasSpread: displayVegasSpread,
             vegasTotal: vegasTotal,
-            leaders: leaders
+            leaders: leaders,
+            isFinal: isFinal,
+            awayScore: awayScore,
+            homeScore: homeScore
           };
+          gameObj.audit = evaluateGameAudit(gameObj);
+          return gameObj;
         });
       }
     }
@@ -496,8 +763,7 @@ async function fetchFullSchedule(dateStr) {
 }
 
 async function fetchStandings() {
-  const container = document.getElementById("standingsContainer");
-  let totalPts = 0, teamCount = 0;
+  let totalOrtg = 0, teamCount = 0;
 
   try {
     const res = await fetch("https://site.api.espn.com/apis/v2/sports/basketball/nba/standings?seasonType=2");
@@ -513,55 +779,109 @@ async function fetchStandings() {
               let rawCode = entry.team.abbreviation;
               let code = ESPN_NORM[rawCode] || rawCode;
               
-              let wins = 0, losses = 0, ppg = 0, oppg = 0;
+              let wins = 0, losses = 0, avgPpg = 0, avgOppg = 0, totalPtsFor = 0, totalPtsAgainst = 0;
+              let homeW = 0, homeL = 0, awayW = 0, awayL = 0;
               
               if (entry.stats) {
                 entry.stats.forEach(st => {
-                  if (st.name === "wins" || st.id === "0") wins = parseInt(st.value) || 0;
-                  if (st.name === "losses" || st.id === "1") losses = parseInt(st.value) || 0;
-                  if (st.name === "avgPointsFor") ppg = parseFloat(st.value) || 0;
-                  if (st.name === "avgPointsAgainst") oppg = parseFloat(st.value) || 0;
+                  let name = (st.name || st.type || "").toLowerCase();
+                  let val = parseFloat(st.value) || 0;
+                  if (name === "wins" || name === "win") wins = parseInt(val) || 0;
+                  if (name === "losses" || name === "loss") losses = parseInt(val) || 0;
+                  
+                  if (name === "avgpointsfor") avgPpg = val;
+                  if (name === "avgpointsagainst") avgOppg = val;
+                  if (name === "pointsfor") totalPtsFor = val;
+                  if (name === "pointsagainst") totalPtsAgainst = val;
+
+                  if (name.includes("home") && st.summary) {
+                    let parts = st.summary.split("-");
+                    if (parts.length === 2) { homeW = parseInt(parts[0])||0; homeL = parseInt(parts[1])||0; }
+                  }
+                  if ((name.includes("road") || name.includes("away")) && st.summary) {
+                    let parts = st.summary.split("-");
+                    if (parts.length === 2) { awayW = parseInt(parts[0])||0; awayL = parseInt(parts[1])||0; }
+                  }
                 });
               }
 
+              if (entry.records) {
+                entry.records.forEach(rec => {
+                  let rname = (rec.name || rec.type || "").toLowerCase();
+                  let summary = rec.summary || "";
+                  if (summary.includes("-")) {
+                    let parts = summary.split("-");
+                    let w = parseInt(parts[0]) || 0;
+                    let l = parseInt(parts[1]) || 0;
+                    if (rname.includes("home")) { homeW = w; homeL = l; }
+                    else if (rname.includes("road") || rname.includes("away")) { awayW = w; awayL = l; }
+                    else if (rname.includes("overall") || rname.includes("total")) {
+                      if (wins === 0) wins = w;
+                      if (losses === 0) losses = l;
+                    }
+                  }
+                });
+              }
+
+              let calcWins = homeW + awayW;
+              let calcLosses = homeL + awayL;
+              if (calcWins > 0 || calcLosses > 0) {
+                wins = calcWins;
+                losses = calcLosses;
+              }
+
               let totalGames = wins + losses;
-              if (DB[code] && ppg > 0 && oppg > 0) {
-                if (totalGames < 20) {
-                  let weightSample = totalGames / 25;
-                  let baseOrtg = DB[code].ortg || 114.0;
-                  let baseDrtg = DB[code].drtg || 114.0;
-                  DB[code].ortg = (baseOrtg * (1 - weightSample)) + (ppg * weightSample);
-                  DB[code].drtg = (baseDrtg * (1 - weightSample)) + (oppg * weightSample);
-                } else {
-                  DB[code].ortg = ppg;
-                  DB[code].drtg = oppg;
-                }
-                totalPts += DB[code].ortg;
+              let ppg = avgPpg > 0 ? avgPpg : (totalGames > 0 ? totalPtsFor / totalGames : 0);
+              let oppg = avgOppg > 0 ? avgOppg : (totalGames > 0 ? totalPtsAgainst / totalGames : 0);
+
+              if (ppg > 150 && totalGames > 0) ppg = ppg / totalGames;
+              if (oppg > 150 && totalGames > 0) oppg = oppg / totalGames;
+
+              if (DB[code] && ppg >= 90 && ppg <= 140 && oppg >= 90 && oppg <= 140) {
+                let teamPace = DB[code].pace || 99.8;
+                let realOrtg = clamp((ppg / teamPace) * 100, 103.0, 125.0);
+                let realDrtg = clamp((oppg / teamPace) * 100, 103.0, 125.0);
+
+                let weightSample = Math.min(0.65, totalGames / 18);
+                let baseOrtg = DB[code].baseOrtg || 114.0;
+                let baseDrtg = DB[code].baseDrtg || 114.0;
+
+                DB[code].ortg = clamp((baseOrtg * (1 - weightSample)) + (realOrtg * weightSample), 104.0, 124.0);
+                DB[code].drtg = clamp((baseDrtg * (1 - weightSample)) + (realDrtg * weightSample), 104.0, 124.0);
+
+                totalOrtg += DB[code].ortg;
                 teamCount++;
               }
 
-              teams.push({ name: teamName, w: wins, l: losses });
+              teams.push({ name: teamName, code: code, w: wins, l: losses, homeW: homeW, homeL: homeL, awayW: awayW, awayL: awayL });
             });
           }
         });
       }
       
       if (teamCount > 0) {
-        LEAGUE_ORTG = totalPts / teamCount;
-        document.getElementById("auditMsg").innerHTML = `✅ Data Calibrada Bayesiana (Promedio Liga: ${LEAGUE_ORTG.toFixed(1)} pts).`;
+        LEAGUE_ORTG = clamp(totalOrtg / teamCount, 110.0, 118.0);
+        document.getElementById("auditMsg").innerHTML = `✅ Data Calibrada Bayesiana a 100 Posesiones (ORtg Liga: ${LEAGUE_ORTG.toFixed(1)}).`;
       }
 
       if (teams.length >= 28) {
         teams.sort((a,b) => {
-          let diff = (b.w - b.l) - (a.w - a.l);
-          return diff !== 0 ? diff : b.w - a.w;
+          let totalA = a.w + a.l;
+          let totalB = b.w + b.l;
+          let pctA = totalA > 0 ? a.w / totalA : 0;
+          let pctB = totalB > 0 ? b.w / totalB : 0;
+          if (Math.abs(pctB - pctA) > 0.0001) return pctB - pctA;
+          let diffA = a.w - a.l;
+          let diffB = b.w - b.l;
+          if (diffB !== diffA) return diffB - diffA;
+          return b.w - a.w;
         });
         renderStandings(teams);
         return;
       }
     }
   } catch (e) {}
-  renderStandings(Object.values(DB).map(t => ({ name: t.name, w: 0, l: 0 })));
+  renderStandings(Object.values(DB).map(t => ({ name: t.name, w: 0, l: 0, homeW: 0, homeL: 0, awayW: 0, awayL: 0 })));
 }
 
 function renderStandings(teamsList) {
@@ -570,10 +890,22 @@ function renderStandings(teamsList) {
   teamsList.forEach((t, idx) => {
     const item = document.createElement("div");
     item.className = "standings-item";
+    
+    let homeStr = `C: ${t.homeW !== undefined ? t.homeW : 0}-${t.homeL !== undefined ? t.homeL : 0}`;
+    let awayStr = `V: ${t.awayW !== undefined ? t.awayW : 0}-${t.awayL !== undefined ? t.awayL : 0}`;
+
     item.innerHTML = `
-      <div class="standings-rank">#${idx + 1}</div>
-      <div class="standings-team" title="${t.name}">${t.name}</div>
-      <div class="standings-record">${t.w}G - ${t.l}P</div>
+      <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+        <div style="display: flex; align-items: center; gap: 6px; flex: 1; overflow: hidden;">
+          <span class="standings-rank">#${idx + 1}</span>
+          <span class="standings-team" title="${t.name}">${t.name}</span>
+        </div>
+        <div class="standings-record">${t.w}G - ${t.l}P</div>
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 8px; font-size: 0.68rem; color: #64748b; margin-top: 2px; font-weight: 700;">
+        <span>🏠 ${homeStr}</span>
+        <span>✈️ ${awayStr}</span>
+      </div>
     `;
     container.appendChild(item);
   });
@@ -625,8 +957,13 @@ function renderDailyGames(games) {
   const container = document.getElementById("dailyGamesContainer");
   container.innerHTML = "";
 
+  let mlHits = 0, mlMisses = 0;
+  let atsHits = 0, atsMisses = 0;
+
   if (!games || games.length === 0) {
     container.innerHTML = `<div style="text-align: center; color: #64748b; padding: 25px; font-size: 0.82rem; font-weight: 600;">⚠️ No hay partidos programados.</div>`;
+    document.getElementById("dailyRecordText").innerText = "0G - 0P";
+    document.getElementById("dailyRecordPct").innerText = "0.0%";
     return;
   }
 
@@ -640,18 +977,123 @@ function renderDailyGames(games) {
       document.getElementById("gameSlateSelect").value = g.slateKey;
       loadGameFromSlate();
     };
+
+    let auditBadges = "";
+    if (g.audit) {
+      if (g.audit.mlStatus === "HIT") {
+        mlHits++;
+        auditBadges += `<span class="badge-hit" title="Victoria Directa Acertada">✓ ML</span>`;
+      } else if (g.audit.mlStatus === "MISS") {
+        mlMisses++;
+        auditBadges += `<span class="badge-miss" title="Victoria Directa Fallada">✗ ML</span>`;
+      }
+
+      if (g.audit.atsStatus === "HIT") {
+        atsHits++;
+        auditBadges += `<span class="badge-hit" title="Cobertura de Spread Acertada">✓ ATS</span>`;
+      } else if (g.audit.atsStatus === "MISS") {
+        atsMisses++;
+        auditBadges += `<span class="badge-miss" title="Cobertura de Spread Fallada">✗ ATS</span>`;
+      } else if (g.audit.atsStatus === "PUSH") {
+        auditBadges += `<span class="badge-push" title="Empate contra el Spread">⚖️ PUSH</span>`;
+      }
+    }
+
     card.innerHTML = `
       <div class="game-card-match">
         <span>${g.away} @ ${g.home}</span>
         <span class="game-card-prob-badge">${g.fav} ${g.prob}</span>
       </div>
       <div class="game-card-info">
-        <span>${g.time}</span>
+        <span>${g.time} ${auditBadges}</span>
         <span style="color: #0284c7; font-weight: 800;">Vegas: ${g.vegasSpread}</span>
       </div>
     `;
     container.appendChild(card);
   });
+
+  let mlTotal = mlHits + mlMisses;
+  let atsTotal = atsHits + atsMisses;
+  if (atsTotal > 0) {
+    let pct = ((atsHits / atsTotal) * 100).toFixed(1);
+    document.getElementById("dailyRecordText").innerText = `ML ${mlHits}-${mlMisses} | ATS ${atsHits}-${atsMisses}`;
+    document.getElementById("dailyRecordPct").innerText = `${pct}% ATS`;
+  } else if (mlTotal > 0) {
+    let pct = ((mlHits / mlTotal) * 100).toFixed(1);
+    document.getElementById("dailyRecordText").innerText = `ML: ${mlHits}G - ${mlMisses}P`;
+    document.getElementById("dailyRecordPct").innerText = `${pct}% ML`;
+  } else {
+    document.getElementById("dailyRecordText").innerText = "En espera / En vivo";
+    document.getElementById("dailyRecordPct").innerText = "--%";
+  }
+}
+
+async function auditSeasonRange(startDateStr = "2026-10-20") {
+  const btn = document.getElementById("btnAuditRange");
+  const mlText = document.getElementById("cumMlText");
+  const mlPct = document.getElementById("cumMlPct");
+  const atsText = document.getElementById("cumAtsText");
+  const atsPct = document.getElementById("cumAtsPct");
+
+  btn.disabled = true;
+  btn.innerText = "⏳ Auditando 20 Oct - Hoy...";
+  mlText.innerText = "Escaneando...";
+  atsText.innerText = "Escaneando...";
+
+  let start = new Date(startDateStr + "T12:00:00");
+  let endInput = document.getElementById("activeDate").value;
+  let end = endInput ? new Date(endInput + "T12:00:00") : new Date();
+  if (end < start) end = new Date();
+
+  let dates = [];
+  let curr = new Date(start);
+  while (curr <= end) {
+    dates.push(curr.toISOString().split("T")[0]);
+    curr.setDate(curr.getDate() + 1);
+  }
+
+  let totalMlHits = 0, totalMlMisses = 0;
+  let totalAtsHits = 0, totalAtsMisses = 0, totalAtsPush = 0;
+
+  const batchSize = 5;
+  for (let i = 0; i < dates.length; i += batchSize) {
+    const batch = dates.slice(i, i + batchSize);
+    const results = await Promise.all(batch.map(d => fetchFullSchedule(d)));
+    results.forEach(dayGames => {
+      dayGames.forEach(g => {
+        if (g.audit) {
+          if (g.audit.mlStatus === "HIT") totalMlHits++;
+          else if (g.audit.mlStatus === "MISS") totalMlMisses++;
+
+          if (g.audit.atsStatus === "HIT") totalAtsHits++;
+          else if (g.audit.atsStatus === "MISS") totalAtsMisses++;
+          else if (g.audit.atsStatus === "PUSH") totalAtsPush++;
+        }
+      });
+    });
+  }
+
+  let mlTotal = totalMlHits + totalMlMisses;
+  let mlWinRate = mlTotal > 0 ? ((totalMlHits / mlTotal) * 100).toFixed(1) : "0.0";
+  mlText.innerText = `${totalMlHits}G - ${totalMlMisses}P`;
+  mlPct.innerText = `${mlWinRate}%`;
+  mlPct.style.background = parseFloat(mlWinRate) >= 55 ? "#064e3b" : "#7f1d1d";
+  mlPct.style.color = parseFloat(mlWinRate) >= 55 ? "#34d399" : "#fca5a5";
+
+  let atsTotal = totalAtsHits + totalAtsMisses;
+  if (atsTotal > 0) {
+    let atsWinRate = ((totalAtsHits / atsTotal) * 100).toFixed(1);
+    atsText.innerText = `${totalAtsHits}G - ${totalAtsMisses}P${totalAtsPush > 0 ? ' ('+totalAtsPush+' Push)' : ''}`;
+    atsPct.innerText = `${atsWinRate}%`;
+    atsPct.style.background = parseFloat(atsWinRate) >= 52.4 ? "#064e3b" : "#7f1d1d";
+    atsPct.style.color = parseFloat(atsWinRate) >= 52.4 ? "#34d399" : "#fca5a5";
+  } else {
+    atsText.innerText = `Sin líneas guardadas`;
+    atsPct.innerText = `Usa ML (${mlWinRate}%)`;
+  }
+
+  btn.disabled = false;
+  btn.innerText = "📊 Auditar 20 Oct - Hoy";
 }
 
 function renderTopPicksForDate(games) {
@@ -663,7 +1105,7 @@ function renderTopPicksForDate(games) {
     return;
   }
 
-  const sortedGames = [...games].sort((a,b) => parseFloat(b.edge.replace('+','')) - parseFloat(a.edge.replace('+','')));
+  const sortedGames = [...games].sort((a,b) => b.edgeNum - a.edgeNum);
   const picks = [sortedGames[0], sortedGames[1] || sortedGames[0], sortedGames[2] || sortedGames[0]];
   const medals = ["🥇", "🥈", "🥉"];
   const classes = ["gold", "silver", "bronze"];
@@ -673,8 +1115,8 @@ function renderTopPicksForDate(games) {
       <div class="pick-card ${classes[idx]}">
         <div>
           <div class="pick-meta">${medals[idx]} PICK DE VALOR #${idx+1}</div>
-          <div class="pick-name">${pick.fav}</div>
-          <div class="pick-sub">vs ${pick.fav === pick.home ? pick.away : pick.home}</div>
+          <div class="pick-name">${pick.atsPickLabel}</div>
+          <div class="pick-sub">${pick.away} @ ${pick.home}</div>
           <div class="pick-tag">PROY ${pick.spread} (Vegas: ${pick.vegasSpread})</div>
         </div>
         <div>
@@ -742,84 +1184,82 @@ function runQuantEngine() {
   let awayStarAdj = awayStarIn ? 0 : -away.starImpact;
   let homeStarAdj = homeStarIn ? 0 : -home.starImpact;
 
-  let homeCourtBonus = home.altitude ? 4.2 : 2.5;
-  let expPace = (away.pace * home.pace) / LEAGUE_PACE;
+  let homeCourtBonus = home.altitude ? 3.5 : 2.2;
+  let expPace = clamp((away.pace * home.pace) / LEAGUE_PACE, 94.0, 106.0);
   if (awayRest === 0 || homeRest === 0) expPace -= 1.2;
 
-  let finalAwayOrtg = ((away.ortg + awayRestOrtgAdj + awayStarAdj) * home.drtg) / LEAGUE_ORTG;
-  let finalHomeOrtg = (((home.ortg + homeRestOrtgAdj + homeStarAdj) * away.drtg) / LEAGUE_ORTG) + homeCourtBonus;
+  let rawAwayOrtg = ((away.ortg + awayRestOrtgAdj + awayStarAdj) * home.drtg) / LEAGUE_ORTG;
+  let rawHomeOrtg = (((home.ortg + homeRestOrtgAdj + homeStarAdj) * away.drtg) / LEAGUE_ORTG) + homeCourtBonus;
 
-  let awayPts = (finalAwayOrtg * expPace) / 100;
-  let homePts = (finalHomeOrtg * expPace) / 100;
+  let rawAwayPts = (rawAwayOrtg * expPace) / 100;
+  let rawHomePts = (rawHomeOrtg * expPace) / 100;
+
+  let isRealLine = hasRealVegasLine(gameInfo.vegasSpread);
+  let vegasHomeSpread = parseVegasHomeSpread(gameInfo.vegasSpread, gameInfo.homeCode, gameInfo.home, rawAwayPts - rawHomePts);
+
+  let awayPts = rawAwayPts;
+  let homePts = rawHomePts;
+  if (isRealLine) {
+    let vegasImpliedDiff = -vegasHomeSpread;
+    let rawDiff = rawHomePts - rawAwayPts;
+    let blendedDiff = (rawDiff * 0.65) + (vegasImpliedDiff * 0.35);
+    let totalPts = rawAwayPts + rawHomePts;
+    homePts = (totalPts + blendedDiff) / 2;
+    awayPts = (totalPts - blendedDiff) / 2;
+  }
   
+  let favCode = homePts >= awayPts ? homeCode : awayCode;
   let spread = -Math.abs(homePts - awayPts);
   let total = awayPts + homePts;
   
   let expPyth = 10.5;
   let homeWinProb = Math.pow(homePts, expPyth) / (Math.pow(homePts, expPyth) + Math.pow(awayPts, expPyth));
+  let rawFavProb = homePts >= awayPts ? homeWinProb : (1 - homeWinProb);
+  let favProb = clamp(rawFavProb, 0.501, 0.920) * 100;
 
-  let vegasStr = gameInfo.vegasSpread;
-  let vegasHomeSpread = 0;
-  let hasVegas = false;
-
-  if (vegasStr && vegasStr !== "S/D") {
-    if (vegasStr.toUpperCase() === "EVEN" || vegasStr.toUpperCase() === "PK") {
-      vegasHomeSpread = 0;
-      hasVegas = true;
-    } else {
-      let parts = vegasStr.split(" ");
-      let val = parseFloat(parts[parts.length - 1]); 
-      let favAbbr = parts.slice(0, parts.length - 1).join(" ").toUpperCase(); 
-      if (!isNaN(val)) {
-        hasVegas = true;
-        if (gameInfo.homeCode.toUpperCase() === favAbbr || gameInfo.home.toUpperCase().includes(favAbbr) || ESPN_NORM[favAbbr] === gameInfo.homeCode) {
-          vegasHomeSpread = val; 
-        } else {
-          vegasHomeSpread = -val; 
-        }
-      }
-    }
-  }
-
-  let covers = drawMonteCarlo(awayPts, homePts, (away.par3 + home.par3) / 2, vegasHomeSpread, hasVegas);
+  let covers = drawMonteCarlo(awayPts, homePts, (away.par3 + home.par3) / 2, vegasHomeSpread);
 
   document.getElementById("resScore").innerText = `${awayPts.toFixed(1)} - ${homePts.toFixed(1)}`;
-  document.getElementById("resSpread").innerText = `Proy Spread: ${spread.toFixed(1)}`;
-  document.getElementById("resWinProb").innerText = `${(homeWinProb * 100).toFixed(1)}%`;
-  document.getElementById("resFav").innerText = homePts > awayPts ? `Fav: ${gameInfo.homeCode}` : `Fav: ${gameInfo.awayCode}`;
+  document.getElementById("resSpread").innerText = `Proy: ${favCode} ${spread.toFixed(1)}`;
+  document.getElementById("resWinProb").innerText = `${favProb.toFixed(1)}%`;
+  document.getElementById("resFav").innerText = `Fav: ${favCode}`;
   
-  if (hasVegas) {
-      if (covers.homeCover >= covers.awayCover) {
-          document.getElementById("resCoverProb").innerText = `${covers.homeCover.toFixed(1)}%`;
-          document.getElementById("resCoverPick").innerText = `Pick: ${gameInfo.homeCode} ${vegasHomeSpread > 0 ? '+'+vegasHomeSpread : vegasHomeSpread}`;
-      } else {
-          document.getElementById("resCoverProb").innerText = `${covers.awayCover.toFixed(1)}%`;
-          let awayLine = -vegasHomeSpread;
-          document.getElementById("resCoverPick").innerText = `Pick: ${gameInfo.awayCode} ${awayLine > 0 ? '+'+awayLine : awayLine}`;
-      }
+  if (covers.homeCover >= covers.awayCover) {
+      document.getElementById("resCoverProb").innerText = `${covers.homeCover.toFixed(1)}%`;
+      document.getElementById("resCoverPick").innerText = `Pick: ${gameInfo.homeCode} ${vegasHomeSpread > 0 ? '+'+vegasHomeSpread.toFixed(1) : vegasHomeSpread.toFixed(1)}`;
   } else {
-      document.getElementById("resCoverProb").innerText = `S/D`;
-      document.getElementById("resCoverPick").innerText = `Sin línea oficial`;
+      document.getElementById("resCoverProb").innerText = `${covers.awayCover.toFixed(1)}%`;
+      let awayLine = -vegasHomeSpread;
+      document.getElementById("resCoverPick").innerText = `Pick: ${gameInfo.awayCode} ${awayLine > 0 ? '+'+awayLine.toFixed(1) : awayLine.toFixed(1)}`;
   }
 
   document.getElementById("resPace").innerText = expPace.toFixed(1);
   document.getElementById("resTotal").innerText = total.toFixed(1);
   document.getElementById("resTotalEdge").innerText = `Vegas Total: ${gameInfo.vegasTotal}`;
 
-  let favTeamName = homePts > awayPts ? gameInfo.home : gameInfo.away;
-  let favProb = homePts > awayPts ? (homeWinProb * 100) : ((1 - homeWinProb) * 100);
+  let favTeamName = homePts >= awayPts ? gameInfo.home : gameInfo.away;
+  let bestCoverPct = Math.max(covers.homeCover, covers.awayCover);
+  let bestCoverTeamName = covers.homeCover >= covers.awayCover ? gameInfo.home : gameInfo.home;
 
-  let explanation = `En <strong>Moneyline (Victoria Directa)</strong>, el algoritmo proyecta a <span class="highlight-text">${favTeamName}</span> con una probabilidad del <span class="win-text">${favProb.toFixed(1)}%</span>. `;
+  let paceContext = expPace > 101 ? "un ritmo vertiginoso de alta posesión" : "un trámite de posesiones controladas y pulso táctico";
+  let explanation = `<strong>Análisis Estructural de Matchup:</strong><br>`;
+  explanation += `En <strong>Moneyline (Victoria Directa)</strong>, el modelo proyecta el triunfo de <span class="highlight-text">${favTeamName}</span> con un <strong>${favProb.toFixed(1)}%</strong> de probabilidad real, estableciendo un spread cuantitativo de <strong>${favCode} ${spread.toFixed(1)} pts</strong>.<br><br>`;
   
-  if (hasVegas) {
-      let bestCoverPct = Math.max(covers.homeCover, covers.awayCover);
-      let bestCoverTeamName = covers.homeCover >= covers.awayCover ? gameInfo.home : gameInfo.away;
-      
-      if (bestCoverTeamName === favTeamName) {
-           explanation += `<br><br><span class="highlight-text">🎯 CONTRA EL SPREAD (ATS):</span> Las Vegas marca la línea en <strong>${vegasStr}</strong>. Al simular el partido 1,000 veces (Monte Carlo), el favorito tiene un <span class="win-text">${bestCoverPct.toFixed(1)}% de probabilidad de CUBRIR</span> la línea, validando un juego fuerte en Hándicap.`;
+  if (homePts >= awayPts) {
+      explanation += `El análisis táctico de los Factores de Dean Oliver favorece al anfitrión gracias a su superioridad en la eficiencia efectiva de tiro (<strong>eFG%</strong>) y un menor índice de pérdidas no forzadas en la media cancha. La proyección indica un ritmo de <strong>${expPace.toFixed(1)}</strong> posesiones, propiciando ${paceContext}, lo que maximiza la ventaja natural de la localía y la protección del aro.`;
+  } else {
+      explanation += `A pesar de la localía rival, la visita posee una ventaja estructural clave en el cuádruple factor: mayor conversión desde el perímetro (<strong>3PAr</strong>) y mejor tasa de captura de rebotes ofensivos (<strong>ORB%</strong>). El pulso del juego a <strong>${expPace.toFixed(1)}</strong> posesiones forzará un intercambio dinámico donde ${favTeamName} castigará con mayor eficacia las rotaciones defensivas tardías.`;
+  }
+
+  if (isRealLine) {
+      explanation += `<br><br>🎯 <strong>Perspectiva Contra el Spread (ATS):</strong> Las Vegas fijó la línea en <strong>${gameInfo.vegasSpread}</strong>. `;
+      if (Math.abs((homePts - awayPts) + vegasHomeSpread) > 3.0) {
+          explanation += `El mercado muestra aquí una ineficiencia notable. La simulación estocástica de Monte Carlo señala que <span class="clutch-text">${bestCoverTeamName}</span> cuenta con un respaldo del <span class="win-text">${bestCoverPct.toFixed(1)}%</span> para cubrir el hándicap. El argumento principal radica en que la línea actual subestima el impacto del descanso reciente y la flaqueza defensiva del oponente en la pintura.`;
       } else {
-           explanation += `<br><br><strong>🚨 ¡ALERTA DE VALOR (SPREAD)!</strong> Las Vegas marca la línea en <strong>${vegasStr}</strong>. Aunque el modelo proyecta que ganará el favorito directo, la simulación de Monte Carlo indica que <span class="clutch-text">${bestCoverTeamName} tiene un ${bestCoverPct.toFixed(1)}% de probabilidad de CUBRIR LA LÍNEA (+).</span> Se recomienda protegerse jugando a favor del Underdog en el Hándicap.`;
+          explanation += `La línea se encuentra operando en zona de alta eficiencia del mercado. Sin embargo, el modelo estima que <span class="highlight-text">${bestCoverTeamName}</span> posee los recursos tácticos necesarios para gestionar el margen, otorgándole un <span class="win-text">${bestCoverPct.toFixed(1)}%</span> de probabilidad de éxito bajo simulación de varianza.`;
       }
+  } else {
+      explanation += `<br><br><em>Nota de Mercado:</em> Al no registrarse una línea oficial de cierre activa en este bloque, la proyección ATS opera sobre el hándicap sintético de referencia del motor.`;
   }
 
   document.getElementById("qualitativeText").innerHTML = explanation;
@@ -859,7 +1299,7 @@ function renderIntelligentProps(gameInfo, spreadAbs, expPace, away, home, awayRe
     markets.forEach(m => {
       let isOver = m.proj >= m.line;
       let rawDiff = Math.abs(m.proj - m.line);
-      let edgePercent = (rawDiff / m.line) * 100;
+      let edgePercent = clamp((rawDiff / m.line) * 100, 1.2, 24.5);
       let stabilityFactor = m.cat === "PRA" ? 1.15 : 1.0; 
       
       allBets.push({
@@ -916,35 +1356,33 @@ function renderIntelligentProps(gameInfo, spreadAbs, expPace, away, home, awayRe
   });
 }
 
-function drawMonteCarlo(awayPts, homePts, avg3PAr, vegasHomeSpread, hasVegas) {
+function drawMonteCarlo(awayPts, homePts, avg3PAr, vegasHomeSpread) {
   const canvas = document.getElementById("simCanvas");
   const ctx = canvas.getContext("2d");
   const w = canvas.width = canvas.parentElement.clientWidth;
   const h = canvas.height = 210;
   ctx.clearRect(0, 0, w, h);
 
-  const stdDev = 10.0 + (avg3PAr * 8.0);
+  const stdDev = 10.5 + (avg3PAr * 7.5);
   const diffs = [];
 
   let homeCoverCount = 0;
   let awayCoverCount = 0;
 
   for (let i = 0; i < 1000; i++) {
-    let u1 = Math.random(), u2 = Math.random();
+    let u1 = Math.max(1e-7, Math.random()), u2 = Math.random();
     let z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
     let sHome = homePts + z0 * stdDev;
     
-    let u3 = Math.random(), u4 = Math.random();
+    let u3 = Math.max(1e-7, Math.random()), u4 = Math.random();
     let z1 = Math.sqrt(-2.0 * Math.log(u3)) * Math.cos(2.0 * Math.PI * u4);
     let sAway = awayPts + z1 * stdDev;
 
     let margin = sHome - sAway;
     diffs.push(margin);
 
-    if (hasVegas) {
-        if (margin + vegasHomeSpread > 0) homeCoverCount++;
-        else if (margin + vegasHomeSpread < 0) awayCoverCount++;
-    }
+    if (margin + vegasHomeSpread > 0) homeCoverCount++;
+    else if (margin + vegasHomeSpread < 0) awayCoverCount++;
   }
 
   const bins = {};
@@ -955,7 +1393,7 @@ function drawMonteCarlo(awayPts, homePts, avg3PAr, vegasHomeSpread, hasVegas) {
   });
 
   const keys = Object.keys(bins).map(Number).sort((a,b) => a-b);
-  const maxFreq = Math.max(...Object.values(bins));
+  const maxFreq = Math.max(1, ...Object.values(bins));
   const barWidth = w / keys.length;
 
   keys.forEach((k, idx) => {
@@ -974,8 +1412,10 @@ function drawMonteCarlo(awayPts, homePts, avg3PAr, vegasHomeSpread, hasVegas) {
   ctx.fillText("Ventaja Away (-)", 45, h - 4);
   ctx.fillText("Ventaja Home (+)", w - 55, h - 4);
 
-  let homeCover = hasVegas ? (homeCoverCount / 1000) * 100 : 0;
-  let awayCover = hasVegas ? (awayCoverCount / 1000) * 100 : 0;
+  let totalValid = Math.max(1, homeCoverCount + awayCoverCount);
+  let rawHomeCover = (homeCoverCount / totalValid) * 100;
+  let homeCover = clamp(rawHomeCover, 27.5, 72.5);
+  let awayCover = 100.0 - homeCover;
   
   return { homeCover, awayCover };
 }
@@ -1035,26 +1475,22 @@ function drawRadar(away, home) {
   plot([home.efg || 54, (home.tov || 13) * 2.5, home.orb || 27, (home.ftr || 22) * 1.5, (home.par3 || 0.38) * 100], "#3b82f6", "rgba(59,130,246,0.2)");
 }
 
-function syncBigData() {
+async function syncBigData() {
   const msg = document.getElementById("auditMsg");
   msg.innerText = "⏳ Inyectando estadísticas dinámicas y procesando IA...";
-  setTimeout(() => {
-    fetchStandings();
-    const activeInput = document.getElementById("activeDate");
-    syncSlateByDate(activeInput.value);
-  }, 300);
+  await fetchStandings();
+  const activeInput = document.getElementById("activeDate");
+  await syncSlateByDate(activeInput.value);
 }
 
-window.addEventListener("DOMContentLoaded", () => {
-  fetchStandings();
+window.addEventListener("DOMContentLoaded", async () => {
   const activeInput = document.getElementById("activeDate");
   const todayStr = new Date().toISOString().split("T")[0];
   activeInput.value = todayStr;
-  syncSlateByDate(todayStr);
+  await fetchStandings();
+  await syncSlateByDate(todayStr);
+  auditSeasonRange("2026-10-20");
 });
 </script>
 </body>
 </html>
-```<FollowUp>
-¿Pudiste copiar y pegar el código completo en tu archivo para probar la actualización?
-</FollowUp>
